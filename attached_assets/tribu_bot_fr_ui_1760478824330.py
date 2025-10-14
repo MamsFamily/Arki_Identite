@@ -315,6 +315,7 @@ async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: st
         conn.commit()
     await inter.response.send_message(f"🗑️ La tribu **{nom}** a été supprimée.")
 
+# Ping & Aide
 @tree.command(name="tribu_test", description="Vérifier si le bot répond")
 async def tribu_test(inter: discord.Interaction):
     await inter.response.send_message("🏓 Pong !")
@@ -372,6 +373,8 @@ class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
     description = discord.ui.TextInput(label="Description (optionnel)", style=discord.TextStyle.paragraph, required=False)
     couleur_hex = discord.ui.TextInput(label="Couleur hex (ex: #00AAFF)", required=False)
     logo_url = discord.ui.TextInput(label="Logo URL (optionnel)", required=False, placeholder="https://...")
+    base = discord.ui.TextInput(label="Base principale (optionnel)", required=False, placeholder="Ex: 45.5 / 32.6")
+    tags = discord.ui.TextInput(label="Tags (séparés par des virgules)", required=False, placeholder="PvE, commerce, élevage")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -379,6 +382,7 @@ class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
         if not row:
             await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
             return
+        # Vérifier droits
         if not (est_admin(inter) or inter.user.id == row["proprietaire_id"] or est_manager(row["id"], inter.user.id)):
             await inter.response.send_message("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
             return
@@ -395,6 +399,10 @@ class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
                 return
         if str(self.logo_url).strip():
             updates["logo_url"] = str(self.logo_url).strip()
+        if str(self.base).strip():
+            updates["base"] = str(self.base).strip()
+        if self.tags is not None and str(self.tags).strip():
+            updates["tags"] = ",".join([t.strip() for t in str(self.tags).split(",")])
         with db_connect() as conn:
             c = conn.cursor()
             if "nom" in updates:
@@ -456,6 +464,7 @@ class PanneauTribu(discord.ui.View):
     async def btn_voir(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalVoirTribu())
 
+# Slash pour ouvrir le panneau
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
     v = PanneauTribu(timeout=180)
@@ -467,6 +476,7 @@ async def panneau(inter: discord.Interaction):
     e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
     await inter.response.send_message(embed=e, view=v, ephemeral=True)
 
+# Ready
 @bot.event
 async def on_ready():
     try:
