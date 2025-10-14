@@ -311,7 +311,7 @@ async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: st
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("DELETE FROM tribus WHERE id=?", (row["id"],))
-        c.execute("DELETE FROM membres WHERE tribu_id=?", (row["id"]))
+        c.execute("DELETE FROM membres WHERE tribu_id=?", (row["id"],))
         conn.commit()
     await inter.response.send_message(f"🗑️ La tribu **{nom}** a été supprimée.")
 
