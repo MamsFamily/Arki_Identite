@@ -112,9 +112,9 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     if tribu["logo_url"]:
         e.set_thumbnail(url=tribu["logo_url"])
     
-    base_value = tribu.get("base") or "—"
-    map_base = tribu.get("map_base") or ""
-    coords_base = tribu.get("coords_base") or ""
+    base_value = tribu["base"] if tribu["base"] else "—"
+    map_base = tribu["map_base"] if "map_base" in tribu.keys() and tribu["map_base"] else ""
+    coords_base = tribu["coords_base"] if "coords_base" in tribu.keys() and tribu["coords_base"] else ""
     if map_base and coords_base:
         base_value = f"{base_value}\n🗺️ Map: **{map_base}**\n📍 Coords: **{coords_base}**"
     elif map_base:
