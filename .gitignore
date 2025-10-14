@@ -47,3 +47,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Database
+tribus.db
+*.db
