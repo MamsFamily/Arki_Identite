@@ -35,6 +35,8 @@ def db_init():
             couleur INTEGER DEFAULT 0x2F3136,
             logo_url TEXT DEFAULT '',
             base TEXT DEFAULT '',
+            map_base TEXT DEFAULT '',
+            coords_base TEXT DEFAULT '',
             tags TEXT DEFAULT '',
             proprietaire_id INTEGER NOT NULL,
             created_at TEXT NOT NULL
@@ -51,6 +53,26 @@ def db_init():
             FOREIGN KEY (tribu_id) REFERENCES tribus(id) ON DELETE CASCADE
         )
         """)
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS avant_postes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tribu_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            nom TEXT NOT NULL,
+            map TEXT DEFAULT '',
+            coords TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (tribu_id) REFERENCES tribus(id) ON DELETE CASCADE
+        )
+        """)
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN map_base TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN coords_base TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
         conn.commit()
 
 def tribu_par_nom(guild_id: int, nom: str):
@@ -79,7 +101,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
 # ---------- Helpers UI ----------
-def embed_tribu(tribu, membres=None) -> discord.Embed:
+def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     color = tribu["couleur"] if tribu["couleur"] else 0x2F3136
     e = discord.Embed(
         title=f"🏕️ Tribu — {tribu['nom']}",
@@ -89,9 +111,20 @@ def embed_tribu(tribu, membres=None) -> discord.Embed:
     )
     if tribu["logo_url"]:
         e.set_thumbnail(url=tribu["logo_url"])
-    e.add_field(name="📍 Base", value=tribu["base"] or "—", inline=True)
+    
+    base_value = tribu.get("base") or "—"
+    map_base = tribu.get("map_base") or ""
+    coords_base = tribu.get("coords_base") or ""
+    if map_base and coords_base:
+        base_value = f"{base_value}\n🗺️ Map: **{map_base}**\n📍 Coords: **{coords_base}**"
+    elif map_base:
+        base_value = f"{base_value}\n🗺️ Map: **{map_base}**"
+    elif coords_base:
+        base_value = f"{base_value}\n📍 Coords: **{coords_base}**"
+    
+    e.add_field(name="🏰 Base Principale", value=base_value, inline=False)
     e.add_field(name="🏷️ Tags", value=tribu["tags"] or "—", inline=True)
-    e.add_field(name="👑 Propriétaire", value=f"<@{tribu['proprietaire_id']}>", inline=False)
+    e.add_field(name="👑 Propriétaire", value=f"<@{tribu['proprietaire_id']}>", inline=True)
 
     if membres is not None:
         lines = []
@@ -107,6 +140,20 @@ def embed_tribu(tribu, membres=None) -> discord.Embed:
             e.add_field(name=f"👥 Membres ({len(lines)})", value="\n".join(lines)[:1024], inline=False)
         if managers:
             e.add_field(name="🛠️ Managers", value=", ".join(f"<@{uid}>" for uid in managers)[:1024], inline=False)
+    
+    if avant_postes is not None and len(avant_postes) > 0:
+        ap_lines = []
+        for ap in avant_postes:
+            ap_text = f"• **{ap['nom']}** — <@{ap['user_id']}>"
+            if ap['map'] and ap['coords']:
+                ap_text += f"\n  🗺️ {ap['map']} | 📍 {ap['coords']}"
+            elif ap['map']:
+                ap_text += f"\n  🗺️ {ap['map']}"
+            elif ap['coords']:
+                ap_text += f"\n  📍 {ap['coords']}"
+            ap_lines.append(ap_text)
+        if ap_lines:
+            e.add_field(name=f"⛺ Avant-Postes ({len(ap_lines)})", value="\n".join(ap_lines)[:1024], inline=False)
 
     e.set_footer(text="Astuce : /tribu modifier ou le bouton « Modifier » pour mettre à jour la fiche")
     return e
@@ -159,7 +206,9 @@ async def tribu_voir(inter: discord.Interaction, nom: str):
         c = conn.cursor()
         c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (row["id"],))
         membres = c.fetchall()
-    await inter.response.send_message(embed=embed_tribu(row, membres))
+        c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (row["id"],))
+        avant_postes = c.fetchall()
+    await inter.response.send_message(embed=embed_tribu(row, membres, avant_postes))
 
 @tribu.command(name="lister", description="Lister toutes les tribus du serveur")
 async def tribu_lister(inter: discord.Interaction):
@@ -182,7 +231,9 @@ async def tribu_lister(inter: discord.Interaction):
     description="Nouvelle description (optionnel)",
     couleur_hex="Couleur hex. ex: #00AAFF (optionnel)",
     logo_url="URL du logo (optionnel)",
-    base="Base principale (optionnel)",
+    base="Nom de la base principale (optionnel)",
+    map_base="Map de la base principale (optionnel)",
+    coords_base="Coordonnées de la base ex: 45.5, 32.6 (optionnel)",
     tags="Tags séparés par des virgules (optionnel)"
 )
 async def tribu_modifier(
@@ -193,6 +244,8 @@ async def tribu_modifier(
     couleur_hex: Optional[str] = None,
     logo_url: Optional[str] = None,
     base: Optional[str] = None,
+    map_base: Optional[str] = None,
+    coords_base: Optional[str] = None,
     tags: Optional[str] = None
 ):
     db_init()
@@ -218,6 +271,10 @@ async def tribu_modifier(
         updates["logo_url"] = logo_url.strip()
     if base is not None:
         updates["base"] = base.strip()
+    if map_base is not None:
+        updates["map_base"] = map_base.strip()
+    if coords_base is not None:
+        updates["coords_base"] = coords_base.strip()
     if tags is not None:
         updates["tags"] = ",".join([t.strip() for t in tags.split(",")]) if tags else ""
 
@@ -273,6 +330,57 @@ async def tribu_retirer_membre(inter: discord.Interaction, nom: str, utilisateur
         c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (row["id"], utilisateur.id))
         conn.commit()
     await inter.response.send_message(f"✅ <@{utilisateur.id}> retiré de **{row['nom']}**.")
+
+@tribu.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à une tribu")
+@app_commands.describe(
+    nom_tribu="Nom de la tribu",
+    nom_avant_poste="Nom de l'avant-poste",
+    utilisateur="Joueur propriétaire de l'avant-poste",
+    map="Map de l'avant-poste (optionnel)",
+    coords="Coordonnées ex: 45.5, 32.6 (optionnel)"
+)
+async def tribu_ajouter_avant_poste(
+    inter: discord.Interaction,
+    nom_tribu: str,
+    nom_avant_poste: str,
+    utilisateur: discord.Member,
+    map: Optional[str] = "",
+    coords: Optional[str] = ""
+):
+    db_init()
+    row = tribu_par_nom(inter.guild_id, nom_tribu)
+    if not row:
+        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        return
+    if not await verifier_droits(inter, row):
+        return
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (row["id"], utilisateur.id, nom_avant_poste.strip(), (map or "").strip(), (coords or "").strip(), dt.datetime.utcnow().isoformat()))
+        conn.commit()
+    await inter.response.send_message(f"✅ Avant-poste **{nom_avant_poste}** ajouté pour <@{utilisateur.id}> dans **{row['nom']}**.")
+
+@tribu.command(name="retirer_avant_poste", description="Retirer un avant-poste d'une tribu")
+@app_commands.describe(nom_tribu="Nom de la tribu", nom_avant_poste="Nom de l'avant-poste à retirer")
+async def tribu_retirer_avant_poste(inter: discord.Interaction, nom_tribu: str, nom_avant_poste: str):
+    db_init()
+    row = tribu_par_nom(inter.guild_id, nom_tribu)
+    if not row:
+        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        return
+    if not await verifier_droits(inter, row):
+        return
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM avant_postes WHERE tribu_id=? AND LOWER(nom)=LOWER(?)", (row["id"], nom_avant_poste))
+        if c.rowcount == 0:
+            await inter.response.send_message(f"❌ Aucun avant-poste trouvé avec le nom **{nom_avant_poste}**.", ephemeral=True)
+            return
+        conn.commit()
+    await inter.response.send_message(f"✅ Avant-poste **{nom_avant_poste}** retiré de **{row['nom']}**.")
 
 @tribu.command(name="transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
@@ -330,9 +438,11 @@ async def aide(inter: discord.Interaction):
         "• **/tribu créer** — créer une nouvelle tribu",
         "• **/tribu voir** — afficher une fiche tribu",
         "• **/tribu lister** — lister toutes les tribus du serveur",
-        "• **/tribu modifier** — éditer nom/description/couleur/logo/base/tags",
+        "• **/tribu modifier** — éditer nom/description/couleur/logo/base/map/coords/tags",
         "• **/tribu ajouter_membre** — ajouter un membre (+ rôle + manager)",
         "• **/tribu retirer_membre** — retirer un membre",
+        "• **/tribu ajouter_avant_poste** — ajouter un avant-poste avec map et coords",
+        "• **/tribu retirer_avant_poste** — retirer un avant-poste",
         "• **/tribu transférer** — transférer la propriété",
         "• **/tribu supprimer** — supprimer une tribu (avec confirmation)",
         "• **/tribu_test** — vérifier que le bot répond",
@@ -424,7 +534,9 @@ class ModalVoirTribu(discord.ui.Modal, title="Voir une tribu"):
             c = conn.cursor()
             c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (row["id"],))
             membres = c.fetchall()
-        await inter.response.send_message(embed=embed_tribu(row, membres), ephemeral=False)
+            c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (row["id"],))
+            avant_postes = c.fetchall()
+        await inter.response.send_message(embed=embed_tribu(row, membres, avant_postes), ephemeral=False)
 
 class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = 180):

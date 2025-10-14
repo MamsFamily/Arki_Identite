@@ -7,11 +7,13 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 
 ### Slash Commands (/)
 - `/tribu créer` — Créer une nouvelle tribu
-- `/tribu voir` — Afficher la fiche détaillée d'une tribu
+- `/tribu voir` — Afficher la fiche détaillée d'une tribu avec base et avant-postes
 - `/tribu lister` — Lister toutes les tribus du serveur
-- `/tribu modifier` — Modifier les informations d'une tribu (nom, description, couleur, logo, base, tags)
+- `/tribu modifier` — Modifier les informations d'une tribu (nom, description, couleur, logo, base, map_base, coords_base, tags)
 - `/tribu ajouter_membre` — Ajouter un membre à une tribu avec un rôle optionnel et droits de manager
 - `/tribu retirer_membre` — Retirer un membre d'une tribu
+- `/tribu ajouter_avant_poste` — Ajouter un avant-poste avec nom, propriétaire, map et coordonnées
+- `/tribu retirer_avant_poste` — Retirer un avant-poste d'une tribu
 - `/tribu transférer` — Transférer la propriété d'une tribu
 - `/tribu supprimer` — Supprimer une tribu (avec confirmation)
 - `/panneau` — Ouvrir le panneau interactif avec boutons
@@ -32,8 +34,9 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 
 ### Base de Données
 Le bot utilise SQLite pour stocker :
-- **Tribus** : id, guild_id, nom, description, couleur, logo_url, base, tags, proprietaire_id, created_at
+- **Tribus** : id, guild_id, nom, description, couleur, logo_url, base, map_base, coords_base, tags, proprietaire_id, created_at
 - **Membres** : tribu_id, user_id, role, manager (flag)
+- **Avant-postes** : id, tribu_id, user_id, nom, map, coords, created_at
 
 ## Configuration Requise
 - Token Discord Bot via la variable d'environnement `DISCORD_BOT_TOKEN`
@@ -66,6 +69,9 @@ Le bot utilise SQLite pour stocker :
 - 14 octobre 2025 : Migration vers le bot complet avec système de tribus, UI interactive et base de données
 - Ajout des modals Discord pour une meilleure expérience utilisateur
 - Implémentation du système de permissions (propriétaire, managers, admins)
+- Ajout des champs map_base et coords_base pour la base principale
+- Création du système d'avant-postes avec map et coordonnées pour chaque joueur
+- Nouvelles commandes : /tribu ajouter_avant_poste et /tribu retirer_avant_poste
 
 ## User Preferences
 - Bot en français
