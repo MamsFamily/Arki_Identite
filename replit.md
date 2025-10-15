@@ -6,13 +6,13 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 ## Fonctionnalités Principales
 
 ### Slash Commands (/)
-- `/tribu créer` — Créer une nouvelle tribu
+- `/tribu créer` — Créer une nouvelle tribu (avec champs optionnels : description, base, map_base, coords_base)
 - `/tribu voir` — Afficher la fiche détaillée d'une tribu avec base et avant-postes
 - `/tribu lister` — Lister toutes les tribus du serveur
 - `/tribu modifier` — Modifier les informations d'une tribu (nom, description, couleur, logo, base, map_base, coords_base, tags)
 - `/tribu ajouter_membre` — Ajouter un membre à une tribu avec un rôle optionnel et droits de manager
 - `/tribu retirer_membre` — Retirer un membre d'une tribu
-- `/tribu ajouter_avant_poste` — Ajouter un avant-poste avec nom, propriétaire, map et coordonnées
+- `/tribu ajouter_avant_poste` — Ajouter ton avant-poste (détection automatique de ta tribu, demande nom, map et coords)
 - `/tribu retirer_avant_poste` — Retirer un avant-poste d'une tribu
 - `/tribu transférer` — Transférer la propriété d'une tribu
 - `/tribu supprimer` — Supprimer une tribu (avec confirmation)
@@ -22,7 +22,7 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 
 ### Interface Utilisateur Interactive
 - **Panneau Tribu** : Interface avec 4 boutons principaux
-  - ➕ **Créer** : Ouvre un modal pour créer une tribu
+  - ➕ **Créer** : Ouvre un modal pour créer une tribu (avec nom, description, base, map et coordonnées)
   - 🛠️ **Modifier** : Ouvre un modal pour modifier une tribu
   - 📜 **Liste** : Affiche toutes les tribus
   - 👀 **Voir** : Ouvre un modal pour voir une tribu spécifique
@@ -66,12 +66,16 @@ Le bot utilise SQLite pour stocker :
 - **Langue** : Toutes les commandes et messages sont en français pour la communauté Arki Family.
 
 ## Recent Changes
+- 15 octobre 2025 : 
+  - Ajout des champs de base (base, map_base, coords_base) lors de la création de tribu via `/tribu créer` et modal
+  - Simplification de `/tribu ajouter_avant_poste` : détection automatique de la tribu du joueur
+  - Fix des bugs sqlite3.Row (utilisation de [] au lieu de .get())
+  - Modal de création amélioré avec 5 champs (nom, description, base, map, coords)
 - 14 octobre 2025 : Migration vers le bot complet avec système de tribus, UI interactive et base de données
 - Ajout des modals Discord pour une meilleure expérience utilisateur
 - Implémentation du système de permissions (propriétaire, managers, admins)
 - Ajout des champs map_base et coords_base pour la base principale
 - Création du système d'avant-postes avec map et coordonnées pour chaque joueur
-- Nouvelles commandes : /tribu ajouter_avant_poste et /tribu retirer_avant_poste
 
 ## User Preferences
 - Bot en français

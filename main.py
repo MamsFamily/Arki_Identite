@@ -174,8 +174,21 @@ tree.add_command(tribu)
 
 # ---- Slash commands de base (FR) ----
 @tribu.command(name="créer", description="Créer une nouvelle tribu")
-@app_commands.describe(nom="Nom de la tribu", description="Description (facultatif)")
-async def tribu_creer(inter: discord.Interaction, nom: str, description: Optional[str] = ""):
+@app_commands.describe(
+    nom="Nom de la tribu", 
+    description="Description (facultatif)",
+    base="Nom de la base principale (facultatif)",
+    map_base="Map de la base (facultatif)",
+    coords_base="Coordonnées de la base ex: 45.5, 32.6 (facultatif)"
+)
+async def tribu_creer(
+    inter: discord.Interaction, 
+    nom: str, 
+    description: Optional[str] = "",
+    base: Optional[str] = "",
+    map_base: Optional[str] = "",
+    coords_base: Optional[str] = ""
+):
     db_init()
     if tribu_par_nom(inter.guild_id, nom):
         await inter.response.send_message("❌ Ce nom de tribu est déjà pris sur ce serveur.", ephemeral=True)
@@ -183,9 +196,18 @@ async def tribu_creer(inter: discord.Interaction, nom: str, description: Optiona
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("""
-            INSERT INTO tribus (guild_id, nom, description, proprietaire_id, created_at)
-            VALUES (?, ?, ?, ?, ?)
-        """, (inter.guild_id, nom.strip(), (description or "").strip(), inter.user.id, dt.datetime.utcnow().isoformat()))
+            INSERT INTO tribus (guild_id, nom, description, base, map_base, coords_base, proprietaire_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            inter.guild_id, 
+            nom.strip(), 
+            (description or "").strip(), 
+            (base or "").strip(),
+            (map_base or "").strip(),
+            (coords_base or "").strip(),
+            inter.user.id, 
+            dt.datetime.utcnow().isoformat()
+        ))
         tribu_id = c.lastrowid
         c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, 1)",
                   (tribu_id, inter.user.id, "Chef",))
@@ -331,37 +353,49 @@ async def tribu_retirer_membre(inter: discord.Interaction, nom: str, utilisateur
         conn.commit()
     await inter.response.send_message(f"✅ <@{utilisateur.id}> retiré de **{row['nom']}**.")
 
-@tribu.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à une tribu")
+@tribu.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à ta tribu")
 @app_commands.describe(
-    nom_tribu="Nom de la tribu",
     nom_avant_poste="Nom de l'avant-poste",
-    utilisateur="Joueur propriétaire de l'avant-poste",
     map="Map de l'avant-poste (optionnel)",
     coords="Coordonnées ex: 45.5, 32.6 (optionnel)"
 )
 async def tribu_ajouter_avant_poste(
     inter: discord.Interaction,
-    nom_tribu: str,
     nom_avant_poste: str,
-    utilisateur: discord.Member,
     map: Optional[str] = "",
     coords: Optional[str] = ""
 ):
     db_init()
-    row = tribu_par_nom(inter.guild_id, nom_tribu)
-    if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+    
+    # Trouver la tribu du joueur
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND m.user_id = ?
+        """, (inter.guild_id, inter.user.id))
+        tribus = c.fetchall()
+    
+    if not tribus:
+        await inter.response.send_message("❌ Tu n'es membre d'aucune tribu. Rejoins ou crée une tribu d'abord.", ephemeral=True)
         return
-    if not await verifier_droits(inter, row):
+    
+    if len(tribus) > 1:
+        noms = ", ".join([t["nom"] for t in tribus])
+        await inter.response.send_message(f"❌ Tu es membre de plusieurs tribus ({noms}). Utilise `/tribu ajouter_avant_poste_pour` pour spécifier la tribu.", ephemeral=True)
         return
+    
+    row = tribus[0]
+    
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("""
             INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (row["id"], utilisateur.id, nom_avant_poste.strip(), (map or "").strip(), (coords or "").strip(), dt.datetime.utcnow().isoformat()))
+        """, (row["id"], inter.user.id, nom_avant_poste.strip(), (map or "").strip(), (coords or "").strip(), dt.datetime.utcnow().isoformat()))
         conn.commit()
-    await inter.response.send_message(f"✅ Avant-poste **{nom_avant_poste}** ajouté pour <@{utilisateur.id}> dans **{row['nom']}**.")
+    await inter.response.send_message(f"✅ Avant-poste **{nom_avant_poste}** ajouté à **{row['nom']}** !")
 
 @tribu.command(name="retirer_avant_poste", description="Retirer un avant-poste d'une tribu")
 @app_commands.describe(nom_tribu="Nom de la tribu", nom_avant_poste="Nom de l'avant-poste à retirer")
@@ -435,13 +469,13 @@ async def aide(inter: discord.Interaction):
         color=0x5865F2
     )
     lignes = [
-        "• **/tribu créer** — créer une nouvelle tribu",
+        "• **/tribu créer** — créer une nouvelle tribu avec base et coordonnées",
         "• **/tribu voir** — afficher une fiche tribu",
         "• **/tribu lister** — lister toutes les tribus du serveur",
         "• **/tribu modifier** — éditer nom/description/couleur/logo/base/map/coords/tags",
         "• **/tribu ajouter_membre** — ajouter un membre (+ rôle + manager)",
         "• **/tribu retirer_membre** — retirer un membre",
-        "• **/tribu ajouter_avant_poste** — ajouter un avant-poste avec map et coords",
+        "• **/tribu ajouter_avant_poste** — ajouter ton avant-poste avec map et coords",
         "• **/tribu retirer_avant_poste** — retirer un avant-poste",
         "• **/tribu transférer** — transférer la propriété",
         "• **/tribu supprimer** — supprimer une tribu (avec confirmation)",
@@ -456,6 +490,9 @@ async def aide(inter: discord.Interaction):
 class ModalCreerTribu(discord.ui.Modal, title="Créer une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", max_length=64)
     description = discord.ui.TextInput(label="Description", style=discord.TextStyle.paragraph, required=False, max_length=500, placeholder="Objectifs, ambiance, règles...")
+    base = discord.ui.TextInput(label="Nom de la base principale (optionnel)", required=False, max_length=100, placeholder="Ex: Base Principale")
+    map_base = discord.ui.TextInput(label="Map de la base (optionnel)", required=False, max_length=50, placeholder="Ex: TheIsland, Ragnarok...")
+    coords_base = discord.ui.TextInput(label="Coordonnées base (optionnel)", required=False, max_length=50, placeholder="Ex: 45.5, 32.6")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -465,9 +502,18 @@ class ModalCreerTribu(discord.ui.Modal, title="Créer une tribu"):
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("""
-                INSERT INTO tribus (guild_id, nom, description, proprietaire_id, created_at)
-                VALUES (?, ?, ?, ?, ?)
-            """, (inter.guild_id, str(self.nom).strip(), str(self.description or "").strip(), inter.user.id, dt.datetime.utcnow().isoformat()))
+                INSERT INTO tribus (guild_id, nom, description, base, map_base, coords_base, proprietaire_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                inter.guild_id, 
+                str(self.nom).strip(), 
+                str(self.description or "").strip(),
+                str(self.base or "").strip(),
+                str(self.map_base or "").strip(),
+                str(self.coords_base or "").strip(),
+                inter.user.id, 
+                dt.datetime.utcnow().isoformat()
+            ))
             tid = c.lastrowid
             c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, 1)",
                       (tid, inter.user.id, "Chef",))
