@@ -80,6 +80,7 @@ Le bot utilise SQLite pour stocker :
 ## Recent Changes
 - 15 octobre 2025 : 
   - **Affichage automatique des fiches mises à jour** : Quand une tribu est modifiée (modification, ajout/retrait membre, ajout/retrait avant-poste, transfert), le bot affiche automatiquement la fiche mise à jour et supprime l'ancienne fiche publiée
+  - **Simplification de l'affichage** : Suppression de la section "Managers" et du nom des joueurs sur les avant-postes
   - **Simplification de la création de tribu** : Modal avec 3 champs obligatoires (nom, map base, coords base)
   - **Simplification de `/tribu ajouter_avant_poste`** : Détection automatique de la tribu du joueur
   - **Simplification de `/tribu ajouter_membre`** : Détection automatique de la tribu du propriétaire/manager
