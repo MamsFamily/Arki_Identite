@@ -742,9 +742,12 @@ async def panneau(inter: discord.Interaction):
 
 @bot.event
 async def on_ready():
+    db_init()  # Initialiser la DB au démarrage
     try:
         synced = await tree.sync()
         print(f"Commandes synchronisées : {len(synced)}")
+        for cmd in synced:
+            print(f"  - /{cmd.name}")
     except Exception as e:
         print("Erreur de sync des commandes :", e)
     print(f"Connecté en tant que {bot.user} (ID: {bot.user.id})")
