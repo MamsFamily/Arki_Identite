@@ -731,14 +731,20 @@ class PanneauTribu(discord.ui.View):
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
-    v = PanneauTribu(timeout=180)
+    v = PanneauTribu(timeout=None)  # Pas de timeout pour un panneau permanent
     e = discord.Embed(
         title="🧭 Panneau — Fiches Tribu",
         description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
         color=0x2B2D31
     )
-    e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
-    await inter.response.send_message(embed=e, view=v, ephemeral=True)
+    
+    # Si admin, afficher pour tout le monde, sinon en privé
+    if est_admin(inter):
+        e.set_footer(text="👑 Panneau admin — Visible par tous")
+        await inter.response.send_message(embed=e, view=v, ephemeral=False)
+    else:
+        e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
+        await inter.response.send_message(embed=e, view=v, ephemeral=True)
 
 @bot.event
 async def on_ready():

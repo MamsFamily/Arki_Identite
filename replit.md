@@ -16,7 +16,7 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 - `/tribu retirer_avant_poste` — Retirer un avant-poste d'une tribu
 - `/tribu transférer` — Transférer la propriété d'une tribu
 - `/tribu supprimer` — Supprimer une tribu (avec confirmation)
-- `/panneau` — Ouvrir le panneau interactif avec boutons
+- `/panneau` — Ouvrir le panneau interactif avec boutons (Admin : visible par tous, Autres : privé)
 - `/aide` — Afficher la liste complète des commandes
 - `/tribu_test` — Tester si le bot répond
 
@@ -84,6 +84,7 @@ Le bot utilise SQLite pour stocker :
   - **Système de maps personnalisées** : Table de base de données pour stocker les maps
   - **Commandes admin `/map`** : Ajouter, supprimer et lister les maps disponibles
   - Maps par défaut : The Island, Scorched Earth, Svartalfheim, Abberation, The Center, Extinction, Astraeos, Ragnarok, Valguero
+  - **Panneau admin public** : Les admins peuvent afficher le panneau visible par tous avec `/panneau`
   - **Suppression des tags** : Fonctionnalité retirée pour simplifier l'interface
   - Ajout d'une note informative après création pour ajouter membres et avant-postes
   - Fix des bugs sqlite3.Row (utilisation de [] au lieu de .get())
