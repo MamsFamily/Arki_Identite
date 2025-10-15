@@ -65,6 +65,15 @@ def db_init():
             FOREIGN KEY (tribu_id) REFERENCES tribus(id) ON DELETE CASCADE
         )
         """)
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS maps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id INTEGER NOT NULL,
+            nom TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(guild_id, nom)
+        )
+        """)
         try:
             c.execute("ALTER TABLE tribus ADD COLUMN map_base TEXT DEFAULT ''")
         except sqlite3.OperationalError:
@@ -73,7 +82,26 @@ def db_init():
             c.execute("ALTER TABLE tribus ADD COLUMN coords_base TEXT DEFAULT ''")
         except sqlite3.OperationalError:
             pass
+        
+        # Ajouter les maps par défaut si elles n'existent pas
+        default_maps = [
+            "The Island", "Scorched Earth", "Svartalfheim", "Abberation",
+            "The Center", "Extinction", "Astraeos", "Ragnarok", "Valguero"
+        ]
+        for map_name in default_maps:
+            c.execute("INSERT OR IGNORE INTO maps (guild_id, nom, created_at) VALUES (?, ?, ?)",
+                     (0, map_name, dt.datetime.utcnow().isoformat()))
+        
         conn.commit()
+
+def get_maps_choices(guild_id: int):
+    """Récupère les choix de maps pour un serveur"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        # Maps globales (guild_id=0) + maps du serveur
+        c.execute("SELECT DISTINCT nom FROM maps WHERE guild_id IN (0, ?) ORDER BY nom", (guild_id,))
+        maps = [row["nom"] for row in c.fetchall()]
+        return [app_commands.Choice(name=m, value=m) for m in maps[:25]]  # Discord limite à 25 choix
 
 def tribu_par_nom(guild_id: int, nom: str):
     with db_connect() as conn:
@@ -215,6 +243,11 @@ async def tribu_creer(
     embed.set_footer(text="ℹ️ Ajoutez des membres avec /tribu ajouter_membre et des avant-postes avec /tribu ajouter_avant_poste")
     await inter.response.send_message("✅ **Tribu créée !**", embed=embed)
 
+@tribu_creer.autocomplete('map_base')
+async def map_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_maps_choices(inter.guild_id)
+
 @tribu.command(name="voir", description="Afficher la fiche d'une tribu")
 @app_commands.describe(nom="Nom de la tribu")
 async def tribu_voir(inter: discord.Interaction, nom: str):
@@ -319,16 +352,32 @@ async def tribu_modifier(
 
     await inter.response.send_message("✅ Fiche mise à jour.", embed=embed_tribu(updated))
 
-@tribu.command(name="ajouter_membre", description="Ajouter un membre à une tribu")
-@app_commands.describe(nom="Nom de la tribu", utilisateur="Membre à ajouter", role="Rôle affiché (optionnel)", manager="Donner les droits de gestion ?")
-async def tribu_ajouter_membre(inter: discord.Interaction, nom: str, utilisateur: discord.Member, role: Optional[str] = "", manager: Optional[bool] = False):
+@tribu.command(name="ajouter_membre", description="Ajouter un membre à ta tribu")
+@app_commands.describe(utilisateur="Membre à ajouter", role="Rôle affiché (optionnel)", manager="Donner les droits de gestion ?")
+async def tribu_ajouter_membre(inter: discord.Interaction, utilisateur: discord.Member, role: Optional[str] = "", manager: Optional[bool] = False):
     db_init()
-    row = tribu_par_nom(inter.guild_id, nom)
-    if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+    
+    # Trouver la tribu du propriétaire/manager
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            LEFT JOIN membres m ON t.id = m.tribu_id AND m.user_id = ?
+            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR m.manager = 1)
+        """, (inter.user.id, inter.guild_id, inter.user.id))
+        tribus = c.fetchall()
+    
+    if not tribus:
+        await inter.response.send_message("❌ Tu n'es propriétaire ou manager d'aucune tribu.", ephemeral=True)
         return
-    if not await verifier_droits(inter, row):
+    
+    if len(tribus) > 1:
+        noms = ", ".join([t["nom"] for t in tribus])
+        await inter.response.send_message(f"❌ Tu gères plusieurs tribus ({noms}). Utilise `/tribu modifier` puis ajoute les membres manuellement.", ephemeral=True)
         return
+    
+    row = tribus[0]
+    
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, ?)",
@@ -355,14 +404,14 @@ async def tribu_retirer_membre(inter: discord.Interaction, nom: str, utilisateur
 @tribu.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à ta tribu")
 @app_commands.describe(
     nom_avant_poste="Nom de l'avant-poste",
-    map="Map de l'avant-poste (optionnel)",
-    coords="Coordonnées ex: 45.5, 32.6 (optionnel)"
+    map="Map de l'avant-poste",
+    coords="Coordonnées ex: 45.5, 32.6"
 )
 async def tribu_ajouter_avant_poste(
     inter: discord.Interaction,
     nom_avant_poste: str,
-    map: Optional[str] = "",
-    coords: Optional[str] = ""
+    map: str,
+    coords: str
 ):
     db_init()
     
@@ -382,7 +431,7 @@ async def tribu_ajouter_avant_poste(
     
     if len(tribus) > 1:
         noms = ", ".join([t["nom"] for t in tribus])
-        await inter.response.send_message(f"❌ Tu es membre de plusieurs tribus ({noms}). Utilise `/tribu ajouter_avant_poste_pour` pour spécifier la tribu.", ephemeral=True)
+        await inter.response.send_message(f"❌ Tu es membre de plusieurs tribus ({noms}). Contacte un admin pour ajouter ton avant-poste.", ephemeral=True)
         return
     
     row = tribus[0]
@@ -392,9 +441,14 @@ async def tribu_ajouter_avant_poste(
         c.execute("""
             INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (row["id"], inter.user.id, nom_avant_poste.strip(), (map or "").strip(), (coords or "").strip(), dt.datetime.utcnow().isoformat()))
+        """, (row["id"], inter.user.id, nom_avant_poste.strip(), map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
         conn.commit()
     await inter.response.send_message(f"✅ Avant-poste **{nom_avant_poste}** ajouté à **{row['nom']}** !")
+
+@tribu_ajouter_avant_poste.autocomplete('map')
+async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_maps_choices(inter.guild_id)
 
 @tribu.command(name="retirer_avant_poste", description="Retirer un avant-poste d'une tribu")
 @app_commands.describe(nom_tribu="Nom de la tribu", nom_avant_poste="Nom de l'avant-poste à retirer")
@@ -456,6 +510,68 @@ async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: st
         conn.commit()
     await inter.response.send_message(f"🗑️ La tribu **{nom}** a été supprimée.")
 
+# ---- Commandes Admin (maps) ----
+class GroupeMap(app_commands.Group):
+    def __init__(self):
+        super().__init__(name="map", description="Gérer les maps disponibles (Admin uniquement)")
+
+map_group = GroupeMap()
+tree.add_command(map_group)
+
+@map_group.command(name="ajouter", description="[ADMIN] Ajouter une map à la liste")
+@app_commands.describe(nom="Nom de la map à ajouter")
+async def map_ajouter(inter: discord.Interaction, nom: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        try:
+            c.execute("INSERT INTO maps (guild_id, nom, created_at) VALUES (?, ?, ?)",
+                     (inter.guild_id, nom.strip(), dt.datetime.utcnow().isoformat()))
+            conn.commit()
+            await inter.response.send_message(f"✅ Map **{nom}** ajoutée à la liste !", ephemeral=True)
+        except sqlite3.IntegrityError:
+            await inter.response.send_message(f"❌ La map **{nom}** existe déjà.", ephemeral=True)
+
+@map_group.command(name="supprimer", description="[ADMIN] Supprimer une map de la liste")
+@app_commands.describe(nom="Nom de la map à supprimer")
+async def map_supprimer(inter: discord.Interaction, nom: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM maps WHERE guild_id=? AND nom=?", (inter.guild_id, nom))
+        if c.rowcount == 0:
+            await inter.response.send_message(f"❌ Map **{nom}** non trouvée.", ephemeral=True)
+        else:
+            conn.commit()
+            await inter.response.send_message(f"✅ Map **{nom}** supprimée de la liste !", ephemeral=True)
+
+@map_group.command(name="lister", description="[ADMIN] Lister toutes les maps disponibles")
+async def map_lister(inter: discord.Interaction):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT nom FROM maps WHERE guild_id IN (0, ?) ORDER BY guild_id, nom", (inter.guild_id,))
+        maps = c.fetchall()
+    
+    if not maps:
+        await inter.response.send_message("Aucune map disponible.", ephemeral=True)
+        return
+    
+    e = discord.Embed(title="🗺️ Maps disponibles", color=0x5865F2)
+    maps_list = "\n".join([f"• {m['nom']}" for m in maps])
+    e.add_field(name="Liste", value=maps_list, inline=False)
+    e.set_footer(text="Utilisez /map ajouter et /map supprimer pour gérer les maps")
+    await inter.response.send_message(embed=e, ephemeral=True)
+
 @tree.command(name="tribu_test", description="Vérifier si le bot répond")
 async def tribu_test(inter: discord.Interaction):
     await inter.response.send_message("🏓 Pong !")
@@ -468,21 +584,25 @@ async def aide(inter: discord.Interaction):
         color=0x5865F2
     )
     lignes = [
-        "• **/tribu créer** — créer une tribu (nom + map base + coords base)",
+        "• **/tribu créer** — créer une tribu (map à sélectionner)",
         "• **/tribu voir** — afficher une fiche tribu complète",
         "• **/tribu lister** — lister toutes les tribus du serveur",
         "• **/tribu modifier** — éditer les infos (description, couleur, logo, tags...)",
-        "• **/tribu ajouter_membre** — ajouter un membre à la tribu",
+        "• **/tribu ajouter_membre** — ajouter un membre à ta tribu",
         "• **/tribu retirer_membre** — retirer un membre de la tribu",
-        "• **/tribu ajouter_avant_poste** — ajouter ton avant-poste (nom + map + coords)",
+        "• **/tribu ajouter_avant_poste** — ajouter ton avant-poste (map à sélectionner)",
         "• **/tribu retirer_avant_poste** — retirer un avant-poste",
         "• **/tribu transférer** — transférer la propriété",
         "• **/tribu supprimer** — supprimer une tribu (avec confirmation)",
-        "• **/tribu_test** — vérifier que le bot répond",
-        "• **/panneau** — ouvre les boutons (Créer / Modifier / Liste / Voir)"
+        "• **/panneau** — ouvre les boutons (Créer / Modifier / Liste / Voir)",
+        "",
+        "**Commandes Admin :**",
+        "• **/map ajouter** — ajouter une map personnalisée",
+        "• **/map supprimer** — supprimer une map",
+        "• **/map lister** — voir toutes les maps disponibles"
     ]
     e.add_field(name="Résumé", value="\n".join(lignes), inline=False)
-    e.set_footer(text="Astuce : limite les tags (3-5) pour garder des fiches lisibles.")
+    e.set_footer(text="💡 Les maps ont des menus déroulants pour faciliter la sélection")
     await inter.response.send_message(embed=e, ephemeral=True)
 
 # ---------- UI (boutons + modals) ----------
