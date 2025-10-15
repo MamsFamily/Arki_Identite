@@ -82,6 +82,14 @@ def db_init():
             c.execute("ALTER TABLE tribus ADD COLUMN coords_base TEXT DEFAULT ''")
         except sqlite3.OperationalError:
             pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN message_id INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN channel_id INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
         
         # Ajouter les maps par défaut si elles n'existent pas
         default_maps = [
@@ -190,6 +198,47 @@ async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
         return True
     await inter.response.send_message("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
     return False
+
+async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, message_prefix: str = "✅ **Fiche mise à jour !**"):
+    """Affiche la fiche tribu mise à jour et supprime l'ancienne si elle existe"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
+        tribu = c.fetchone()
+        if not tribu:
+            return
+        
+        c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (tribu_id,))
+        membres = c.fetchall()
+        c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        avant_postes = c.fetchall()
+        
+        # Supprimer l'ancien message s'il existe
+        old_message_id = tribu["message_id"] if "message_id" in tribu.keys() else 0
+        old_channel_id = tribu["channel_id"] if "channel_id" in tribu.keys() else 0
+        
+        if old_message_id and old_channel_id:
+            try:
+                channel = inter.guild.get_channel(old_channel_id)
+                if channel:
+                    old_message = await channel.fetch_message(old_message_id)
+                    if old_message:
+                        await old_message.delete()
+            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                pass  # Message déjà supprimé ou pas accessible
+        
+        # Envoyer le nouveau message avec la fiche
+        embed = embed_tribu(tribu, membres, avant_postes)
+        if inter.response.is_done():
+            msg = await inter.followup.send(message_prefix, embed=embed, wait=True)
+        else:
+            await inter.response.send_message(message_prefix, embed=embed)
+            msg = await inter.original_response()
+        
+        # Sauvegarder le nouveau message_id et channel_id
+        c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                 (msg.id, msg.channel.id, tribu_id))
+        conn.commit()
 
 # ---------- Groupe de commandes ----------
 class GroupeTribu(app_commands.Group):
