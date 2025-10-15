@@ -163,23 +163,18 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
 
     if membres is not None:
         lines = []
-        managers = []
         for m in membres:
             line = f"• <@{m['user_id']}>"
             if m["role"]:
                 line += f" — {m['role']}"
-            if m["manager"]:
-                managers.append(m["user_id"])
             lines.append(line)
         if lines:
             e.add_field(name=f"👥 Membres ({len(lines)})", value="\n".join(lines)[:1024], inline=False)
-        if managers:
-            e.add_field(name="🛠️ Managers", value=", ".join(f"<@{uid}>" for uid in managers)[:1024], inline=False)
     
     if avant_postes is not None and len(avant_postes) > 0:
         ap_lines = []
         for ap in avant_postes:
-            ap_text = f"• **{ap['nom']}** — <@{ap['user_id']}>"
+            ap_text = f"• **{ap['nom']}**"
             if ap['map'] and ap['coords']:
                 ap_text += f"\n  🗺️ {ap['map']} | 📍 {ap['coords']}"
             elif ap['map']:
