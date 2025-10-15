@@ -151,7 +151,6 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
         base_value = f"{base_value}\n📍 Coords: **{coords_base}**"
     
     e.add_field(name="🏰 Base Principale", value=base_value, inline=False)
-    e.add_field(name="🏷️ Tags", value=tribu["tags"] or "—", inline=True)
     e.add_field(name="👑 Propriétaire", value=f"<@{tribu['proprietaire_id']}>", inline=True)
 
     if membres is not None:
@@ -287,8 +286,7 @@ async def tribu_lister(inter: discord.Interaction):
     logo_url="URL du logo (optionnel)",
     base="Nom de la base principale (optionnel)",
     map_base="Map de la base principale (optionnel)",
-    coords_base="Coordonnées de la base ex: 45.5, 32.6 (optionnel)",
-    tags="Tags séparés par des virgules (optionnel)"
+    coords_base="Coordonnées de la base ex: 45.5, 32.6 (optionnel)"
 )
 async def tribu_modifier(
     inter: discord.Interaction,
@@ -299,8 +297,7 @@ async def tribu_modifier(
     logo_url: Optional[str] = None,
     base: Optional[str] = None,
     map_base: Optional[str] = None,
-    coords_base: Optional[str] = None,
-    tags: Optional[str] = None
+    coords_base: Optional[str] = None
 ):
     db_init()
     row = tribu_par_nom(inter.guild_id, nom)
@@ -329,8 +326,6 @@ async def tribu_modifier(
         updates["map_base"] = map_base.strip()
     if coords_base is not None:
         updates["coords_base"] = coords_base.strip()
-    if tags is not None:
-        updates["tags"] = ",".join([t.strip() for t in tags.split(",")]) if tags else ""
 
     if not updates:
         await inter.response.send_message("Aucun changement fourni.", ephemeral=True)
@@ -587,7 +582,7 @@ async def aide(inter: discord.Interaction):
         "• **/tribu créer** — créer une tribu (map à sélectionner)",
         "• **/tribu voir** — afficher une fiche tribu complète",
         "• **/tribu lister** — lister toutes les tribus du serveur",
-        "• **/tribu modifier** — éditer les infos (description, couleur, logo, tags...)",
+        "• **/tribu modifier** — éditer les infos (description, couleur, logo...)",
         "• **/tribu ajouter_membre** — ajouter un membre à ta tribu",
         "• **/tribu retirer_membre** — retirer un membre de la tribu",
         "• **/tribu ajouter_avant_poste** — ajouter ton avant-poste (map à sélectionner)",

@@ -9,7 +9,7 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 - `/tribu créer` — Créer une nouvelle tribu (nom + map base + coords base **obligatoires**, map avec menu déroulant)
 - `/tribu voir` — Afficher la fiche détaillée d'une tribu avec base et avant-postes
 - `/tribu lister` — Lister toutes les tribus du serveur
-- `/tribu modifier` — Modifier les informations d'une tribu (nom, description, couleur, logo, base, map_base, coords_base, tags)
+- `/tribu modifier` — Modifier les informations d'une tribu (nom, description, couleur, logo, base, map_base, coords_base)
 - `/tribu ajouter_membre` — Ajouter un membre à ta tribu (détection automatique de ta tribu)
 - `/tribu retirer_membre` — Retirer un membre d'une tribu
 - `/tribu ajouter_avant_poste` — Ajouter ton avant-poste (détection automatique de ta tribu, map avec menu déroulant)
@@ -43,7 +43,7 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 
 ### Base de Données
 Le bot utilise SQLite pour stocker :
-- **Tribus** : id, guild_id, nom, description, couleur, logo_url, base, map_base, coords_base, tags, proprietaire_id, created_at
+- **Tribus** : id, guild_id, nom, description, couleur, logo_url, base, map_base, coords_base, proprietaire_id, created_at
 - **Membres** : tribu_id, user_id, role, manager (flag)
 - **Avant-postes** : id, tribu_id, user_id, nom, map, coords, created_at
 - **Maps** : id, guild_id, nom, created_at (maps globales avec guild_id=0, maps personnalisées par serveur)
@@ -84,6 +84,7 @@ Le bot utilise SQLite pour stocker :
   - **Système de maps personnalisées** : Table de base de données pour stocker les maps
   - **Commandes admin `/map`** : Ajouter, supprimer et lister les maps disponibles
   - Maps par défaut : The Island, Scorched Earth, Svartalfheim, Abberation, The Center, Extinction, Astraeos, Ragnarok, Valguero
+  - **Suppression des tags** : Fonctionnalité retirée pour simplifier l'interface
   - Ajout d'une note informative après création pour ajouter membres et avant-postes
   - Fix des bugs sqlite3.Row (utilisation de [] au lieu de .get())
 - 14 octobre 2025 : 
