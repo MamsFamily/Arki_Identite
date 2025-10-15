@@ -43,10 +43,12 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 
 ### Base de Données
 Le bot utilise SQLite pour stocker :
-- **Tribus** : id, guild_id, nom, description, couleur, logo_url, base, map_base, coords_base, proprietaire_id, created_at
+- **Tribus** : id, guild_id, nom, description, couleur, logo_url, base, map_base, coords_base, proprietaire_id, created_at, message_id, channel_id
 - **Membres** : tribu_id, user_id, role, manager (flag)
 - **Avant-postes** : id, tribu_id, user_id, nom, map, coords, created_at
 - **Maps** : id, guild_id, nom, created_at (maps globales avec guild_id=0, maps personnalisées par serveur)
+
+**Note** : Les colonnes `message_id` et `channel_id` permettent au bot de suivre la dernière fiche publiée pour chaque tribu, afin de pouvoir la supprimer automatiquement lors d'une mise à jour.
 
 ## Configuration Requise
 - Token Discord Bot via la variable d'environnement `DISCORD_BOT_TOKEN`
@@ -77,6 +79,7 @@ Le bot utilise SQLite pour stocker :
 
 ## Recent Changes
 - 15 octobre 2025 : 
+  - **Affichage automatique des fiches mises à jour** : Quand une tribu est modifiée (modification, ajout/retrait membre, ajout/retrait avant-poste, transfert), le bot affiche automatiquement la fiche mise à jour et supprime l'ancienne fiche publiée
   - **Simplification de la création de tribu** : Modal avec 3 champs obligatoires (nom, map base, coords base)
   - **Simplification de `/tribu ajouter_avant_poste`** : Détection automatique de la tribu du joueur
   - **Simplification de `/tribu ajouter_membre`** : Détection automatique de la tribu du propriétaire/manager
