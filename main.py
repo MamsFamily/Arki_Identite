@@ -176,18 +176,14 @@ tree.add_command(tribu)
 @tribu.command(name="créer", description="Créer une nouvelle tribu")
 @app_commands.describe(
     nom="Nom de la tribu", 
-    description="Description (facultatif)",
-    base="Nom de la base principale (facultatif)",
-    map_base="Map de la base (facultatif)",
-    coords_base="Coordonnées de la base ex: 45.5, 32.6 (facultatif)"
+    map_base="Map de la base principale",
+    coords_base="Coordonnées de la base ex: 45.5, 32.6"
 )
 async def tribu_creer(
     inter: discord.Interaction, 
     nom: str, 
-    description: Optional[str] = "",
-    base: Optional[str] = "",
-    map_base: Optional[str] = "",
-    coords_base: Optional[str] = ""
+    map_base: str,
+    coords_base: str
 ):
     db_init()
     if tribu_par_nom(inter.guild_id, nom):
@@ -201,10 +197,10 @@ async def tribu_creer(
         """, (
             inter.guild_id, 
             nom.strip(), 
-            (description or "").strip(), 
-            (base or "").strip(),
-            (map_base or "").strip(),
-            (coords_base or "").strip(),
+            "",  # description vide par défaut
+            "Base Principale",  # nom de base par défaut
+            map_base.strip(),
+            coords_base.strip(),
             inter.user.id, 
             dt.datetime.utcnow().isoformat()
         ))
@@ -214,7 +210,10 @@ async def tribu_creer(
         conn.commit()
         c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
         row = c.fetchone()
-    await inter.response.send_message("✅ **Tribu créée !**", embed=embed_tribu(row))
+    
+    embed = embed_tribu(row)
+    embed.set_footer(text="ℹ️ Ajoutez des membres avec /tribu ajouter_membre et des avant-postes avec /tribu ajouter_avant_poste")
+    await inter.response.send_message("✅ **Tribu créée !**", embed=embed)
 
 @tribu.command(name="voir", description="Afficher la fiche d'une tribu")
 @app_commands.describe(nom="Nom de la tribu")
@@ -469,13 +468,13 @@ async def aide(inter: discord.Interaction):
         color=0x5865F2
     )
     lignes = [
-        "• **/tribu créer** — créer une nouvelle tribu avec base et coordonnées",
-        "• **/tribu voir** — afficher une fiche tribu",
+        "• **/tribu créer** — créer une tribu (nom + map base + coords base)",
+        "• **/tribu voir** — afficher une fiche tribu complète",
         "• **/tribu lister** — lister toutes les tribus du serveur",
-        "• **/tribu modifier** — éditer nom/description/couleur/logo/base/map/coords/tags",
-        "• **/tribu ajouter_membre** — ajouter un membre (+ rôle + manager)",
-        "• **/tribu retirer_membre** — retirer un membre",
-        "• **/tribu ajouter_avant_poste** — ajouter ton avant-poste avec map et coords",
+        "• **/tribu modifier** — éditer les infos (description, couleur, logo, tags...)",
+        "• **/tribu ajouter_membre** — ajouter un membre à la tribu",
+        "• **/tribu retirer_membre** — retirer un membre de la tribu",
+        "• **/tribu ajouter_avant_poste** — ajouter ton avant-poste (nom + map + coords)",
         "• **/tribu retirer_avant_poste** — retirer un avant-poste",
         "• **/tribu transférer** — transférer la propriété",
         "• **/tribu supprimer** — supprimer une tribu (avec confirmation)",
@@ -488,11 +487,9 @@ async def aide(inter: discord.Interaction):
 
 # ---------- UI (boutons + modals) ----------
 class ModalCreerTribu(discord.ui.Modal, title="Créer une tribu"):
-    nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", max_length=64)
-    description = discord.ui.TextInput(label="Description", style=discord.TextStyle.paragraph, required=False, max_length=500, placeholder="Objectifs, ambiance, règles...")
-    base = discord.ui.TextInput(label="Nom de la base principale (optionnel)", required=False, max_length=100, placeholder="Ex: Base Principale")
-    map_base = discord.ui.TextInput(label="Map de la base (optionnel)", required=False, max_length=50, placeholder="Ex: TheIsland, Ragnarok...")
-    coords_base = discord.ui.TextInput(label="Coordonnées base (optionnel)", required=False, max_length=50, placeholder="Ex: 45.5, 32.6")
+    nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", max_length=64, required=True)
+    map_base = discord.ui.TextInput(label="🗺️ Map de la base principale", placeholder="Ex: TheIsland, Ragnarok...", max_length=50, required=True)
+    coords_base = discord.ui.TextInput(label="📍 Coordonnées de la base", placeholder="Ex: 45.5, 32.6", max_length=50, required=True)
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -507,10 +504,10 @@ class ModalCreerTribu(discord.ui.Modal, title="Créer une tribu"):
             """, (
                 inter.guild_id, 
                 str(self.nom).strip(), 
-                str(self.description or "").strip(),
-                str(self.base or "").strip(),
-                str(self.map_base or "").strip(),
-                str(self.coords_base or "").strip(),
+                "",  # description vide par défaut
+                "Base Principale",  # nom de base par défaut
+                str(self.map_base).strip(),
+                str(self.coords_base).strip(),
                 inter.user.id, 
                 dt.datetime.utcnow().isoformat()
             ))
@@ -520,7 +517,10 @@ class ModalCreerTribu(discord.ui.Modal, title="Créer une tribu"):
             conn.commit()
             c.execute("SELECT * FROM tribus WHERE id=?", (tid,))
             row = c.fetchone()
-        await inter.response.send_message("✅ **Tribu créée !**", embed=embed_tribu(row), ephemeral=False)
+        
+        embed = embed_tribu(row)
+        embed.set_footer(text="ℹ️ Ajoutez des membres avec /tribu ajouter_membre et des avant-postes avec /tribu ajouter_avant_poste")
+        await inter.response.send_message("✅ **Tribu créée !**", embed=embed, ephemeral=False)
 
 class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu à modifier")
