@@ -6,19 +6,24 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 ## Fonctionnalités Principales
 
 ### Slash Commands (/)
-- `/tribu créer` — Créer une nouvelle tribu (nom + map base + coords base **obligatoires**)
+- `/tribu créer` — Créer une nouvelle tribu (nom + map base + coords base **obligatoires**, map avec menu déroulant)
 - `/tribu voir` — Afficher la fiche détaillée d'une tribu avec base et avant-postes
 - `/tribu lister` — Lister toutes les tribus du serveur
 - `/tribu modifier` — Modifier les informations d'une tribu (nom, description, couleur, logo, base, map_base, coords_base, tags)
-- `/tribu ajouter_membre` — Ajouter un membre à une tribu avec un rôle optionnel et droits de manager
+- `/tribu ajouter_membre` — Ajouter un membre à ta tribu (détection automatique de ta tribu)
 - `/tribu retirer_membre` — Retirer un membre d'une tribu
-- `/tribu ajouter_avant_poste` — Ajouter ton avant-poste (détection automatique de ta tribu, demande nom, map et coords)
+- `/tribu ajouter_avant_poste` — Ajouter ton avant-poste (détection automatique de ta tribu, map avec menu déroulant)
 - `/tribu retirer_avant_poste` — Retirer un avant-poste d'une tribu
 - `/tribu transférer` — Transférer la propriété d'une tribu
 - `/tribu supprimer` — Supprimer une tribu (avec confirmation)
 - `/panneau` — Ouvrir le panneau interactif avec boutons
 - `/aide` — Afficher la liste complète des commandes
 - `/tribu_test` — Tester si le bot répond
+
+### Commandes Admin
+- `/map ajouter` — Ajouter une map personnalisée à la liste (Admin uniquement)
+- `/map supprimer` — Supprimer une map de la liste (Admin uniquement)
+- `/map lister` — Voir toutes les maps disponibles (Admin uniquement)
 
 ### Interface Utilisateur Interactive
 - **Panneau Tribu** : Interface avec 4 boutons principaux
@@ -41,6 +46,7 @@ Le bot utilise SQLite pour stocker :
 - **Tribus** : id, guild_id, nom, description, couleur, logo_url, base, map_base, coords_base, tags, proprietaire_id, created_at
 - **Membres** : tribu_id, user_id, role, manager (flag)
 - **Avant-postes** : id, tribu_id, user_id, nom, map, coords, created_at
+- **Maps** : id, guild_id, nom, created_at (maps globales avec guild_id=0, maps personnalisées par serveur)
 
 ## Configuration Requise
 - Token Discord Bot via la variable d'environnement `DISCORD_BOT_TOKEN`
@@ -73,6 +79,11 @@ Le bot utilise SQLite pour stocker :
 - 15 octobre 2025 : 
   - **Simplification de la création de tribu** : Modal avec 3 champs obligatoires (nom, map base, coords base)
   - **Simplification de `/tribu ajouter_avant_poste`** : Détection automatique de la tribu du joueur
+  - **Simplification de `/tribu ajouter_membre`** : Détection automatique de la tribu du propriétaire/manager
+  - **Ajout de menus déroulants** : Sélection de map via autocomplete pour bases et avant-postes
+  - **Système de maps personnalisées** : Table de base de données pour stocker les maps
+  - **Commandes admin `/map`** : Ajouter, supprimer et lister les maps disponibles
+  - Maps par défaut : The Island, Scorched Earth, Svartalfheim, Abberation, The Center, Extinction, Astraeos, Ragnarok, Valguero
   - Ajout d'une note informative après création pour ajouter membres et avant-postes
   - Fix des bugs sqlite3.Row (utilisation de [] au lieu de .get())
 - 14 octobre 2025 : 
