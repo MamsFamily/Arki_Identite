@@ -199,7 +199,7 @@ async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
     await inter.response.send_message("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
     return False
 
-async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, message_prefix: str = "✅ **Fiche mise à jour !**"):
+async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, message_prefix: str = "✅ **Fiche mise à jour !**", ephemeral: bool = False):
     """Affiche la fiche tribu mise à jour et supprime l'ancienne si elle existe"""
     with db_connect() as conn:
         c = conn.cursor()
@@ -229,16 +229,16 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         
         # Envoyer le nouveau message avec la fiche
         embed = embed_tribu(tribu, membres, avant_postes)
-        if inter.response.is_done():
-            msg = await inter.followup.send(message_prefix, embed=embed, wait=True)
-        else:
-            await inter.response.send_message(message_prefix, embed=embed)
-            msg = await inter.original_response()
         
-        # Sauvegarder le nouveau message_id et channel_id
-        c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
-                 (msg.id, msg.channel.id, tribu_id))
-        conn.commit()
+        # Répondre à l'interaction
+        await inter.response.send_message(message_prefix, embed=embed, ephemeral=ephemeral)
+        msg = await inter.original_response()
+        
+        # Sauvegarder le nouveau message_id et channel_id (seulement si pas ephemeral)
+        if not ephemeral:
+            c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                     (msg.id, msg.channel.id, tribu_id))
+            conn.commit()
 
 # ---------- Groupe de commandes ----------
 class GroupeTribu(app_commands.Group):
@@ -739,7 +739,7 @@ class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
                 conn.commit()
         
         if updates:
-            await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**")
+            await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**", ephemeral=False)
         else:
             await inter.response.send_message("ℹ️ Aucun changement détecté.", ephemeral=True)
 
