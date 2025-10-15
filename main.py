@@ -391,10 +391,8 @@ async def tribu_modifier(
         set_clause = ", ".join(f"{k}=?" for k in updates.keys())
         c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
         conn.commit()
-        c.execute("SELECT * FROM tribus WHERE id=?", (row["id"],))
-        updated = c.fetchone()
 
-    await inter.response.send_message("✅ Fiche mise à jour.", embed=embed_tribu(updated))
+    await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**")
 
 @tribu.command(name="ajouter_membre", description="Ajouter un membre à ta tribu")
 @app_commands.describe(utilisateur="Membre à ajouter", role="Rôle affiché (optionnel)", manager="Donner les droits de gestion ?")
@@ -427,7 +425,8 @@ async def tribu_ajouter_membre(inter: discord.Interaction, utilisateur: discord.
         c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, ?)",
                   (row["id"], utilisateur.id, role or "", 1 if manager else 0))
         conn.commit()
-    await inter.response.send_message(f"✅ <@{utilisateur.id}> ajouté à **{row['nom']}**.")
+    
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **<@{utilisateur.id}> ajouté à {row['nom']} !**")
 
 @tribu.command(name="retirer_membre", description="Retirer un membre d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", utilisateur="Membre à retirer")
@@ -443,7 +442,8 @@ async def tribu_retirer_membre(inter: discord.Interaction, nom: str, utilisateur
         c = conn.cursor()
         c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (row["id"], utilisateur.id))
         conn.commit()
-    await inter.response.send_message(f"✅ <@{utilisateur.id}> retiré de **{row['nom']}**.")
+    
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **<@{utilisateur.id}> retiré de {row['nom']} !**")
 
 @tribu.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à ta tribu")
 @app_commands.describe(
@@ -487,7 +487,8 @@ async def tribu_ajouter_avant_poste(
             VALUES (?, ?, ?, ?, ?, ?)
         """, (row["id"], inter.user.id, nom_avant_poste.strip(), map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
         conn.commit()
-    await inter.response.send_message(f"✅ Avant-poste **{nom_avant_poste}** ajouté à **{row['nom']}** !")
+    
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {nom_avant_poste} ajouté à {row['nom']} !**")
 
 @tribu_ajouter_avant_poste.autocomplete('map')
 async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str):
@@ -511,7 +512,8 @@ async def tribu_retirer_avant_poste(inter: discord.Interaction, nom_tribu: str, 
             await inter.response.send_message(f"❌ Aucun avant-poste trouvé avec le nom **{nom_avant_poste}**.", ephemeral=True)
             return
         conn.commit()
-    await inter.response.send_message(f"✅ Avant-poste **{nom_avant_poste}** retiré de **{row['nom']}**.")
+    
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {nom_avant_poste} retiré de {row['nom']} !**")
 
 @tribu.command(name="transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
@@ -530,9 +532,8 @@ async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio
         c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, 1)",
                   (row["id"], nouveau_proprio.id, "Chef",))
         conn.commit()
-        c.execute("SELECT * FROM tribus WHERE id=?", (row["id"],))
-        updated = c.fetchone()
-    await inter.response.send_message(f"✅ Propriété transférée à <@{nouveau_proprio.id}>.", embed=embed_tribu(updated))
+    
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Propriété de {row['nom']} transférée à <@{nouveau_proprio.id}> !**")
 
 @tribu.command(name="supprimer", description="Supprimer une tribu (confirmation requise)")
 @app_commands.describe(nom="Nom de la tribu", confirmation="Retape exactement le nom pour confirmer")
@@ -682,9 +683,18 @@ class ModalCreerTribu(discord.ui.Modal, title="Créer une tribu"):
             c.execute("SELECT * FROM tribus WHERE id=?", (tid,))
             row = c.fetchone()
         
+        # Afficher la fiche et sauvegarder le message_id
         embed = embed_tribu(row)
         embed.set_footer(text="ℹ️ Ajoutez des membres avec /tribu ajouter_membre et des avant-postes avec /tribu ajouter_avant_poste")
         await inter.response.send_message("✅ **Tribu créée !**", embed=embed, ephemeral=False)
+        msg = await inter.original_response()
+        
+        # Sauvegarder le message_id et channel_id
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                     (msg.id, msg.channel.id, tid))
+            conn.commit()
 
 class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu à modifier")
@@ -727,9 +737,11 @@ class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
                 set_clause = ", ".join(f"{k}=?" for k in updates.keys())
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
                 conn.commit()
-            c.execute("SELECT * FROM tribus WHERE id=?", (row["id"],))
-            updated = c.fetchone()
-        await inter.response.send_message("✅ Fiche mise à jour.", embed=embed_tribu(updated), ephemeral=False)
+        
+        if updates:
+            await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**")
+        else:
+            await inter.response.send_message("ℹ️ Aucun changement détecté.", ephemeral=True)
 
 class ModalVoirTribu(discord.ui.Modal, title="Voir une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu")
