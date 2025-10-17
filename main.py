@@ -1023,7 +1023,7 @@ async def personnaliser_tribu(inter: discord.Interaction):
 
 @tree.command(name="guide", description="Afficher le guide pour personnaliser ta tribu")
 async def guide(inter: discord.Interaction):
-    await inter.response.send_modal(ModalGuideTribu())
+    await afficher_guide(inter)
 
 @tree.command(name="quitter_tribu", description="Quitter ta tribu")
 async def quitter_tribu(inter: discord.Interaction):
@@ -1389,29 +1389,35 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
         
         await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu personnalisée !**", ephemeral=False)
 
-class ModalGuideTribu(discord.ui.Modal, title="📖 Guide"):
-    site_couleur = discord.ui.TextInput(
-        label="Site pour la couleur",
-        default="https://htmlcolorcodes.com/fr/selecteur-de-couleur/",
-        required=False,
-        style=discord.TextStyle.short
+async def afficher_guide(inter: discord.Interaction):
+    """Affiche le guide d'information pour personnaliser sa tribu"""
+    e = discord.Embed(
+        title="📖 Guide — Personnaliser ta tribu",
+        description="Voici les informations utiles pour compléter et personnaliser ta fiche tribu :",
+        color=0x5865F2
     )
-    site_images = discord.ui.TextInput(
-        label="Site pour publier un logo ou une image",
-        default="https://postimages.org (Recopier le lien direct)",
-        required=False,
-        style=discord.TextStyle.short
+    
+    e.add_field(
+        name="🎨 Site pour la couleur",
+        value="https://htmlcolorcodes.com/fr/selecteur-de-couleur/",
+        inline=False
     )
-    commandes_progression = discord.ui.TextInput(
-        label="Ajouter boss et notes validées",
-        default="/boss_validé_tribu et /note_validé_tribu",
-        required=False,
-        style=discord.TextStyle.short
+    
+    e.add_field(
+        name="🖼️ Site pour publier un logo ou une image",
+        value="https://postimages.org\n*N'oublie pas de recopier le lien direct pour ajouter une photo ou un logo.*",
+        inline=False
     )
-
-    async def on_submit(self, inter: discord.Interaction):
-        # Ce modal est juste informatif, pas de sauvegarde
-        await inter.response.send_message("ℹ️ **Guide consulté** : Utilise les liens et commandes indiqués pour compléter ta fiche !", ephemeral=True)
+    
+    e.add_field(
+        name="📊 Ajouter les boss et les notes validées par la tribu",
+        value="Utilise ces commandes pour compléter la progression de ta fiche :\n• `/boss_validé_tribu`\n• `/note_validé_tribu`",
+        inline=False
+    )
+    
+    e.set_footer(text="💡 Ce guide est disponible à tout moment via /guide ou le bouton Guide du panneau")
+    
+    await inter.response.send_message(embed=e, ephemeral=True)
 
 # Ancien modal Détailler conservé temporairement pour compatibilité
 class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
@@ -1473,7 +1479,7 @@ class PanneauTribu(discord.ui.View):
     
     @discord.ui.button(label="Guide", style=discord.ButtonStyle.secondary, emoji="📖")
     async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_modal(ModalGuideTribu())
+        await afficher_guide(inter)
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
