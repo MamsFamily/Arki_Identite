@@ -13,11 +13,11 @@ Le bot Discord "Arki Family" est conçu pour la communauté Ark: Survival Ascend
 Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des interactions Discord modernes (slash commands, boutons, modals) pour une UX riche.
 
 **UI/UX Decisions:**
-- **Panneau Interactif (`/panneau`):** Un point d'entrée centralisé avec des boutons pour les actions principales (Créer, Modifier, Personnaliser, Détailler une tribu). Les panneaux admin s'auto-suppriment pour éviter l'encombrement.
+- **Panneau Interactif (`/panneau`):** Un point d'entrée centralisé avec des boutons pour les actions principales (Créer, Modifier, Personnaliser, Guide). Les panneaux admin s'auto-suppriment pour éviter l'encombrement. Inclut une bannière visuelle.
 - **Fiches Tribu Détaillées:** Affichent les informations dans un ordre structuré (En-tête, Description, Devise, Membres, Base Principale, Avant-Postes, Objectif, Recrutement, Progression Boss/Notes, Photo Base) avec des titres en **GRAS MAJUSCULES** pour la lisibilité.
-- **Boutons sous la Fiche Tribu:** "Quitter tribu", "Historique" (avec pagination), et "Staff" (pour admins/modérateurs).
+- **Menu Déroulant sous la Fiche Tribu:** Menu avec 3 options - "Quitter tribu", "Historique" (avec pagination), et "Staff" (pour admins/modérateurs).
 - **Modals:** Utilisés pour la saisie de données complexes, simplifiant les processus de création et de modification.
-- **Menus Déroulants:** Pour la sélection de maps avec autocomplétion.
+- **Menus Déroulants:** Pour la sélection de maps et tribus avec autocomplétion.
 
 **Technical Implementations & Feature Specifications:**
 - **Gestion des Tribus:** Création, modification (nom, couleur, logo, map/coords de base, description, devise, recrutement, photo, objectif), transfert de propriété, et suppression.
@@ -43,6 +43,24 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - **SQLite:** Base de données embarquée pour la persistance des données.
 
 ## Recent Changes
+
+### 17 octobre 2025 - Refonte Complète des Modals et UI
+**Réorganisation majeure des modals** :
+- ✅ **Modal Créer** : 5 champs (Nom, Map base, Coords base, Description, Devise)
+- ✅ **Modal Modifier** : 5 champs (Nom, Map base, Coords base, Description, Recrutement)
+- ✅ **Modal Personnaliser** : 5 champs (Couleur, Logo, Objectif, Devise, Photo base)
+- ✅ **Modal Guide** : 3 champs read-only avec informations pratiques (site couleur, site images, commandes progression)
+
+**Changements de commandes** :
+- ✅ **/détailler_tribu** renommée en **/guide**
+
+**Amélioration du panneau** :
+- ✅ **Couleurs des boutons** : Créer=vert, Modifier=bleu, Personnaliser=bleu, Guide=gris
+- ✅ **Bannière** : Ajout d'une bannière visuelle en haut du panneau
+
+**Menu déroulant sous la fiche** :
+- ✅ **Remplacement des boutons** : Menu déroulant avec 3 options (Quitter tribu, Historique, Staff)
+- ✅ **UX améliorée** : Plus compact et intuitif
 
 ### 17 octobre 2025 - Ajout du label "Devise"
 **Amélioration visuelle de la fiche** :
