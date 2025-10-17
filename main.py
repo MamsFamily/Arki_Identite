@@ -1220,6 +1220,8 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
 
 class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
     nom = discord.ui.TextInput(label="Nom tribu (optionnel)", required=False)
+    couleur_hex = discord.ui.TextInput(label="Couleur (optionnel)", required=False, placeholder="Ex: #00AAFF")
+    logo_url = discord.ui.TextInput(label="Logo URL (optionnel)", required=False, placeholder="https://...")
     map_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Map (optionnel)", required=False)
     coords_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Coords (optionnel)", required=False)
 
@@ -1246,6 +1248,14 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             updates["map_base"] = str(self.map_base).strip()
         if str(self.coords_base).strip():
             updates["coords_base"] = str(self.coords_base).strip()
+        if str(self.logo_url).strip():
+            updates["logo_url"] = str(self.logo_url).strip()
+        if str(self.couleur_hex).strip():
+            try:
+                updates["couleur"] = int(str(self.couleur_hex).replace("#", ""), 16)
+            except ValueError:
+                await inter.response.send_message("❌ Couleur invalide. Utilise un format hex comme #00AAFF", ephemeral=True)
+                return
         
         with db_connect() as conn:
             c = conn.cursor()
@@ -1375,6 +1385,19 @@ class PanneauTribu(discord.ui.View):
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
+    # Supprimer tous les anciens panneaux dans le canal
+    try:
+        async for msg in inter.channel.history(limit=50):
+            if msg.embeds and len(msg.embeds) > 0:
+                embed = msg.embeds[0]
+                if embed.title == "🧭 Panneau — Fiches Tribu":
+                    try:
+                        await msg.delete()
+                    except:
+                        pass
+    except:
+        pass
+    
     v = PanneauTribu(timeout=None)  # Pas de timeout pour un panneau permanent
     e = discord.Embed(
         title="🧭 Panneau — Fiches Tribu",
