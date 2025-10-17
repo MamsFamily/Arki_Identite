@@ -368,7 +368,7 @@ class BoutonsFicheTribu(discord.ui.View):
             
             # Ne peut pas quitter si référent
             if inter.user.id == tribu["proprietaire_id"]:
-                await inter.response.send_message("❌ Le référent tribu ne peut pas quitter. Utilise `/tribu transférer` d'abord.", ephemeral=True)
+                await inter.response.send_message("❌ Le référent tribu ne peut pas quitter. Utilise `/tribu_transférer` d'abord.", ephemeral=True)
                 return
             
             c.execute("SELECT * FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, inter.user.id))
@@ -493,16 +493,9 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
                      (msg.id, msg.channel.id, tribu_id))
             conn.commit()
 
-# ---------- Groupe de commandes ----------
-class GroupeTribu(app_commands.Group):
-    def __init__(self):
-        super().__init__(name="tribu", description="Gérer les fiches tribu")
+# ---------- Commandes slash standalone ----------
 
-tribu = GroupeTribu()
-tree.add_command(tribu)
-
-# ---- Slash commands de base (FR) ----
-@tribu.command(name="créer", description="Créer une nouvelle tribu")
+@tree.command(name="créer_tribu", description="Créer une nouvelle tribu")
 @app_commands.describe(
     nom="Nom de la tribu", 
     map_base="Map de la base principale",
@@ -541,7 +534,7 @@ async def tribu_creer(
         row = c.fetchone()
     
     embed = embed_tribu(row)
-    embed.set_footer(text="ℹ️ Ajoutez des membres avec /tribu ajouter_membre et des avant-postes avec /tribu ajouter_avant_poste")
+    embed.set_footer(text="ℹ️ Ajoutez des membres avec /ajouter_membre_tribu et des avant-postes avec /ajouter_avant_poste")
     await inter.response.send_message("✅ **Tribu créée !**", embed=embed)
 
 @tribu_creer.autocomplete('map_base')
@@ -549,9 +542,12 @@ async def map_autocomplete(inter: discord.Interaction, current: str):
     db_init()
     return get_maps_choices(inter.guild_id)
 
-@tribu.command(name="voir", description="Afficher la fiche d'une tribu")
+@tree.command(name="tribu_voir", description="[ADMIN/MODO] Afficher la fiche d'une tribu")
 @app_commands.describe(nom="Nom de la tribu")
 async def tribu_voir(inter: discord.Interaction, nom: str):
+    if not est_admin_ou_modo(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
+        return
     db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
@@ -563,23 +559,9 @@ async def tribu_voir(inter: discord.Interaction, nom: str):
         membres = c.fetchall()
         c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (row["id"],))
         avant_postes = c.fetchall()
-    await inter.response.send_message(embed=embed_tribu(row, membres, avant_postes))
+    await afficher_fiche_mise_a_jour(inter, row["id"], "📋 **Fiche tribu**", ephemeral=False)
 
-@tribu.command(name="lister", description="Lister toutes les tribus du serveur")
-async def tribu_lister(inter: discord.Interaction):
-    db_init()
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("SELECT nom, proprietaire_id FROM tribus WHERE guild_id=? ORDER BY LOWER(nom) ASC", (inter.guild_id,))
-        rows = c.fetchall()
-    if not rows:
-        await inter.response.send_message("Aucune tribu pour l'instant. Utilise **/tribu créer** pour commencer.", ephemeral=True)
-        return
-    texte = "\n".join(f"• **{r['nom']}** — proprio : <@{r['proprietaire_id']}>"
-                      for r in rows)
-    await inter.response.send_message(texte)
-
-@tribu.command(name="modifier", description="Modifier les infos d'une tribu")
+@tree.command(name="modifier_tribu", description="Modifier les infos d'une tribu")
 @app_commands.describe(
     nom="Nom de la tribu à modifier",
     nouveau_nom="Nouveau nom (optionnel)",
@@ -647,9 +629,9 @@ async def tribu_modifier(
 
     await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**")
 
-@tribu.command(name="ajouter_membre", description="Ajouter un membre à ta tribu")
-@app_commands.describe(utilisateur="Membre à ajouter", role="Rôle affiché (optionnel)", manager="Donner les droits de gestion ?")
-async def tribu_ajouter_membre(inter: discord.Interaction, utilisateur: discord.Member, role: Optional[str] = "", manager: Optional[bool] = False):
+@tree.command(name="ajouter_membre_tribu", description="Ajouter un membre à ta tribu")
+@app_commands.describe(utilisateur="Membre à ajouter", nom_ingame="Nom in-game du joueur", role="Rôle affiché (optionnel)", manager="Donner les droits de gestion ?")
+async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.Member, nom_ingame: str, role: Optional[str] = "", manager: Optional[bool] = False):
     db_init()
     
     # Trouver la tribu du propriétaire/manager
@@ -668,22 +650,22 @@ async def tribu_ajouter_membre(inter: discord.Interaction, utilisateur: discord.
     
     if len(tribus) > 1:
         noms = ", ".join([t["nom"] for t in tribus])
-        await inter.response.send_message(f"❌ Tu gères plusieurs tribus ({noms}). Utilise `/tribu modifier` puis ajoute les membres manuellement.", ephemeral=True)
+        await inter.response.send_message(f"❌ Tu gères plusieurs tribus ({noms}). Utilise `/modifier_tribu` puis ajoute les membres manuellement.", ephemeral=True)
         return
     
     row = tribus[0]
     
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, ?)",
-                  (row["id"], utilisateur.id, role or "", 1 if manager else 0))
+        c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, nom_in_game, role, manager) VALUES (?, ?, ?, ?, ?)",
+                  (row["id"], utilisateur.id, nom_ingame.strip(), role or "", 1 if manager else 0))
         conn.commit()
     
     await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **<@{utilisateur.id}> ajouté à {row['nom']} !**")
 
-@tribu.command(name="retirer_membre", description="Retirer un membre d'une tribu")
+@tree.command(name="supprimer_membre_tribu", description="Retirer un membre d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", utilisateur="Membre à retirer")
-async def tribu_retirer_membre(inter: discord.Interaction, nom: str, utilisateur: discord.Member):
+async def supprimer_membre_tribu(inter: discord.Interaction, nom: str, utilisateur: discord.Member):
     db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
@@ -698,15 +680,13 @@ async def tribu_retirer_membre(inter: discord.Interaction, nom: str, utilisateur
     
     await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **<@{utilisateur.id}> retiré de {row['nom']} !**")
 
-@tribu.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à ta tribu")
+@tree.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à ta tribu")
 @app_commands.describe(
-    nom_avant_poste="Nom de l'avant-poste",
     map="Map de l'avant-poste",
     coords="Coordonnées ex: 45.5, 32.6"
 )
-async def tribu_ajouter_avant_poste(
+async def ajouter_avant_poste(
     inter: discord.Interaction,
-    nom_avant_poste: str,
     map: str,
     coords: str
 ):
@@ -733,24 +713,29 @@ async def tribu_ajouter_avant_poste(
     
     row = tribus[0]
     
+    # Générer un nom d'avant-poste automatique basé sur le nombre d'avant-postes existants
     with db_connect() as conn:
         c = conn.cursor()
+        c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (row["id"],))
+        count = c.fetchone()["count"]
+        nom_avant_poste = f"Avant-Poste {count + 1}"
+        
         c.execute("""
             INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (row["id"], inter.user.id, nom_avant_poste.strip(), map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
+        """, (row["id"], inter.user.id, nom_avant_poste, map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
         conn.commit()
     
     await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {nom_avant_poste} ajouté à {row['nom']} !**")
 
-@tribu_ajouter_avant_poste.autocomplete('map')
+@ajouter_avant_poste.autocomplete('map')
 async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str):
     db_init()
     return get_maps_choices(inter.guild_id)
 
-@tribu.command(name="retirer_avant_poste", description="Retirer un avant-poste d'une tribu")
+@tree.command(name="supprimer_avant_poste", description="Retirer un avant-poste d'une tribu")
 @app_commands.describe(nom_tribu="Nom de la tribu", nom_avant_poste="Nom de l'avant-poste à retirer")
-async def tribu_retirer_avant_poste(inter: discord.Interaction, nom_tribu: str, nom_avant_poste: str):
+async def supprimer_avant_poste(inter: discord.Interaction, nom_tribu: str, nom_avant_poste: str):
     db_init()
     row = tribu_par_nom(inter.guild_id, nom_tribu)
     if not row:
@@ -768,7 +753,7 @@ async def tribu_retirer_avant_poste(inter: discord.Interaction, nom_tribu: str, 
     
     await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {nom_avant_poste} retiré de {row['nom']} !**")
 
-@tribu.command(name="transférer", description="Transférer la propriété d'une tribu")
+@tree.command(name="tribu_transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
 async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio: discord.Member):
     db_init()
@@ -788,7 +773,7 @@ async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio
     
     await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Propriété de {row['nom']} transférée à <@{nouveau_proprio.id}> !**")
 
-@tribu.command(name="supprimer", description="Supprimer une tribu (confirmation requise)")
+@tree.command(name="tribu_supprimer", description="Supprimer une tribu (confirmation requise)")
 @app_commands.describe(nom="Nom de la tribu", confirmation="Retape exactement le nom pour confirmer")
 async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: str):
     db_init()
@@ -809,16 +794,10 @@ async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: st
     await inter.response.send_message(f"🗑️ La tribu **{nom}** a été supprimée.")
 
 # ---- Commandes Admin (maps) ----
-class GroupeMap(app_commands.Group):
-    def __init__(self):
-        super().__init__(name="map", description="Gérer les maps disponibles (Admin uniquement)")
 
-map_group = GroupeMap()
-tree.add_command(map_group)
-
-@map_group.command(name="ajouter", description="[ADMIN] Ajouter une map à la liste")
+@tree.command(name="ajout_map", description="[ADMIN] Ajouter une map à la liste")
 @app_commands.describe(nom="Nom de la map à ajouter")
-async def map_ajouter(inter: discord.Interaction, nom: str):
+async def ajout_map(inter: discord.Interaction, nom: str):
     if not est_admin(inter):
         await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
         return
@@ -833,9 +812,9 @@ async def map_ajouter(inter: discord.Interaction, nom: str):
         except sqlite3.IntegrityError:
             await inter.response.send_message(f"❌ La map **{nom}** existe déjà.", ephemeral=True)
 
-@map_group.command(name="supprimer", description="[ADMIN] Supprimer une map de la liste")
+@tree.command(name="retirer_map", description="[ADMIN] Supprimer une map de la liste")
 @app_commands.describe(nom="Nom de la map à supprimer")
-async def map_supprimer(inter: discord.Interaction, nom: str):
+async def retirer_map(inter: discord.Interaction, nom: str):
     if not est_admin(inter):
         await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
         return
@@ -849,30 +828,119 @@ async def map_supprimer(inter: discord.Interaction, nom: str):
             conn.commit()
             await inter.response.send_message(f"✅ Map **{nom}** supprimée de la liste !", ephemeral=True)
 
-@map_group.command(name="lister", description="[ADMIN] Lister toutes les maps disponibles")
-async def map_lister(inter: discord.Interaction):
+@tree.command(name="test_bot", description="Vérifier si le bot répond")
+async def tribu_test(inter: discord.Interaction):
+    await inter.response.send_message("🏓 Pong !")
+
+@tree.command(name="personnaliser_tribu", description="Personnaliser ta tribu (description, devise, logo, couleur)")
+async def personnaliser_tribu(inter: discord.Interaction):
+    await inter.response.send_modal(ModalPersonnaliserTribu())
+
+@tree.command(name="détailler_tribu", description="Détailler ta tribu (photo base, objectif, boss, notes)")
+async def detailler_tribu(inter: discord.Interaction):
+    await inter.response.send_modal(ModalDetaillerTribu())
+
+@tree.command(name="quitter_tribu", description="Quitter ta tribu")
+async def quitter_tribu(inter: discord.Interaction):
+    db_init()
+    
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND m.user_id = ?
+        """, (inter.guild_id, inter.user.id))
+        tribus = c.fetchall()
+    
+    if not tribus:
+        await inter.response.send_message("❌ Tu n'es membre d'aucune tribu.", ephemeral=True)
+        return
+    
+    if len(tribus) > 1:
+        noms = ", ".join([t["nom"] for t in tribus])
+        await inter.response.send_message(f"❌ Tu es membre de plusieurs tribus ({noms}). Utilise le bouton 'Quitter tribu' sur la fiche de la tribu que tu veux quitter.", ephemeral=True)
+        return
+    
+    tribu = tribus[0]
+    
+    if inter.user.id == tribu["proprietaire_id"]:
+        await inter.response.send_message("❌ Le référent tribu ne peut pas quitter. Utilise `/tribu_transférer` d'abord.", ephemeral=True)
+        return
+    
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (tribu["id"], inter.user.id))
+        conn.commit()
+    
+    ajouter_historique(tribu["id"], inter.user.id, "Quitter tribu", f"<@{inter.user.id}> a quitté la tribu")
+    await inter.response.send_message(f"✅ Tu as quitté la tribu **{tribu['nom']}**.", ephemeral=True)
+
+@tree.command(name="ajout_boss", description="[ADMIN] Ajouter un boss à la liste")
+@app_commands.describe(nom="Nom du boss à ajouter")
+async def ajout_boss(inter: discord.Interaction, nom: str):
     if not est_admin(inter):
         await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
         return
     db_init()
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("SELECT nom FROM maps WHERE guild_id IN (0, ?) ORDER BY guild_id, nom", (inter.guild_id,))
-        maps = c.fetchall()
-    
-    if not maps:
-        await inter.response.send_message("Aucune map disponible.", ephemeral=True)
-        return
-    
-    e = discord.Embed(title="🗺️ Maps disponibles", color=0x5865F2)
-    maps_list = "\n".join([f"• {m['nom']}" for m in maps])
-    e.add_field(name="Liste", value=maps_list, inline=False)
-    e.set_footer(text="Utilisez /map ajouter et /map supprimer pour gérer les maps")
-    await inter.response.send_message(embed=e, ephemeral=True)
+        try:
+            c.execute("INSERT INTO boss (guild_id, nom, created_at) VALUES (?, ?, ?)",
+                     (inter.guild_id, nom.strip(), dt.datetime.utcnow().isoformat()))
+            conn.commit()
+            await inter.response.send_message(f"✅ Boss **{nom}** ajouté à la liste !", ephemeral=True)
+        except sqlite3.IntegrityError:
+            await inter.response.send_message(f"❌ Le boss **{nom}** existe déjà.", ephemeral=True)
 
-@tree.command(name="tribu_test", description="Vérifier si le bot répond")
-async def tribu_test(inter: discord.Interaction):
-    await inter.response.send_message("🏓 Pong !")
+@tree.command(name="retirer_boss", description="[ADMIN] Supprimer un boss de la liste")
+@app_commands.describe(nom="Nom du boss à supprimer")
+async def retirer_boss(inter: discord.Interaction, nom: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM boss WHERE guild_id=? AND nom=?", (inter.guild_id, nom))
+        if c.rowcount == 0:
+            await inter.response.send_message(f"❌ Boss **{nom}** non trouvé.", ephemeral=True)
+        else:
+            conn.commit()
+            await inter.response.send_message(f"✅ Boss **{nom}** supprimé de la liste !", ephemeral=True)
+
+@tree.command(name="ajout_note", description="[ADMIN] Ajouter une note à la liste")
+@app_commands.describe(nom="Nom de la note à ajouter")
+async def ajout_note(inter: discord.Interaction, nom: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        try:
+            c.execute("INSERT INTO notes (guild_id, nom, created_at) VALUES (?, ?, ?)",
+                     (inter.guild_id, nom.strip(), dt.datetime.utcnow().isoformat()))
+            conn.commit()
+            await inter.response.send_message(f"✅ Note **{nom}** ajoutée à la liste !", ephemeral=True)
+        except sqlite3.IntegrityError:
+            await inter.response.send_message(f"❌ La note **{nom}** existe déjà.", ephemeral=True)
+
+@tree.command(name="retirer_note", description="[ADMIN] Supprimer une note de la liste")
+@app_commands.describe(nom="Nom de la note à supprimer")
+async def retirer_note(inter: discord.Interaction, nom: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM notes WHERE guild_id=? AND nom=?", (inter.guild_id, nom))
+        if c.rowcount == 0:
+            await inter.response.send_message(f"❌ Note **{nom}** non trouvée.", ephemeral=True)
+        else:
+            conn.commit()
+            await inter.response.send_message(f"✅ Note **{nom}** supprimée de la liste !", ephemeral=True)
 
 @tree.command(name="aide", description="Afficher la liste des commandes du bot")
 async def aide(inter: discord.Interaction):
@@ -882,22 +950,32 @@ async def aide(inter: discord.Interaction):
         color=0x5865F2
     )
     lignes = [
-        "• **/tribu créer** — créer une tribu (map à sélectionner)",
-        "• **/tribu voir** — afficher une fiche tribu complète",
-        "• **/tribu lister** — lister toutes les tribus du serveur",
-        "• **/tribu modifier** — éditer les infos (description, couleur, logo...)",
-        "• **/tribu ajouter_membre** — ajouter un membre à ta tribu",
-        "• **/tribu retirer_membre** — retirer un membre de la tribu",
-        "• **/tribu ajouter_avant_poste** — ajouter ton avant-poste (map à sélectionner)",
-        "• **/tribu retirer_avant_poste** — retirer un avant-poste",
-        "• **/tribu transférer** — transférer la propriété",
-        "• **/tribu supprimer** — supprimer une tribu (avec confirmation)",
-        "• **/panneau** — ouvre les boutons (Créer / Modifier / Liste / Voir)",
+        "**Gestion des tribus :**",
+        "• **/créer_tribu** — créer une nouvelle tribu",
+        "• **/tribu_voir** — afficher une fiche tribu complète",
+        "• **/modifier_tribu** — éditer les infos de base",
+        "• **/personnaliser_tribu** — personnaliser (description, devise, logo, couleur)",
+        "• **/détailler_tribu** — détailler (photo, objectif, boss, notes)",
+        "• **/quitter_tribu** — quitter ta tribu",
+        "• **/tribu_transférer** — transférer la propriété",
+        "• **/tribu_supprimer** — supprimer une tribu (avec confirmation)",
+        "",
+        "**Membres et avant-postes :**",
+        "• **/ajouter_membre_tribu** — ajouter un membre à ta tribu",
+        "• **/supprimer_membre_tribu** — retirer un membre de la tribu",
+        "• **/ajouter_avant_poste** — ajouter ton avant-poste",
+        "• **/supprimer_avant_poste** — retirer un avant-poste",
+        "",
+        "**Interface :**",
+        "• **/panneau** — ouvre les boutons (Créer / Modifier / Personnaliser / Détailler)",
         "",
         "**Commandes Admin :**",
-        "• **/map ajouter** — ajouter une map personnalisée",
-        "• **/map supprimer** — supprimer une map",
-        "• **/map lister** — voir toutes les maps disponibles"
+        "• **/ajout_map** — ajouter une map personnalisée",
+        "• **/retirer_map** — supprimer une map",
+        "• **/ajout_boss** — ajouter un boss",
+        "• **/retirer_boss** — supprimer un boss",
+        "• **/ajout_note** — ajouter une note",
+        "• **/retirer_note** — supprimer une note"
     ]
     e.add_field(name="Résumé", value="\n".join(lignes), inline=False)
     e.set_footer(text="💡 Les maps ont des menus déroulants pour faciliter la sélection")
