@@ -1006,9 +1006,9 @@ async def tribu_test(inter: discord.Interaction):
 async def personnaliser_tribu(inter: discord.Interaction):
     await inter.response.send_modal(ModalPersonnaliserTribu())
 
-@tree.command(name="détailler_tribu", description="Détailler ta tribu (photo base, objectif, boss, notes)")
-async def detailler_tribu(inter: discord.Interaction):
-    await inter.response.send_modal(ModalDetaillerTribu())
+@tree.command(name="guide", description="Afficher le guide pour personnaliser ta tribu")
+async def guide(inter: discord.Interaction):
+    await inter.response.send_modal(ModalGuideTribu())
 
 @tree.command(name="quitter_tribu", description="Quitter ta tribu")
 async def quitter_tribu(inter: discord.Interaction):
@@ -1215,7 +1215,7 @@ async def aide(inter: discord.Interaction):
         "• **/tribu_voir** — afficher une fiche tribu complète",
         "• **/modifier_tribu** — éditer les infos de base",
         "• **/personnaliser_tribu** — personnaliser (description, devise, logo, couleur)",
-        "• **/détailler_tribu** — détailler (photo, objectif, boss, notes)",
+        "• **/guide** — afficher le guide pour personnaliser ta tribu",
         "• **/quitter_tribu** — quitter ta tribu",
         "• **/tribu_transférer** — transférer la propriété",
         "• **/tribu_supprimer** — supprimer une tribu (avec confirmation)",
@@ -1452,13 +1452,13 @@ class PanneauTribu(discord.ui.View):
     async def btn_modifier(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalModifierTribu())
     
-    @discord.ui.button(label="Personnaliser", style=discord.ButtonStyle.secondary, emoji="🎨")
+    @discord.ui.button(label="Personnaliser", style=discord.ButtonStyle.primary, emoji="🎨")
     async def btn_personnaliser(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalPersonnaliserTribu())
     
-    @discord.ui.button(label="Détailler", style=discord.ButtonStyle.secondary, emoji="📋")
-    async def btn_detailler(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_modal(ModalDetaillerTribu())
+    @discord.ui.button(label="Guide", style=discord.ButtonStyle.secondary, emoji="📖")
+    async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_modal(ModalGuideTribu())
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
