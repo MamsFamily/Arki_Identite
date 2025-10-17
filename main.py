@@ -446,11 +446,12 @@ class HistoriqueView(discord.ui.View):
         # Activer/désactiver le bouton "Voir +" selon s'il reste des entrées
         has_more = (self.offset + self.page_size) < self.total_entries
         
-        # Chercher le bouton dans les enfants de la vue
+        # Chercher et mettre à jour le bouton dans les enfants de la vue
         for child in self.children:
-            if isinstance(child, discord.ui.Button) and child.label == "Voir +":
-                child.disabled = not has_more
-                break
+            if isinstance(child, discord.ui.Button):
+                if "Voir" in str(child.label) or child.custom_id == "voir_plus_btn":
+                    child.disabled = not has_more
+                    break
         
         return e
     
@@ -537,12 +538,15 @@ class MenuFicheTribu(discord.ui.View):
         
         # Créer la vue avec pagination
         view = HistoriqueView(self.tribu_id, tribu['nom'], offset=0)
+        
+        # Initialiser l'embed ET configurer le bouton
         embed = await view.create_embed()
         
         if embed is None:
             await inter.response.send_message("📜 Aucun historique pour cette tribu.", ephemeral=True)
             return
         
+        # Le bouton est maintenant correctement configuré
         await inter.response.send_message(embed=embed, view=view, ephemeral=True)
     
     async def action_staff(self, inter: discord.Interaction):
