@@ -925,17 +925,22 @@ async def ajouter_avant_poste(
     
     row = tribus[0]
     
-    # Ajouter l'avant-poste sans nom
+    # Générer un nom automatique pour l'avant-poste
     with db_connect() as conn:
         c = conn.cursor()
+        # Compter les avant-postes existants
+        c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (row["id"],))
+        count = c.fetchone()["count"]
+        nom_avant_poste = f"Avant-poste {count + 1}"
+        
         c.execute("""
             INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
-            VALUES (?, ?, NULL, ?, ?, ?)
-        """, (row["id"], inter.user.id, map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (row["id"], inter.user.id, nom_avant_poste, map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
         conn.commit()
     
-    ajouter_historique(row["id"], inter.user.id, "Ajout avant-poste", f"{map.strip()} | {coords.strip()}")
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste ajouté : {map.strip()} !**")
+    ajouter_historique(row["id"], inter.user.id, "Ajout avant-poste", f"{nom_avant_poste} - {map.strip()} | {coords.strip()}")
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **{nom_avant_poste} ajouté : {map.strip()} !**")
 
 @ajouter_avant_poste.autocomplete('map')
 async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str):
