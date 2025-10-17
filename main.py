@@ -626,54 +626,28 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
         avant_postes = c.fetchall()
         
-        # Supprimer l'ancienne fiche référencée dans la DB
+        # Récupérer l'ancien salon et message
         old_message_id = tribu["message_id"] if "message_id" in tribu.keys() else 0
         old_channel_id = tribu["channel_id"] if "channel_id" in tribu.keys() else 0
         
-        if old_message_id and old_channel_id:
+        # Supprimer les anciennes fiches UNIQUEMENT si on affiche dans le MÊME salon
+        if old_channel_id and old_channel_id == inter.channel.id:
+            # On est dans le même salon, supprimer toutes les fiches de cette tribu
             try:
-                old_channel = inter.guild.get_channel(old_channel_id)
-                if old_channel:
-                    old_message = await old_channel.fetch_message(old_message_id)
-                    if old_message:
-                        await old_message.delete()
-            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
-                pass  # Message déjà supprimé ou pas accessible
-        
-        # Supprimer TOUTES les fiches de cette tribu dans le canal actuel (nouveau salon)
-        # Cela nettoie les doublons même si on affiche dans le même salon
-        try:
-            async for message in inter.channel.history(limit=50):
-                if message.author.id == inter.client.user.id and message.embeds:
-                    # Vérifier si c'est une fiche de cette tribu
-                    for embed in message.embeds:
-                        if embed.title and f"Tribu — {tribu['nom']}" in embed.title:
-                            try:
-                                await message.delete()
-                            except:
-                                pass
-                            break
-        except:
-            pass  # Erreur lors de la recherche, on continue quand même
-        
-        # Si l'ancien canal est différent du nouveau, nettoyer aussi l'ancien
-        if old_channel_id and old_channel_id != inter.channel.id:
-            try:
-                old_channel = inter.guild.get_channel(old_channel_id)
-                if old_channel:
-                    # Chercher les 50 derniers messages du bot contenant une fiche de cette tribu
-                    async for message in old_channel.history(limit=50):
-                        if message.author.id == inter.client.user.id and message.embeds:
-                            # Vérifier si c'est une fiche de cette tribu
-                            for embed in message.embeds:
-                                if embed.title and f"Tribu — {tribu['nom']}" in embed.title:
-                                    try:
-                                        await message.delete()
-                                    except:
-                                        pass
-                                    break
+                async for message in inter.channel.history(limit=50):
+                    if message.author.id == inter.client.user.id and message.embeds:
+                        # Vérifier si c'est une fiche de cette tribu
+                        for embed in message.embeds:
+                            if embed.title and f"Tribu — {tribu['nom']}" in embed.title:
+                                try:
+                                    await message.delete()
+                                except:
+                                    pass
+                                break
             except:
                 pass  # Erreur lors de la recherche, on continue quand même
+        
+        # Si on affiche dans un salon différent, ne rien supprimer (laisser l'ancienne fiche)
         
         # Envoyer le nouveau message avec la fiche et les boutons
         embed = embed_tribu(tribu, membres, avant_postes)

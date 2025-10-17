@@ -44,6 +44,12 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 17 octobre 2025 - Gestion Intelligente des Fiches Tribu
+**Amélioration de l'affichage des fiches** :
+- ✅ **Suppression conditionnelle** : Les fiches ne sont supprimées que si affichées dans le **même salon**
+- ✅ **Multi-salon** : Permet d'afficher la même tribu dans plusieurs salons différents simultanément
+- ✅ **Pas de doublons** : Si on affiche dans le même salon, toutes les anciennes fiches de cette tribu sont supprimées avant d'afficher la nouvelle
+
 ### 17 octobre 2025 - Nom In Game lors de la création
 **Amélioration du modal Créer** :
 - ✅ **Nouveau champ "Ton nom In Game"** : Demande le nom in-game du créateur lors de la création d'une tribu
