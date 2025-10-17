@@ -274,27 +274,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     if "photo_base" in tribu.keys() and tribu["photo_base"]:
         e.set_image(url=tribu["photo_base"])
     
-    # Base principale
-    map_base = tribu["map_base"] if "map_base" in tribu.keys() and tribu["map_base"] else ""
-    coords_base = tribu["coords_base"] if "coords_base" in tribu.keys() and tribu["coords_base"] else ""
-    base_info = []
-    if map_base:
-        base_info.append(f"🗺️ **{map_base}**")
-    if coords_base:
-        base_info.append(f"📍 **{coords_base}**")
-    base_value = "\n".join(base_info) if base_info else "—"
-    e.add_field(name="🏰 Base Principale", value=base_value, inline=False)
-    
-    # Objectif
-    if "objectif" in tribu.keys() and tribu["objectif"]:
-        e.add_field(name="🎯 Objectif", value=tribu["objectif"], inline=False)
-    
-    # Ouvert au recrutement
-    if "ouvert_recrutement" in tribu.keys():
-        recrutement = "✅ Oui" if tribu["ouvert_recrutement"] else "❌ Non"
-        e.add_field(name="📢 Recrutement", value=recrutement, inline=True)
-    
-    # Membres avec référent
+    # Membres avec référent (DÉPLACÉ ICI - après description/devise)
     if membres is not None:
         lines = []
         referent_id = tribu['proprietaire_id']
@@ -316,6 +296,26 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
         if lines:
             e.add_field(name=f"👥 Membres ({len(lines)})", value="\n".join(lines)[:1024], inline=False)
     
+    # Base principale
+    map_base = tribu["map_base"] if "map_base" in tribu.keys() and tribu["map_base"] else ""
+    coords_base = tribu["coords_base"] if "coords_base" in tribu.keys() and tribu["coords_base"] else ""
+    base_info = []
+    if map_base:
+        base_info.append(f"**{map_base}**")
+    if coords_base:
+        base_info.append(f"📍 **{coords_base}**")
+    base_value = "\n".join(base_info) if base_info else "—"
+    e.add_field(name="🏠 Base Principale", value=base_value, inline=False)
+    
+    # Objectif
+    if "objectif" in tribu.keys() and tribu["objectif"]:
+        e.add_field(name="🎯 Objectif", value=tribu["objectif"], inline=False)
+    
+    # Ouvert au recrutement
+    if "ouvert_recrutement" in tribu.keys():
+        recrutement = "✅ Oui" if tribu["ouvert_recrutement"] else "❌ Non"
+        e.add_field(name="Recrutement", value=recrutement, inline=True)
+    
     # Avant-postes (sans nom de joueur)
     if avant_postes is not None and len(avant_postes) > 0:
         ap_lines = []
@@ -323,7 +323,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
             ap_text = f"• **{ap['nom']}**"
             ap_info = []
             if ap['map']:
-                ap_info.append(f"🗺️ {ap['map']}")
+                ap_info.append(f"{ap['map']}")
             if ap['coords']:
                 ap_info.append(f"📍 {ap['coords']}")
             if ap_info:
