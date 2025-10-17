@@ -347,6 +347,79 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     e.set_footer(text="💡 Utilise les boutons ci-dessous pour gérer la tribu")
     return e
 
+# ---------- Vue pour l'historique paginé ----------
+class HistoriqueView(discord.ui.View):
+    def __init__(self, tribu_id: int, tribu_nom: str, offset: int = 0):
+        super().__init__(timeout=180)  # 3 minutes
+        self.tribu_id = tribu_id
+        self.tribu_nom = tribu_nom
+        self.offset = offset
+        self.page_size = 10
+    
+    async def create_embed(self):
+        """Crée l'embed de l'historique pour la page actuelle"""
+        with db_connect() as conn:
+            c = conn.cursor()
+            # Compter le total d'entrées
+            c.execute("SELECT COUNT(*) as total FROM historique WHERE tribu_id=?", (self.tribu_id,))
+            total = c.fetchone()["total"]
+            
+            if total == 0:
+                return None
+            
+            # Récupérer les entrées pour cette page
+            c.execute("""
+                SELECT user_id, action, details, created_at 
+                FROM historique 
+                WHERE tribu_id=? 
+                ORDER BY created_at DESC 
+                LIMIT ? OFFSET ?
+            """, (self.tribu_id, self.page_size, self.offset))
+            historique = c.fetchall()
+        
+        if not historique:
+            return None
+        
+        # Créer l'embed
+        e = discord.Embed(
+            title=f"📜 Historique — {self.tribu_nom}",
+            color=0x5865F2,
+            timestamp=dt.datetime.utcnow()
+        )
+        
+        lines = []
+        for h in historique:
+            date = dt.datetime.fromisoformat(h["created_at"]).strftime("%d/%m/%y %H:%M")
+            lines.append(f"**{date}** — <@{h['user_id']}>\n  ↳ {h['action']}")
+            if h["details"]:
+                lines.append(f"  _{h['details']}_")
+        
+        e.description = "\n".join(lines)
+        
+        # Footer avec info de pagination
+        page_actuelle = (self.offset // self.page_size) + 1
+        total_pages = (total + self.page_size - 1) // self.page_size
+        entries_debut = self.offset + 1
+        entries_fin = min(self.offset + self.page_size, total)
+        e.set_footer(text=f"Entrées {entries_debut}-{entries_fin} sur {total} • Page {page_actuelle}/{total_pages}")
+        
+        # Activer/désactiver le bouton "Voir +" selon s'il reste des entrées
+        has_more = (self.offset + self.page_size) < total
+        self.voir_plus_btn.disabled = not has_more
+        
+        return e
+    
+    @discord.ui.button(label="Voir +", style=discord.ButtonStyle.primary, emoji="📖")
+    async def voir_plus_btn(self, inter: discord.Interaction, button: discord.ui.Button):
+        # Charger la page suivante
+        self.offset += self.page_size
+        embed = await self.create_embed()
+        
+        if embed:
+            await inter.response.edit_message(embed=embed, view=self)
+        else:
+            await inter.response.send_message("📜 Fin de l'historique atteint.", ephemeral=True)
+
 # ---------- Boutons de la fiche tribu ----------
 class BoutonsFicheTribu(discord.ui.View):
     def __init__(self, tribu_id: int, timeout: Optional[float] = None):
@@ -400,39 +473,16 @@ class BoutonsFicheTribu(discord.ui.View):
             if not has_perm:
                 await inter.response.send_message("❌ Seuls les managers, admins et modos peuvent voir l'historique.", ephemeral=True)
                 return
-            
-            # Récupérer l'historique
-            c.execute("""
-                SELECT user_id, action, details, created_at 
-                FROM historique 
-                WHERE tribu_id=? 
-                ORDER BY created_at DESC 
-                LIMIT 20
-            """, (self.tribu_id,))
-            historique = c.fetchall()
         
-        if not historique:
+        # Créer la vue avec pagination
+        view = HistoriqueView(self.tribu_id, tribu['nom'], offset=0)
+        embed = await view.create_embed()
+        
+        if embed is None:
             await inter.response.send_message("📜 Aucun historique pour cette tribu.", ephemeral=True)
             return
         
-        # Créer l'embed d'historique
-        e = discord.Embed(
-            title=f"📜 Historique — {tribu['nom']}",
-            color=0x5865F2,
-            timestamp=dt.datetime.utcnow()
-        )
-        
-        lines = []
-        for h in historique:
-            date = dt.datetime.fromisoformat(h["created_at"]).strftime("%d/%m/%y %H:%M")
-            lines.append(f"**{date}** — <@{h['user_id']}>\n  ↳ {h['action']}")
-            if h["details"]:
-                lines.append(f"  _{h['details']}_")
-        
-        e.description = "\n".join(lines[:20])  # Limiter à 20 entrées
-        e.set_footer(text="Historique des 20 dernières actions")
-        
-        await inter.response.send_message(embed=e, ephemeral=True)
+        await inter.response.send_message(embed=embed, view=view, ephemeral=True)
     
     @discord.ui.button(label="Staff", style=discord.ButtonStyle.primary, emoji="⚙️")
     async def btn_staff(self, inter: discord.Interaction, button: discord.ui.Button):
