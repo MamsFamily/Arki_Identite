@@ -56,7 +56,7 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 **Amélioration du panneau** :
 - ✅ **Couleurs des boutons** : Créer=vert, Modifier=bleu, Personnaliser=bleu, Guide=gris
-- ✅ **Bannière** : Ajout d'une bannière visuelle en haut du panneau
+- ✅ **Bannière** : Ajout d'une bannière visuelle personnalisée en haut du panneau (https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg)
 
 **Menu déroulant sous la fiche** :
 - ✅ **Remplacement des boutons** : Menu déroulant avec 3 options (Quitter tribu, Historique, Staff)
