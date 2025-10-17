@@ -349,6 +349,102 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     e.set_footer(text="💡 Utilise les boutons ci-dessous pour gérer la tribu")
     return e
 
+# ---------- Boutons de la fiche tribu ----------
+class BoutonsFicheTribu(discord.ui.View):
+    def __init__(self, tribu_id: int, timeout: Optional[float] = None):
+        super().__init__(timeout=timeout)
+        self.tribu_id = tribu_id
+    
+    @discord.ui.button(label="Quitter tribu", style=discord.ButtonStyle.danger, emoji="🚪")
+    async def btn_quitter(self, inter: discord.Interaction, button: discord.ui.Button):
+        # Vérifier que l'utilisateur est membre
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            tribu = c.fetchone()
+            if not tribu:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+            
+            # Ne peut pas quitter si référent
+            if inter.user.id == tribu["proprietaire_id"]:
+                await inter.response.send_message("❌ Le référent tribu ne peut pas quitter. Utilise `/tribu transférer` d'abord.", ephemeral=True)
+                return
+            
+            c.execute("SELECT * FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, inter.user.id))
+            if not c.fetchone():
+                await inter.response.send_message("❌ Tu n'es pas membre de cette tribu.", ephemeral=True)
+                return
+            
+            # Retirer le membre
+            c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, inter.user.id))
+            conn.commit()
+        
+        ajouter_historique(self.tribu_id, inter.user.id, "Quitter tribu", f"<@{inter.user.id}> a quitté la tribu")
+        await inter.response.send_message(f"✅ Tu as quitté la tribu **{tribu['nom']}**.", ephemeral=True)
+    
+    @discord.ui.button(label="Historique", style=discord.ButtonStyle.secondary, emoji="📜")
+    async def btn_historique(self, inter: discord.Interaction, button: discord.ui.Button):
+        # Vérifier les permissions (managers, admin ou modo)
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            tribu = c.fetchone()
+            if not tribu:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+            
+            # Vérifier les droits
+            has_perm = (est_admin_ou_modo(inter) or 
+                       inter.user.id == tribu["proprietaire_id"] or 
+                       est_manager(self.tribu_id, inter.user.id))
+            
+            if not has_perm:
+                await inter.response.send_message("❌ Seuls les managers, admins et modos peuvent voir l'historique.", ephemeral=True)
+                return
+            
+            # Récupérer l'historique
+            c.execute("""
+                SELECT user_id, action, details, created_at 
+                FROM historique 
+                WHERE tribu_id=? 
+                ORDER BY created_at DESC 
+                LIMIT 20
+            """, (self.tribu_id,))
+            historique = c.fetchall()
+        
+        if not historique:
+            await inter.response.send_message("📜 Aucun historique pour cette tribu.", ephemeral=True)
+            return
+        
+        # Créer l'embed d'historique
+        e = discord.Embed(
+            title=f"📜 Historique — {tribu['nom']}",
+            color=0x5865F2,
+            timestamp=dt.datetime.utcnow()
+        )
+        
+        lines = []
+        for h in historique:
+            date = dt.datetime.fromisoformat(h["created_at"]).strftime("%d/%m/%y %H:%M")
+            lines.append(f"**{date}** — <@{h['user_id']}>\n  ↳ {h['action']}")
+            if h["details"]:
+                lines.append(f"  _{h['details']}_")
+        
+        e.description = "\n".join(lines[:20])  # Limiter à 20 entrées
+        e.set_footer(text="Historique des 20 dernières actions")
+        
+        await inter.response.send_message(embed=e, ephemeral=True)
+    
+    @discord.ui.button(label="Staff", style=discord.ButtonStyle.primary, emoji="⚙️")
+    async def btn_staff(self, inter: discord.Interaction, button: discord.ui.Button):
+        # Vérifie si admin ou modo
+        if not est_admin_ou_modo(inter):
+            await inter.response.send_message("❌ Cette fonction est réservée aux admins et modos.", ephemeral=True)
+            return
+        
+        await inter.response.send_message("⚙️ **Mode Staff activé** : Tu as maintenant tous les droits sur cette tribu pour la modifier.", ephemeral=True)
+
 async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
     if est_admin(inter) or inter.user.id == tribu["proprietaire_id"] or est_manager(tribu["id"], inter.user.id):
         return True
@@ -383,11 +479,12 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass  # Message déjà supprimé ou pas accessible
         
-        # Envoyer le nouveau message avec la fiche
+        # Envoyer le nouveau message avec la fiche et les boutons
         embed = embed_tribu(tribu, membres, avant_postes)
+        view = BoutonsFicheTribu(tribu_id, timeout=None)
         
         # Répondre à l'interaction
-        await inter.response.send_message(message_prefix, embed=embed, ephemeral=ephemeral)
+        await inter.response.send_message(message_prefix, embed=embed, view=view, ephemeral=ephemeral)
         msg = await inter.original_response()
         
         # Sauvegarder le nouveau message_id et channel_id (seulement si pas ephemeral)
