@@ -1231,7 +1231,6 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
     notes = discord.ui.TextInput(label="Notes complétées (séparées par ,)", required=False, placeholder="Notes Island, Bob...")
 
     async def on_submit(self, inter: discord.Interaction):
-        await inter.response.defer()
         db_init()
         with db_connect() as conn:
             c = conn.cursor()
@@ -1243,7 +1242,7 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
             row = c.fetchone()
         
         if not row:
-            await inter.followup.send("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+            await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
             return
         
         updates = {}
@@ -1263,37 +1262,12 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
                 conn.commit()
                 ajouter_historique(row["id"], inter.user.id, "Détails ajoutés", f"Champs: {', '.join(updates.keys())}")
+            else:
+                # Si aucune mise à jour, juste afficher la fiche
+                await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
+                return
         
-        # Utiliser followup au lieu de response car on a déjà defer()
-        with db_connect() as conn:
-            c = conn.cursor()
-            c.execute("SELECT * FROM tribus WHERE id=?", (row["id"],))
-            tribu = c.fetchone()
-            
-            # Supprimer l'ancienne fiche si elle existe
-            if tribu["message_id"] and tribu["channel_id"]:
-                try:
-                    channel = inter.guild.get_channel(tribu["channel_id"])
-                    if channel:
-                        old_msg = await channel.fetch_message(tribu["message_id"])
-                        await old_msg.delete()
-                except:
-                    pass
-            
-            # Récupérer membres et avant-postes
-            c.execute("SELECT * FROM membres WHERE tribu_id=?", (row["id"],))
-            membres = c.fetchall()
-            c.execute("SELECT * FROM avant_postes WHERE tribu_id=?", (row["id"],))
-            avant_postes = c.fetchall()
-            
-            # Envoyer la nouvelle fiche
-            embed = embed_tribu(tribu, membres, avant_postes)
-            view = BoutonsFicheTribu(row["id"], timeout=None)
-            msg = await inter.followup.send("✅ **Détails ajoutés !**", embed=embed, view=view, wait=True)
-            
-            # Enregistrer la nouvelle fiche
-            c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", (msg.id, msg.channel.id, row["id"]))
-            conn.commit()
+        await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Détails ajoutés !**", ephemeral=False)
 
 class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = None):
