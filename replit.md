@@ -145,6 +145,11 @@ Le bot utilise SQLite avec les tables suivantes :
 - Coords base (optionnel)
 - ❌ Champs "ajouter/supprimer membres" retirés → utiliser `/ajouter_membre_tribu` et `/supprimer_membre_tribu`
 
+#### Modal "📋 Détailler" - 2 champs
+- Photo base URL (optionnel)
+- Objectif (50 car. max, optionnel)
+- ❌ Champs "progression boss/notes" retirés → utiliser `/boss_validé_tribu` et `/note_validé_tribu`
+
 ### 17 octobre 2025 - REFONTE MAJEURE 🎉
 **Refonte complète du panneau et des commandes** :
 

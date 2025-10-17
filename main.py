@@ -1321,13 +1321,6 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
 class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
     photo_base = discord.ui.TextInput(label="Photo base (URL)", required=False, placeholder="https://...")
     objectif = discord.ui.TextInput(label="Objectif (50 car. max)", max_length=50, required=False)
-    info_progression = discord.ui.TextInput(
-        label="ℹ️ Progression Boss & Notes", 
-        required=False, 
-        style=discord.TextStyle.paragraph,
-        placeholder="Pour ajouter la progression de votre tribu:\n• Boss : /boss_validé_tribu\n• Notes : /note_validé_tribu",
-        default="Pour ajouter la progression de votre tribu:\n• Boss : /boss_validé_tribu\n• Notes : /note_validé_tribu"
-    )
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1357,7 +1350,10 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
                 conn.commit()
                 ajouter_historique(row["id"], inter.user.id, "Détails ajoutés", f"Champs: {', '.join(updates.keys())}")
-                await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Détails ajoutés !**", ephemeral=False)
+                
+                # Message avec info sur la progression
+                msg_success = "✅ **Détails ajoutés !**\n\nℹ️ *Pour la progression Boss/Notes, utilise :*\n• `/boss_validé_tribu`\n• `/note_validé_tribu`"
+                await afficher_fiche_mise_a_jour(inter, row["id"], msg_success, ephemeral=False)
             else:
                 # Si aucune mise à jour, juste afficher la fiche
                 await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
