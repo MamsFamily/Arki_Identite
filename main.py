@@ -153,6 +153,22 @@ def db_init():
         )
         """)
         
+        # Table de configuration
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS config (
+            guild_id INTEGER NOT NULL,
+            cle TEXT NOT NULL,
+            valeur TEXT DEFAULT '',
+            PRIMARY KEY (guild_id, cle)
+        )
+        """)
+        
+        # Initialiser la bannière par défaut si elle n'existe pas
+        c.execute("""
+        INSERT OR IGNORE INTO config (guild_id, cle, valeur)
+        VALUES (0, 'banniere_panneau', 'https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg')
+        """)
+        
         # Boss par défaut
         default_boss = ["Broodmother", "Megapithecus", "Dragon", "Cave Tek", "Manticore", "Rockwell", "King Titan", "Boss Astraeos"]
         for boss_name in default_boss:
@@ -236,6 +252,29 @@ def ajouter_historique(tribu_id: int, user_id: int, action: str, details: str = 
             INSERT INTO historique (tribu_id, user_id, action, details, created_at)
             VALUES (?, ?, ?, ?, ?)
         """, (tribu_id, user_id, action, details, dt.datetime.utcnow().isoformat()))
+        conn.commit()
+
+def get_config(guild_id: int, cle: str, defaut: str = "") -> str:
+    """Récupère une valeur de configuration"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT valeur FROM config WHERE guild_id=? AND cle=?", (guild_id, cle))
+        row = c.fetchone()
+        if row:
+            return row["valeur"]
+        # Essayer avec guild_id=0 (config globale)
+        c.execute("SELECT valeur FROM config WHERE guild_id=0 AND cle=?", (cle,))
+        row = c.fetchone()
+        return row["valeur"] if row else defaut
+
+def set_config(guild_id: int, cle: str, valeur: str):
+    """Définit une valeur de configuration"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            INSERT OR REPLACE INTO config (guild_id, cle, valeur)
+            VALUES (?, ?, ?)
+        """, (guild_id, cle, valeur))
         conn.commit()
 
 # ---------- Bot ----------
@@ -1127,6 +1166,25 @@ async def retirer_note(inter: discord.Interaction, nom: str):
             conn.commit()
             await inter.response.send_message(f"✅ Note **{nom}** supprimée de la liste !", ephemeral=True)
 
+@tree.command(name="changer_bannière_panneau", description="[ADMIN] Modifier la bannière du panneau")
+@app_commands.describe(url="URL de la nouvelle bannière (image)")
+async def changer_banniere_panneau(inter: discord.Interaction, url: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    
+    db_init()
+    
+    # Vérifier que c'est une URL valide
+    if not url.startswith("http://") and not url.startswith("https://"):
+        await inter.response.send_message("❌ L'URL doit commencer par http:// ou https://", ephemeral=True)
+        return
+    
+    # Sauvegarder la nouvelle bannière
+    set_config(inter.guild_id, "banniere_panneau", url)
+    
+    await inter.response.send_message(f"✅ **Bannière du panneau modifiée !**\n\nNouvelle URL : {url}\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
+
 @tree.command(name="boss_validé_tribu", description="Valider un boss complété pour ta tribu")
 @app_commands.describe(boss="Boss complété")
 async def boss_valide_tribu(inter: discord.Interaction, boss: str):
@@ -1250,7 +1308,8 @@ async def aide(inter: discord.Interaction):
         "• **/ajout_boss** — ajouter un boss",
         "• **/retirer_boss** — supprimer un boss",
         "• **/ajout_note** — ajouter une note",
-        "• **/retirer_note** — supprimer une note"
+        "• **/retirer_note** — supprimer une note",
+        "• **/changer_bannière_panneau** — modifier la bannière du panneau"
     ]
     e.add_field(name="Résumé", value="\n".join(lignes), inline=False)
     e.set_footer(text="💡 Les maps ont des menus déroulants pour faciliter la sélection")
@@ -1514,7 +1573,8 @@ async def panneau(inter: discord.Interaction):
             description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
             color=0x2B2D31
         )
-        e.set_image(url="https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
+        banniere_url = get_config(inter.guild_id, "banniere_panneau", "https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
+        e.set_image(url=banniere_url)
         e.set_footer(text="👑 Panneau admin — Visible par tous")
         await inter.followup.send(embed=e, view=v)
     else:
@@ -1523,7 +1583,8 @@ async def panneau(inter: discord.Interaction):
             description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
             color=0x2B2D31
         )
-        e.set_image(url="https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
+        banniere_url = get_config(inter.guild_id, "banniere_panneau", "https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
+        e.set_image(url=banniere_url)
         e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
         await inter.response.send_message(embed=e, view=v, ephemeral=True)
 
