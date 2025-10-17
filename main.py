@@ -191,9 +191,19 @@ def tribu_par_nom(guild_id: int, nom: str):
         c.execute("SELECT * FROM tribus WHERE guild_id=? AND LOWER(nom)=LOWER(?)", (guild_id, nom))
         return c.fetchone()
 
+ROLE_MODO_ID = 1157803768893689877
+
 def est_admin(inter: discord.Interaction) -> bool:
     perms = inter.user.guild_permissions
     return perms.manage_guild or perms.administrator
+
+def est_modo(inter: discord.Interaction) -> bool:
+    """Vérifie si l'utilisateur a le rôle modo"""
+    return any(role.id == ROLE_MODO_ID for role in inter.user.roles)
+
+def est_admin_ou_modo(inter: discord.Interaction) -> bool:
+    """Vérifie si l'utilisateur est admin ou modo"""
+    return est_admin(inter) or est_modo(inter)
 
 def est_manager(tribu_id: int, user_id: int) -> bool:
     with db_connect() as conn:
@@ -201,6 +211,32 @@ def est_manager(tribu_id: int, user_id: int) -> bool:
         c.execute("SELECT manager FROM membres WHERE tribu_id=? AND user_id=?", (tribu_id, user_id))
         row = c.fetchone()
         return bool(row and row["manager"])
+
+def get_boss_choices(guild_id: int):
+    """Récupère les choix de boss pour un serveur"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT DISTINCT nom FROM boss WHERE guild_id IN (0, ?) ORDER BY nom", (guild_id,))
+        boss = [row["nom"] for row in c.fetchall()]
+        return [app_commands.Choice(name=b, value=b) for b in boss[:25]]
+
+def get_notes_choices(guild_id: int):
+    """Récupère les choix de notes pour un serveur"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT DISTINCT nom FROM notes WHERE guild_id IN (0, ?) ORDER BY nom", (guild_id,))
+        notes = [row["nom"] for row in c.fetchall()]
+        return [app_commands.Choice(name=n, value=n) for n in notes[:25]]
+
+def ajouter_historique(tribu_id: int, user_id: int, action: str, details: str = ""):
+    """Ajoute une entrée dans l'historique de la tribu"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO historique (tribu_id, user_id, action, details, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        """, (tribu_id, user_id, action, details, dt.datetime.utcnow().isoformat()))
+        conn.commit()
 
 # ---------- Bot ----------
 intents = discord.Intents.default()
