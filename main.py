@@ -1092,6 +1092,14 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
             c.execute("INSERT INTO membres (tribu_id, user_id, manager) VALUES (?, ?, 1)",
                       (tid, inter.user.id))
             
+            # Ajouter un membre optionnel si fourni
+            if str(self.membres).strip():
+                membre_info = parser_membre_info(str(self.membres), inter.guild)
+                if membre_info:
+                    c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, nom_in_game, manager) VALUES (?, ?, ?, ?)",
+                              (tid, membre_info['user_id'], membre_info['nom_ingame'], membre_info['manager']))
+                    ajouter_historique(tid, inter.user.id, "Ajout membre", f"<@{membre_info['user_id']}> ajouté lors de la création")
+            
             conn.commit()
         
         ajouter_historique(tid, inter.user.id, "Création tribu", f"Tribu {str(self.nom)} créée")
@@ -1133,11 +1141,38 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
         
         with db_connect() as conn:
             c = conn.cursor()
+            
+            # Mettre à jour les champs de base
             if updates:
                 set_clause = ", ".join(f"{k}=?" for k in updates.keys())
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
-                conn.commit()
                 ajouter_historique(row["id"], inter.user.id, "Modification", f"Champs modifiés: {', '.join(updates.keys())}")
+            
+            # Ajouter un membre si fourni
+            if str(self.ajouter_membre).strip():
+                membre_info = parser_membre_info(str(self.ajouter_membre), inter.guild)
+                if membre_info:
+                    c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, nom_in_game, manager) VALUES (?, ?, ?, ?)",
+                              (row["id"], membre_info['user_id'], membre_info['nom_ingame'], membre_info['manager']))
+                    ajouter_historique(row["id"], inter.user.id, "Ajout membre", f"<@{membre_info['user_id']}> ajouté")
+            
+            # Supprimer un membre si fourni
+            if str(self.supprimer_membre).strip():
+                mention = str(self.supprimer_membre).strip()
+                user_id = None
+                
+                # Extraire l'ID de la mention
+                if mention.startswith('<@') and mention.endswith('>'):
+                    user_id = int(mention.replace('<@', '').replace('!', '').replace('>', ''))
+                elif mention.isdigit():
+                    user_id = int(mention)
+                
+                if user_id:
+                    c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (row["id"], user_id))
+                    if c.rowcount > 0:
+                        ajouter_historique(row["id"], inter.user.id, "Retrait membre", f"<@{user_id}> retiré")
+            
+            conn.commit()
         
         await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu modifiée !**", ephemeral=False)
 
