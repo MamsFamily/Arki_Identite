@@ -6,11 +6,11 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 ## Fonctionnalités Principales
 
 ### Panneau Interactif
-Commande `/panneau` ouvre un panneau avec 4 boutons :
-- **✨ Créer** : Créer une nouvelle tribu (nom, membre optionnel, map base, coords base)
-- **🛠️ Modifier** : Modifier nom, membres, map/coords base (détection auto de ta tribu)
+Commande `/panneau` ouvre un panneau avec 4 boutons (supprime automatiquement tous les anciens panneaux) :
+- **✨ Créer** : Créer une nouvelle tribu (nom, couleur, logo, map base, coords base)
+- **🛠️ Modifier** : Modifier nom, couleur, logo, map/coords base (détection auto de ta tribu)
 - **🎨 Personnaliser** : Description, devise, logo, couleur, recrutement
-- **📋 Détailler** : Photo base, objectif, progression boss/notes
+- **📋 Détailler** : Photo base, objectif (progression boss/notes via commandes dédiées)
 
 ### Commandes Slash (/)
 
@@ -123,14 +123,36 @@ Le bot utilise SQLite avec les tables suivantes :
 
 ## Recent Changes
 
+### 17 octobre 2025 - Optimisation des Modals et Auto-Suppression Panneaux
+**Amélioration de l'UX des modals** :
+
+#### Panneau - Suppression automatique
+- Lorsqu'un nouveau panneau est demandé avec `/panneau`, tous les anciens panneaux sont automatiquement supprimés (recherche dans les 50 derniers messages)
+
+#### Modal "✨ Créer" - 5 champs
+- Nom de la tribu (obligatoire)
+- Couleur hex (optionnel) - Ex: #00AAFF
+- Logo URL (optionnel)
+- Map base (obligatoire)
+- Coords base (obligatoire)
+- ❌ Champ "membre" retiré → utiliser `/ajouter_membre_tribu` après création
+
+#### Modal "🛠️ Modifier" - 5 champs
+- Nom tribu (optionnel)
+- Couleur hex (optionnel)
+- Logo URL (optionnel)
+- Map base (optionnel)
+- Coords base (optionnel)
+- ❌ Champs "ajouter/supprimer membres" retirés → utiliser `/ajouter_membre_tribu` et `/supprimer_membre_tribu`
+
 ### 17 octobre 2025 - REFONTE MAJEURE 🎉
 **Refonte complète du panneau et des commandes** :
 
 #### Nouveau Panneau (4 boutons) :
-- ✨ **Créer** : Modal avec nom, membre optionnel, map base, coords base
-- 🛠️ **Modifier** : Modal pour modifier nom, ajouter/supprimer membres, map/coords base (détection auto)
+- ✨ **Créer** : Modal avec nom, couleur, logo, map base, coords base
+- 🛠️ **Modifier** : Modal pour modifier nom, couleur, logo, map/coords base (détection auto)
 - 🎨 **Personnaliser** : Modal pour description, devise, logo, couleur, recrutement
-- 📋 **Détailler** : Modal pour photo base, objectif, progression boss/notes
+- 📋 **Détailler** : Modal pour photo base, objectif (progression boss/notes via commandes dédiées)
 
 #### Boutons sous la fiche tribu (3 boutons) :
 - 🚪 **Quitter tribu** : Se retirer de la tribu
