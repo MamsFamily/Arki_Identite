@@ -44,6 +44,14 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 17 octobre 2025 - Commandes de Retrait de Progression
+**Nouvelles commandes pour retirer la validation** :
+- ✅ **/boss_non_validé_tribu** : Retire un boss précédemment validé de la progression
+- ✅ **/notes_non_validé_tribu** : Retire une note précédemment validée de la progression
+- ✅ **Emoji animé <a:no:1328152539660554363>** : Affiché lors de la suppression de boss/notes
+- ✅ **Guide mis à jour** : Les 4 commandes de progression sont maintenant listées dans le Guide
+- ✅ **Total : 27 commandes** slash disponibles
+
 ### 17 octobre 2025 - Gestion Intelligente des Fiches Tribu
 **Amélioration de l'affichage des fiches** :
 - ✅ **Suppression conditionnelle** : Les fiches ne sont supprimées que si affichées dans le **même salon**
