@@ -1514,7 +1514,7 @@ async def panneau(inter: discord.Interaction):
             description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
             color=0x2B2D31
         )
-        e.set_image(url="https://i.postimg.cc/5t1qPnFv/669-AF008-04-DE-431-D-9243-3150-D81-FFB89.png")
+        e.set_image(url="https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
         e.set_footer(text="👑 Panneau admin — Visible par tous")
         await inter.followup.send(embed=e, view=v)
     else:
@@ -1523,7 +1523,7 @@ async def panneau(inter: discord.Interaction):
             description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
             color=0x2B2D31
         )
-        e.set_image(url="https://i.postimg.cc/5t1qPnFv/669-AF008-04-DE-431-D-9243-3150-D81-FFB89.png")
+        e.set_image(url="https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
         e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
         await inter.response.send_message(embed=e, view=v, ephemeral=True)
 
