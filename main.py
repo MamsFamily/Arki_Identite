@@ -502,7 +502,7 @@ def parser_membre_info(texte: str, guild: discord.Guild):
     }
 
 async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, message_prefix: str = "✅ **Fiche mise à jour !**", ephemeral: bool = False):
-    """Affiche la fiche tribu mise à jour et supprime l'ancienne si elle existe"""
+    """Affiche la fiche tribu mise à jour et supprime TOUTES les anciennes fiches existantes"""
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
@@ -515,7 +515,7 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
         avant_postes = c.fetchall()
         
-        # Supprimer l'ancien message s'il existe
+        # Supprimer l'ancienne fiche référencée dans la DB
         old_message_id = tribu["message_id"] if "message_id" in tribu.keys() else 0
         old_channel_id = tribu["channel_id"] if "channel_id" in tribu.keys() else 0
         
@@ -528,6 +528,27 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
                         await old_message.delete()
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass  # Message déjà supprimé ou pas accessible
+        
+        # Chercher et supprimer TOUTES les autres anciennes fiches de cette tribu dans le canal actuel
+        # (au cas où il y aurait des fiches orphelines)
+        try:
+            channel = inter.channel
+            if channel:
+                # Chercher les 50 derniers messages du bot contenant une fiche de cette tribu
+                async for message in channel.history(limit=50):
+                    if message.author.id == inter.client.user.id and message.embeds:
+                        # Vérifier si c'est une fiche de cette tribu
+                        for embed in message.embeds:
+                            if embed.title and f"Tribu — {tribu['nom']}" in embed.title:
+                                # Ne pas supprimer si c'est le message qu'on vient de supprimer
+                                if message.id != old_message_id:
+                                    try:
+                                        await message.delete()
+                                    except:
+                                        pass
+                                break
+        except:
+            pass  # Erreur lors de la recherche, on continue quand même
         
         # Envoyer le nouveau message avec la fiche et les boutons
         embed = embed_tribu(tribu, membres, avant_postes)
