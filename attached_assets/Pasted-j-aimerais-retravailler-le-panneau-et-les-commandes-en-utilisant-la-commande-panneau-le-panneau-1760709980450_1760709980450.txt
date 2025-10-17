@@ -1,0 +1,83 @@
+j'aimerais retravailler le panneau et les commandes 
+
+en utilisant la commande /panneau le panneau s'ouvre avec 4 boutons 
+
+1 er bouton : Créer 
+
+4 questions s'ouvrent:  - Nom de la tribu 
+			- Membres de la tribu : membre à ajouter avec le nom utilisateur discord, le joueur devra également indiquer le nom In Game du membre ajouté, et dire si oui ou non le joueur est autorisé a modifier la fiche tribu.
+			- Map de la base principale 
+			- Coordonnées de la base principale. 
+Indique également avec un petit message en bas du panneau que d'autres options d'ajout et de personnalisation sont disponible en utilisant les boutons "Modifier" , "Personnaliser" "Infos +" présent sur le panneau.
+
+2eme bouton : Modifier ( le bot détecte la tribu auquel le joueur fait parti automatiquement lorsqu'il appuye sur le bouton
+
+5 questions s'ouvrent:  - Nom de la tribu
+			- Ajout d'un membre
+			- Supprimer un membre (menu déroulant sur les membres de la tribu) 
+			- Map Base principale
+			- Coordonnées base principale 
+
+3eme bouton : Personnaliser 
+
+5 questions s'ouvrent:  - Description de la tribu (50 caractères max) 
+			- Devise de la tribu 
+			- Logo de la tribu ( url d'image) 
+			- Couleur hex de la fiche tribu ( ex : #OOAAFF)
+			- Ouverts au recrutement 
+
+4eme bouton : Détailler
+
+4 questions s'ouvrent:  - Photo de la base principale
+			- Objectif de la tribu (50 caractères max) 
+			- Progression Boss (faire un système de cases à cocher) les options des cases à cocher sont : Broodmother, Megapithecus, Dragon, Cave Tek, Manticore, Rockwell, King Titan, Boss Astraeos
+			- Progression Notes (faire un système de cases à cocher) les options des cases à cocher sont : Notes Island, Notes Scorched, Notes Abbération, Extinction, Bob 
+		
+
+J'aimerais qu'il y est 3 boutons en bas de la fiche tribu: 
+1 - Quitter tribu : accessible à tout les membres de la fiche tribu, qui permette de se retirer de la fiche tribu.
+2 - Historique : Accessible aux membres de la tribu qui ont les droits de modifications, admins du serveur et au role modo ( identifiant role : 1157803768893689877) il donnera accès a l'historique de la fiche tribu. Chaque action faite sur la fiche tribu devra être noté dans ce dossier, quel action faite par quel membre et à quel date et heure (dossier éphémère qui n'est visible que par celui qui interagi avec le bouton) 
+3 - Staff : bouton accessible uniquement par les admins du serveur et le role modo ( identifiant role 1157803768893689877) qui permet de donner tout les droits de la fiche tribu en question, pour modifier, ajouter, ou supprimer des informations.
+
+
+en commandes Slash / je souhaite qu'on garde
+
+/Aide (Liste des commandes disponibles et leur fonctions) 
+/Panneau
+/Tribu supprimer
+/Tribu transférer
+/Tribu voir ( uniquement Admin et role Modo (identifiant role : 1157803768893689877)
+
+
+Je souhaite que l'on change le nom des commandes : 
+
+/Tribu_ajouter_avant_poste en /Ajouter_avant_poste (la commande demande la map en menu déroulant + les coordonnées. on retire la question nom_avant_poste)
+/Tribu_retirer_avant_poste en /Supprimer_avant_poste
+/Tribu_ajouter_membre en /Ajouter_membre_tribu ( utilisateur discord + nom perso In Game + autorisé oui ou non à apporter des modifications sur la fiche tribu)
+/Tribu_retirer_membre en /Supprimer_membre_tribu
+/Tribu_test en /Test_bot
+/Tribu_créer en /Créer_tribu (meme fonction que le bouton Créer sur le panneau)
+/Tribu_modifier en /Modifier_tribu (meme fonction que le bouton Modifier sur le panneau)
+/Map_Lister en /Ajout_map (admin)
+
+
+
+Je souhaite que l'on ajoute les commandes: 
+
+/Personnaliser_Tribu (meme fonction que le bouton personnaliser sur le panneau)
+/Détailler_tribu (meme fonction que le bouton Détailler sur le panneau)
+/Quitter_tribu (meme fonction que le bouton Quitter sur le panneau)
+/Ajout_Boss (Permet uniquement à l'admin d'ajouter un boss dans les options à cocher dans la partie Progression boss)
+/Retirer_Boss (Permet uniquement à l'admin de supprimer un boss dans les options à cocher dans la partie Progression boss)
+/Ajout_Note (Permet uniquement à l'admin d'ajouter une note dans les options à cocher dans la partie Progression notes)
+/Retirer_note (Permet uniquement à l'admin de retirer une note dans les options à cocher dans la partie Progression notes)
+/Retirer_map (Permet uniquement à l'admin de retirer une map dans la liste déroulante des maps)
+
+
+
+Je souhaite que dans la fiche tribu les informations renseignées soit bien visibles et bien ordonnées. 
+Celui qui créer la fiche tribu se nommera "Référent Tribu", les autres membres seront listés uniquement dans la liste des membres sans que l'ont voit si ils ont l'autorisation ou non d'apporter des modifications à la fiche. 
+Aucun membre, ni même le référent tribu, ne sera citer et ping autre part dans la fiche tribu que dans la liste des membres. 
+
+
+    
