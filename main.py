@@ -1175,11 +1175,11 @@ async def aide(inter: discord.Interaction):
 
 # ---------- UI (boutons + modals) ----------
 class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
-    nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", max_length=64, required=True)
+    nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", required=True)
     couleur_hex = discord.ui.TextInput(label="Couleur (optionnel)", required=False, placeholder="Ex: #00AAFF")
     logo_url = discord.ui.TextInput(label="Logo URL (optionnel)", required=False, placeholder="https://...")
-    map_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Map", placeholder="Ex: The Island", max_length=50, required=True)
-    coords_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Coords", placeholder="Ex: 45.5, 32.6", max_length=50, required=True)
+    map_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Map", placeholder="Ex: The Island", required=True)
+    coords_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Coords", placeholder="Ex: 45.5, 32.6", required=True)
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1271,8 +1271,8 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
                 await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"):
-    description = discord.ui.TextInput(label="Description (50 car. max)", max_length=50, required=False, style=discord.TextStyle.short)
-    devise = discord.ui.TextInput(label="Devise de la tribu", required=False, max_length=100)
+    description = discord.ui.TextInput(label="Description", required=False, style=discord.TextStyle.short)
+    devise = discord.ui.TextInput(label="Devise de la tribu", required=False)
     logo_url = discord.ui.TextInput(label="Logo (URL image)", required=False, placeholder="https://...")
     couleur_hex = discord.ui.TextInput(label="Couleur hex (ex: #00AAFF)", required=False)
     recrutement = discord.ui.TextInput(label="Ouvert recrutement? (oui/non)", required=False, placeholder="oui ou non")
@@ -1320,7 +1320,7 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
 
 class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
     photo_base = discord.ui.TextInput(label="Photo base (URL)", required=False, placeholder="https://...")
-    objectif = discord.ui.TextInput(label="Objectif (50 car. max)", max_length=50, required=False)
+    objectif = discord.ui.TextInput(label="Objectif", required=False)
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()

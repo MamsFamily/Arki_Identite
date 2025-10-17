@@ -60,12 +60,12 @@ Chaque fiche tribu affichée a 3 boutons :
 ### Fiche Tribu Améliorée
 La fiche tribu affiche (dans cet ordre) :
 - **En-tête** : Logo (si présent) et couleur personnalisée
-- **Description** : Courte description (50 car. max)
+- **Description** : Courte description
 - **Devise** : Devise de la tribu
 - **👥 MEMBRES** : Liste de tous les membres avec le Référent Tribu en premier
 - **🏠 BASE PRINCIPALE** : Map et coordonnées de la base
 - **⛺ AVANT-POSTES** : Liste des avant-postes avec map/coords (juste après la base principale)
-- **🎯 OBJECTIF** : Objectif actuel (50 car. max)
+- **🎯 OBJECTIF** : Objectif actuel
 - **📢 RECRUTEMENT** : Statut ouvert/fermé
 - **🐉 PROGRESSION BOSS** : Boss complétés (avec ✅)
 - **📝 PROGRESSION NOTES** : Notes complétées (avec ✅)
@@ -157,8 +157,11 @@ Le bot utilise SQLite avec les tables suivantes :
 
 #### Modal "📋 Détailler" - 2 champs
 - Photo base URL (optionnel)
-- Objectif (50 car. max, optionnel)
+- Objectif (optionnel)
 - ❌ Champs "progression boss/notes" retirés → utiliser `/boss_validé_tribu` et `/note_validé_tribu`
+
+### 17 octobre 2025 - Suppression des limitations de caractères
+- ❌ **Toutes les limites de caractères supprimées** : Description, devise, objectif, nom, maps, coords peuvent maintenant être de longueur libre
 
 ### 17 octobre 2025 - REFONTE MAJEURE 🎉
 **Refonte complète du panneau et des commandes** :
