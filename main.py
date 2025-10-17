@@ -1353,7 +1353,7 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     map_base = discord.ui.TextInput(label="Base principale - Map", placeholder="Ex: The Island", required=True)
     coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", placeholder="Ex: 45.5, 32.6", required=True)
     description = discord.ui.TextInput(label="Une petite description", style=discord.TextStyle.paragraph, required=False)
-    devise = discord.ui.TextInput(label="Recrutement ouvert", required=False, placeholder="Ex: Oui, nous recrutons !")
+    recrutement = discord.ui.TextInput(label="Recrutement ouvert", required=False, placeholder="Ex: Oui, nous recrutons !")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1364,11 +1364,11 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("""
-                INSERT INTO tribus (guild_id, nom, map_base, coords_base, description, devise, proprietaire_id, created_at)
+                INSERT INTO tribus (guild_id, nom, map_base, coords_base, description, recrutement, proprietaire_id, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (inter.guild_id, str(self.nom).strip(), str(self.map_base).strip(), 
                   str(self.coords_base).strip(), str(self.description).strip() if str(self.description).strip() else None,
-                  str(self.devise).strip() if str(self.devise).strip() else None, 
+                  str(self.recrutement).strip() if str(self.recrutement).strip() else None, 
                   inter.user.id, dt.datetime.utcnow().isoformat()))
             tid = c.lastrowid
             
