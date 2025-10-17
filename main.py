@@ -1334,8 +1334,13 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
 class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
     photo_base = discord.ui.TextInput(label="Photo base (URL)", required=False, placeholder="https://...")
     objectif = discord.ui.TextInput(label="Objectif (50 car. max)", max_length=50, required=False)
-    boss = discord.ui.TextInput(label="Boss complétés (séparés par ,)", required=False, placeholder="Broodmother, Dragon...")
-    notes = discord.ui.TextInput(label="Notes complétées (séparées par ,)", required=False, placeholder="Notes Island, Bob...")
+    info_progression = discord.ui.TextInput(
+        label="ℹ️ Progression Boss & Notes", 
+        required=False, 
+        style=discord.TextStyle.paragraph,
+        placeholder="Pour ajouter la progression de votre tribu:\n• Boss : /boss_validé_tribu\n• Notes : /note_validé_tribu",
+        default="Pour ajouter la progression de votre tribu:\n• Boss : /boss_validé_tribu\n• Notes : /note_validé_tribu"
+    )
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1357,10 +1362,6 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
             updates["photo_base"] = str(self.photo_base).strip()
         if str(self.objectif).strip():
             updates["objectif"] = str(self.objectif).strip()
-        if str(self.boss).strip():
-            updates["progression_boss"] = str(self.boss).strip()
-        if str(self.notes).strip():
-            updates["progression_notes"] = str(self.notes).strip()
         
         with db_connect() as conn:
             c = conn.cursor()
@@ -1369,12 +1370,11 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
                 conn.commit()
                 ajouter_historique(row["id"], inter.user.id, "Détails ajoutés", f"Champs: {', '.join(updates.keys())}")
+                await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Détails ajoutés !**", ephemeral=False)
             else:
                 # Si aucune mise à jour, juste afficher la fiche
                 await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
                 return
-        
-        await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Détails ajoutés !**", ephemeral=False)
 
 class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = None):
