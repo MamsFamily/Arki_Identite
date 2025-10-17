@@ -58,19 +58,20 @@ Chaque fiche tribu affichée a 3 boutons :
 - **Modérateurs** : Rôle modo (ID: 1157803768893689877) avec droits similaires aux admins
 
 ### Fiche Tribu Améliorée
-La fiche tribu affiche :
+La fiche tribu affiche (dans cet ordre) :
 - **En-tête** : Logo (si présent) et couleur personnalisée
-- **Référent Tribu** : Mention du créateur
 - **Description** : Courte description (50 car. max)
 - **Devise** : Devise de la tribu
-- **Objectif** : Objectif actuel (50 car. max)
-- **Recrutement** : Statut ouvert/fermé
-- **Photo Base** : Image de la base principale (si présente)
-- **Base Principale** : Map et coordonnées
-- **Membres** : Liste de tous les membres
-- **Avant-Postes** : Liste des avant-postes avec map/coords (sans noms de joueurs)
-- **Progression Boss** : Boss complétés (avec ✅)
-- **Progression Notes** : Notes complétées (avec ✅)
+- **👥 MEMBRES** : Liste de tous les membres avec le Référent Tribu en premier
+- **🏠 BASE PRINCIPALE** : Map et coordonnées de la base
+- **⛺ AVANT-POSTES** : Liste des avant-postes avec map/coords (juste après la base principale)
+- **🎯 OBJECTIF** : Objectif actuel (50 car. max)
+- **📢 RECRUTEMENT** : Statut ouvert/fermé
+- **🐉 PROGRESSION BOSS** : Boss complétés (avec ✅)
+- **📝 PROGRESSION NOTES** : Notes complétées (avec ✅)
+- **Photo Base** : Image de la base principale affichée en grand (si présente)
+
+**Note** : Tous les titres de catégories sont en **GRAS MAJUSCULES** pour une meilleure visibilité.
 
 ### Base de Données
 Le bot utilise SQLite avec les tables suivantes :
@@ -124,6 +125,12 @@ Le bot utilise SQLite avec les tables suivantes :
 - **Historique** : Toutes les actions sont trackées (création, modification, ajout/retrait membres, etc.)
 
 ## Recent Changes
+
+### 17 octobre 2025 - Amélioration Visuelle de la Fiche Tribu
+**Réorganisation et formatage des sections** :
+- ✅ **Avant-postes déplacés** : Maintenant affichés juste après la BASE PRINCIPALE
+- ✅ **Titres en GRAS MAJUSCULES** : Tous les titres de catégories sont plus visibles (**👥 MEMBRES**, **🏠 BASE PRINCIPALE**, **⛺ AVANT-POSTES**, etc.)
+- ✅ **Ordre optimisé** : Membres → Base principale → Avant-postes → Objectif → Recrutement → Progressions
 
 ### 17 octobre 2025 - Optimisation des Modals et Auto-Suppression Panneaux
 **Amélioration de l'UX des modals** :
