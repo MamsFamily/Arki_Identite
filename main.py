@@ -365,9 +365,8 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
         e.add_field(name="**🎯 OBJECTIF**", value=tribu["objectif"], inline=False)
     
     # Ouvert au recrutement
-    if "ouvert_recrutement" in tribu.keys():
-        recrutement = "<a:utility4:1194399266152644698> Oui" if tribu["ouvert_recrutement"] else "<a:logoa_error:1194398790665379891> Non"
-        e.add_field(name="**📢 RECRUTEMENT**", value=recrutement, inline=True)
+    if "recrutement" in tribu.keys() and tribu["recrutement"]:
+        e.add_field(name="**📢 RECRUTEMENT OUVERT**", value=tribu["recrutement"], inline=False)
     
     # Progression Boss
     if "progression_boss" in tribu.keys() and tribu["progression_boss"]:
@@ -1419,18 +1418,18 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
         if str(self.recrutement).strip().lower() in ["oui", "non"]:
             updates["ouvert_recrutement"] = 1 if str(self.recrutement).strip().lower() == "oui" else 0
         
-        with db_connect() as conn:
-            c = conn.cursor()
-            
-            # Mettre à jour les champs de base
-            if updates:
+        if updates:
+            with db_connect() as conn:
+                c = conn.cursor()
                 set_clause = ", ".join(f"{k}=?" for k in updates.keys())
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
-                ajouter_historique(row["id"], inter.user.id, "Modification", f"Champs modifiés: {', '.join(updates.keys())}")
                 conn.commit()
-                await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu modifiée !**", ephemeral=False)
-            else:
-                await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
+            
+            # Ajouter l'historique après avoir fermé la connexion
+            ajouter_historique(row["id"], inter.user.id, "Modification", f"Champs modifiés: {', '.join(updates.keys())}")
+            await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu modifiée !**", ephemeral=False)
+        else:
+            await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"):
     couleur_hex = discord.ui.TextInput(label="Couleur", required=False, placeholder="Ex: #00AAFF")
@@ -1470,13 +1469,15 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
         if str(self.photo_base).strip():
             updates["photo_base"] = str(self.photo_base).strip()
         
-        with db_connect() as conn:
-            c = conn.cursor()
-            if updates:
+        if updates:
+            with db_connect() as conn:
+                c = conn.cursor()
                 set_clause = ", ".join(f"{k}=?" for k in updates.keys())
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
                 conn.commit()
-                ajouter_historique(row["id"], inter.user.id, "Personnalisation", f"Champs: {', '.join(updates.keys())}")
+            
+            # Ajouter l'historique après avoir fermé la connexion
+            ajouter_historique(row["id"], inter.user.id, "Personnalisation", f"Champs: {', '.join(updates.keys())}")
         
         await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu personnalisée !**", ephemeral=False)
 
