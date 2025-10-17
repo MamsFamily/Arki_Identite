@@ -44,6 +44,12 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 17 octobre 2025 - Nom In Game lors de la création
+**Amélioration du modal Créer** :
+- ✅ **Nouveau champ "Ton nom In Game"** : Demande le nom in-game du créateur lors de la création d'une tribu
+- ✅ **Affichage dans la fiche** : Le nom in-game s'affiche à côté du nom d'utilisateur Discord dans la liste des membres
+- ✅ **Champs optionnels** : Map base et coords base sont maintenant optionnels lors de la création (peuvent être ajoutés via Modifier)
+
 ### 17 octobre 2025 - Amélioration du Guide
 **Ajout de sections informatives** :
 - ✅ **Section gestion membres/avant-postes** : Ajout des commandes `/ajouter_membre_tribu`, `/supprimer_membre_tribu`, `/ajouter_avant_poste`, `/supprimer_avant_poste` dans le guide
