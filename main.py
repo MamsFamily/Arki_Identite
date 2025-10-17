@@ -1382,11 +1382,6 @@ class PanneauTribu(discord.ui.View):
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
     v = PanneauTribu(timeout=None)  # Pas de timeout pour un panneau permanent
-    e = discord.Embed(
-        title="🧭 Panneau — Fiches Tribu",
-        description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
-        color=0x2B2D31
-    )
     
     # Si admin, supprimer les anciens panneaux et afficher pour tout le monde
     if est_admin(inter):
@@ -1398,22 +1393,33 @@ async def panneau(inter: discord.Interaction):
         try:
             async for msg in inter.channel.history(limit=50):
                 if msg.embeds and len(msg.embeds) > 0:
-                    embed = msg.embeds[0]
-                    if embed.title == "🧭 Panneau — Fiches Tribu":
-                        try:
-                            await msg.delete()
-                            panneaux_supprimes += 1
-                            print(f"Panneau supprimé : {msg.id}")
-                        except Exception as e:
-                            print(f"Erreur suppression panneau {msg.id}: {e}")
-        except Exception as e:
-            print(f"Erreur lors de la recherche de panneaux: {e}")
+                    for embed in msg.embeds:
+                        if embed.title == "🧭 Panneau — Fiches Tribu":
+                            try:
+                                await msg.delete()
+                                panneaux_supprimes += 1
+                                print(f"Panneau supprimé : {msg.id}")
+                                break
+                            except Exception as ex:
+                                print(f"Erreur suppression panneau {msg.id}: {ex}")
+        except Exception as ex:
+            print(f"Erreur lors de la recherche de panneaux: {ex}")
         
         print(f"Total panneaux supprimés: {panneaux_supprimes}")
         
+        e = discord.Embed(
+            title="🧭 Panneau — Fiches Tribu",
+            description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
+            color=0x2B2D31
+        )
         e.set_footer(text="👑 Panneau admin — Visible par tous")
         await inter.followup.send(embed=e, view=v)
     else:
+        e = discord.Embed(
+            title="🧭 Panneau — Fiches Tribu",
+            description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
+            color=0x2B2D31
+        )
         e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
         await inter.response.send_message(embed=e, view=v, ephemeral=True)
 
