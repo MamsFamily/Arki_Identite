@@ -904,144 +904,188 @@ async def aide(inter: discord.Interaction):
     await inter.response.send_message(embed=e, ephemeral=True)
 
 # ---------- UI (boutons + modals) ----------
-class ModalCreerTribu(discord.ui.Modal, title="Créer une tribu"):
+class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", max_length=64, required=True)
-    map_base = discord.ui.TextInput(label="🗺️ Map de la base principale", placeholder="Ex: TheIsland, Ragnarok...", max_length=50, required=True)
-    coords_base = discord.ui.TextInput(label="📍 Coordonnées de la base", placeholder="Ex: 45.5, 32.6", max_length=50, required=True)
+    membres = discord.ui.TextInput(label="Membre à ajouter (optionnel)", placeholder="@pseudo NomInGame autorisé:oui/non", required=False, style=discord.TextStyle.short)
+    map_base = discord.ui.TextInput(label="🗺️ Map base principale", placeholder="Ex: The Island", max_length=50, required=True)
+    coords_base = discord.ui.TextInput(label="📍 Coordonnées base", placeholder="Ex: 45.5, 32.6", max_length=50, required=True)
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
         if tribu_par_nom(inter.guild_id, str(self.nom)):
             await inter.response.send_message("❌ Ce nom de tribu est déjà pris.", ephemeral=True)
             return
+        
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("""
-                INSERT INTO tribus (guild_id, nom, description, base, map_base, coords_base, proprietaire_id, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                inter.guild_id, 
-                str(self.nom).strip(), 
-                "",  # description vide par défaut
-                "Base Principale",  # nom de base par défaut
-                str(self.map_base).strip(),
-                str(self.coords_base).strip(),
-                inter.user.id, 
-                dt.datetime.utcnow().isoformat()
-            ))
+                INSERT INTO tribus (guild_id, nom, map_base, coords_base, proprietaire_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (inter.guild_id, str(self.nom).strip(), str(self.map_base).strip(), 
+                  str(self.coords_base).strip(), inter.user.id, dt.datetime.utcnow().isoformat()))
             tid = c.lastrowid
-            c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, 1)",
-                      (tid, inter.user.id, "Chef",))
+            
+            # Ajouter le créateur comme Référent
+            c.execute("INSERT INTO membres (tribu_id, user_id, manager) VALUES (?, ?, 1)",
+                      (tid, inter.user.id))
+            
             conn.commit()
-            c.execute("SELECT * FROM tribus WHERE id=?", (tid,))
-            row = c.fetchone()
         
-        # Afficher la fiche et sauvegarder le message_id
-        embed = embed_tribu(row)
-        embed.set_footer(text="ℹ️ Ajoutez des membres avec /tribu ajouter_membre et des avant-postes avec /tribu ajouter_avant_poste")
-        await inter.response.send_message("✅ **Tribu créée !**", embed=embed, ephemeral=False)
-        msg = await inter.original_response()
+        ajouter_historique(tid, inter.user.id, "Création tribu", f"Tribu {str(self.nom)} créée")
         
-        # Sauvegarder le message_id et channel_id
-        with db_connect() as conn:
-            c = conn.cursor()
-            c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
-                     (msg.id, msg.channel.id, tid))
-            conn.commit()
+        # Note d'information
+        note = "ℹ️ **Autres options disponibles** : Utilise les boutons « Modifier », « Personnaliser » et « Détailler » pour compléter ta fiche !"
+        await afficher_fiche_mise_a_jour(inter, tid, f"✅ **Tribu {str(self.nom)} créée !**\n{note}", ephemeral=False)
 
-class ModalModifierTribu(discord.ui.Modal, title="Modifier une tribu"):
-    nom = discord.ui.TextInput(label="Nom de la tribu à modifier")
-    nouveau_nom = discord.ui.TextInput(label="Nouveau nom (optionnel)", required=False)
-    description = discord.ui.TextInput(label="Description (optionnel)", style=discord.TextStyle.paragraph, required=False)
-    couleur_hex = discord.ui.TextInput(label="Couleur hex (ex: #00AAFF)", required=False)
-    logo_url = discord.ui.TextInput(label="Logo URL (optionnel)", required=False, placeholder="https://...")
+class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
+    nom = discord.ui.TextInput(label="Nom tribu (optionnel)", required=False)
+    ajouter_membre = discord.ui.TextInput(label="Ajouter membre (optionnel)", placeholder="@pseudo NomInGame autorisé:oui/non", required=False)
+    supprimer_membre = discord.ui.TextInput(label="Supprimer membre (optionnel)", placeholder="@pseudo", required=False)
+    map_base = discord.ui.TextInput(label="Map base (optionnel)", required=False)
+    coords_base = discord.ui.TextInput(label="Coords base (optionnel)", required=False)
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
-        row = tribu_par_nom(inter.guild_id, str(self.nom))
-        if not row:
-            await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
-            return
-        if not (est_admin(inter) or inter.user.id == row["proprietaire_id"] or est_manager(row["id"], inter.user.id)):
-            await inter.response.send_message("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
-            return
-        updates = {}
-        if str(self.nouveau_nom).strip():
-            updates["nom"] = str(self.nouveau_nom).strip()
-        if self.description is not None:
-            updates["description"] = str(self.description).strip()
-        if str(self.couleur_hex).strip():
-            try:
-                updates["couleur"] = int(str(self.couleur_hex).replace("#",""), 16)
-            except ValueError:
-                await inter.response.send_message("❌ Couleur invalide. Utilise un hex, ex: #00AAFF", ephemeral=True)
-                return
-        if str(self.logo_url).strip():
-            updates["logo_url"] = str(self.logo_url).strip()
+        # Trouver la tribu de l'utilisateur
         with db_connect() as conn:
             c = conn.cursor()
-            if "nom" in updates:
-                c.execute("SELECT 1 FROM tribus WHERE guild_id=? AND LOWER(nom)=LOWER(?) AND id<>?",
-                          (inter.guild_id, updates["nom"], row["id"]))
-                if c.fetchone():
-                    await inter.response.send_message("❌ Ce nouveau nom est déjà utilisé.", ephemeral=True)
-                    return
+            c.execute("""
+                SELECT t.* FROM tribus t
+                LEFT JOIN membres m ON t.id = m.tribu_id
+                WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+            """, (inter.guild_id, inter.user.id, inter.user.id))
+            row = c.fetchone()
+        
+        if not row:
+            await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+            return
+        
+        updates = {}
+        if str(self.nom).strip():
+            updates["nom"] = str(self.nom).strip()
+        if str(self.map_base).strip():
+            updates["map_base"] = str(self.map_base).strip()
+        if str(self.coords_base).strip():
+            updates["coords_base"] = str(self.coords_base).strip()
+        
+        with db_connect() as conn:
+            c = conn.cursor()
             if updates:
                 set_clause = ", ".join(f"{k}=?" for k in updates.keys())
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
                 conn.commit()
+                ajouter_historique(row["id"], inter.user.id, "Modification", f"Champs modifiés: {', '.join(updates.keys())}")
         
-        if updates:
-            await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**", ephemeral=False)
-        else:
-            await inter.response.send_message("ℹ️ Aucun changement détecté.", ephemeral=True)
+        await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu modifiée !**", ephemeral=False)
 
-class ModalVoirTribu(discord.ui.Modal, title="Voir une tribu"):
-    nom = discord.ui.TextInput(label="Nom de la tribu")
+class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"):
+    description = discord.ui.TextInput(label="Description (50 car. max)", max_length=50, required=False, style=discord.TextStyle.short)
+    devise = discord.ui.TextInput(label="Devise de la tribu", required=False, max_length=100)
+    logo_url = discord.ui.TextInput(label="Logo (URL image)", required=False, placeholder="https://...")
+    couleur_hex = discord.ui.TextInput(label="Couleur hex (ex: #00AAFF)", required=False)
+    recrutement = discord.ui.TextInput(label="Ouvert recrutement? (oui/non)", required=False, placeholder="oui ou non")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
-        row = tribu_par_nom(inter.guild_id, str(self.nom))
-        if not row:
-            await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
-            return
         with db_connect() as conn:
             c = conn.cursor()
-            c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (row["id"],))
-            membres = c.fetchall()
-            c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (row["id"],))
-            avant_postes = c.fetchall()
-        await inter.response.send_message(embed=embed_tribu(row, membres, avant_postes), ephemeral=False)
+            c.execute("""
+                SELECT t.* FROM tribus t
+                LEFT JOIN membres m ON t.id = m.tribu_id
+                WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+            """, (inter.guild_id, inter.user.id, inter.user.id))
+            row = c.fetchone()
+        
+        if not row:
+            await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+            return
+        
+        updates = {}
+        if str(self.description).strip():
+            updates["description"] = str(self.description).strip()
+        if str(self.devise).strip():
+            updates["devise"] = str(self.devise).strip()
+        if str(self.logo_url).strip():
+            updates["logo_url"] = str(self.logo_url).strip()
+        if str(self.couleur_hex).strip():
+            try:
+                updates["couleur"] = int(str(self.couleur_hex).replace("#", ""), 16)
+            except ValueError:
+                await inter.response.send_message("❌ Couleur invalide.", ephemeral=True)
+                return
+        if str(self.recrutement).strip().lower() in ["oui", "non"]:
+            updates["ouvert_recrutement"] = 1 if str(self.recrutement).strip().lower() == "oui" else 0
+        
+        with db_connect() as conn:
+            c = conn.cursor()
+            if updates:
+                set_clause = ", ".join(f"{k}=?" for k in updates.keys())
+                c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
+                conn.commit()
+                ajouter_historique(row["id"], inter.user.id, "Personnalisation", f"Champs: {', '.join(updates.keys())}")
+        
+        await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu personnalisée !**", ephemeral=False)
+
+class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
+    photo_base = discord.ui.TextInput(label="Photo base (URL)", required=False, placeholder="https://...")
+    objectif = discord.ui.TextInput(label="Objectif (50 car. max)", max_length=50, required=False)
+    boss = discord.ui.TextInput(label="Boss complétés (séparés par ,)", required=False, placeholder="Broodmother, Dragon...")
+    notes = discord.ui.TextInput(label="Notes complétées (séparées par ,)", required=False, placeholder="Notes Island, Bob...")
+
+    async def on_submit(self, inter: discord.Interaction):
+        db_init()
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT t.* FROM tribus t
+                LEFT JOIN membres m ON t.id = m.tribu_id
+                WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+            """, (inter.guild_id, inter.user.id, inter.user.id))
+            row = c.fetchone()
+        
+        if not row:
+            await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+            return
+        
+        updates = {}
+        if str(self.photo_base).strip():
+            updates["photo_base"] = str(self.photo_base).strip()
+        if str(self.objectif).strip():
+            updates["objectif"] = str(self.objectif).strip()
+        if str(self.boss).strip():
+            updates["progression_boss"] = str(self.boss).strip()
+        if str(self.notes).strip():
+            updates["progression_notes"] = str(self.notes).strip()
+        
+        with db_connect() as conn:
+            c = conn.cursor()
+            if updates:
+                set_clause = ", ".join(f"{k}=?" for k in updates.keys())
+                c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
+                conn.commit()
+                ajouter_historique(row["id"], inter.user.id, "Détails ajoutés", f"Champs: {', '.join(updates.keys())}")
+        
+        await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Détails ajoutés !**", ephemeral=False)
 
 class PanneauTribu(discord.ui.View):
-    def __init__(self, timeout: Optional[float] = 180):
+    def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout=timeout)
 
-    @discord.ui.button(label="Créer", style=discord.ButtonStyle.success, emoji="➕")
+    @discord.ui.button(label="Créer", style=discord.ButtonStyle.success, emoji="✨")
     async def btn_creer(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalCreerTribu())
 
     @discord.ui.button(label="Modifier", style=discord.ButtonStyle.primary, emoji="🛠️")
     async def btn_modifier(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalModifierTribu())
-
-    @discord.ui.button(label="Liste", style=discord.ButtonStyle.secondary, emoji="📜")
-    async def btn_liste(self, inter: discord.Interaction, button: discord.ui.Button):
-        db_init()
-        with db_connect() as conn:
-            c = conn.cursor()
-            c.execute("SELECT nom, proprietaire_id FROM tribus WHERE guild_id=? ORDER BY LOWER(nom) ASC", (inter.guild_id,))
-            rows = c.fetchall()
-        if not rows:
-            await inter.response.send_message("Aucune tribu pour l'instant. Utilise le bouton **Créer**.", ephemeral=True)
-            return
-        texte = "\n".join(f"• **{r['nom']}** — proprio : <@{r['proprietaire_id']}>"
-                          for r in rows)
-        await inter.response.send_message(texte, ephemeral=True)
-
-    @discord.ui.button(label="Voir", style=discord.ButtonStyle.secondary, emoji="👀")
-    async def btn_voir(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_modal(ModalVoirTribu())
+    
+    @discord.ui.button(label="Personnaliser", style=discord.ButtonStyle.secondary, emoji="🎨")
+    async def btn_personnaliser(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_modal(ModalPersonnaliserTribu())
+    
+    @discord.ui.button(label="Détailler", style=discord.ButtonStyle.secondary, emoji="📋")
+    async def btn_detailler(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_modal(ModalDetaillerTribu())
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
