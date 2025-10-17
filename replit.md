@@ -44,6 +44,11 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 17 octobre 2025 - Amélioration du Guide
+**Ajout de sections informatives** :
+- ✅ **Section gestion membres/avant-postes** : Ajout des commandes `/ajouter_membre_tribu`, `/supprimer_membre_tribu`, `/ajouter_avant_poste`, `/supprimer_avant_poste` dans le guide
+- ✅ **Référence à /aide** : Le footer indique maintenant d'utiliser `/aide` pour voir toutes les commandes disponibles
+
 ### 17 octobre 2025 - Commande Admin Bannière Panneau
 **Nouvelle commande admin** :
 - ✅ **/changer_bannière_panneau** : Permet aux admins de modifier la bannière du panneau avec une URL personnalisée

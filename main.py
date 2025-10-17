@@ -1501,7 +1501,13 @@ async def afficher_guide(inter: discord.Interaction):
         inline=False
     )
     
-    e.set_footer(text="💡 Ce guide est disponible à tout moment via /guide ou le bouton Guide du panneau")
+    e.add_field(
+        name="👥 Gérer les membres et avant-postes",
+        value="Pour ajouter ou retirer des membres et avant-postes, utilise :\n• `/ajouter_membre_tribu`\n• `/supprimer_membre_tribu`\n• `/ajouter_avant_poste`\n• `/supprimer_avant_poste`",
+        inline=False
+    )
+    
+    e.set_footer(text="💡 Utilise /aide pour voir toutes les commandes disponibles")
     
     await inter.response.send_message(embed=e, ephemeral=True)
 
