@@ -630,8 +630,16 @@ async def tribu_modifier(
     await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**")
 
 @tree.command(name="ajouter_membre_tribu", description="Ajouter un membre à ta tribu")
-@app_commands.describe(utilisateur="Membre à ajouter", nom_ingame="Nom in-game du joueur", role="Rôle affiché (optionnel)", manager="Donner les droits de gestion ?")
-async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.Member, nom_ingame: str, role: Optional[str] = "", manager: Optional[bool] = False):
+@app_commands.describe(
+    utilisateur="Membre à ajouter", 
+    nom_ingame="Nom in-game du joueur", 
+    autorise="Autoriser à modifier la fiche ? (oui/non)"
+)
+@app_commands.choices(autorise=[
+    app_commands.Choice(name="Oui", value="oui"),
+    app_commands.Choice(name="Non", value="non")
+])
+async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.Member, nom_ingame: str, autorise: str):
     db_init()
     
     # Trouver la tribu du propriétaire/manager
@@ -655,10 +663,13 @@ async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.
     
     row = tribus[0]
     
+    # Convertir oui/non en 1/0 pour la base de données
+    manager_flag = 1 if autorise.lower() == "oui" else 0
+    
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, nom_in_game, role, manager) VALUES (?, ?, ?, ?, ?)",
-                  (row["id"], utilisateur.id, nom_ingame.strip(), role or "", 1 if manager else 0))
+        c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, nom_in_game, manager) VALUES (?, ?, ?, ?)",
+                  (row["id"], utilisateur.id, nom_ingame.strip(), manager_flag))
         conn.commit()
     
     await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **<@{utilisateur.id}> ajouté à {row['nom']} !**")
