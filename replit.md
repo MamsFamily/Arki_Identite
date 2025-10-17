@@ -49,7 +49,7 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - ✅ **Modal Créer** : 5 champs (Nom, Map base, Coords base, Description, Devise)
 - ✅ **Modal Modifier** : 5 champs (Nom, Map base, Coords base, Description, Recrutement)
 - ✅ **Modal Personnaliser** : 5 champs (Couleur, Logo, Objectif, Devise, Photo base)
-- ✅ **Modal Guide** : 3 champs read-only avec informations pratiques (site couleur, site images, commandes progression)
+- ✅ **Guide** : Affichage en lecture seule via embed avec 3 sections d'information (site couleur, site images, commandes progression)
 
 **Changements de commandes** :
 - ✅ **/détailler_tribu** renommée en **/guide**
