@@ -1173,6 +1173,11 @@ async def retirer_boss(inter: discord.Interaction, nom: str):
             conn.commit()
             await inter.response.send_message(f"✅ Boss **{nom}** supprimé de la liste !", ephemeral=True)
 
+@retirer_boss.autocomplete('nom')
+async def retirer_boss_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_boss_choices(inter.guild_id)
+
 @tree.command(name="ajout_note", description="[ADMIN] Ajouter une note à la liste")
 @app_commands.describe(nom="Nom de la note à ajouter")
 async def ajout_note(inter: discord.Interaction, nom: str):
@@ -1205,6 +1210,11 @@ async def retirer_note(inter: discord.Interaction, nom: str):
         else:
             conn.commit()
             await inter.response.send_message(f"✅ Note **{nom}** supprimée de la liste !", ephemeral=True)
+
+@retirer_note.autocomplete('nom')
+async def retirer_note_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_notes_choices(inter.guild_id)
 
 @tree.command(name="changer_bannière_panneau", description="[ADMIN] Modifier la bannière du panneau")
 @app_commands.describe(url="URL de la nouvelle bannière (image)")

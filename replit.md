@@ -50,6 +50,7 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - ✅ **/notes_non_validé_tribu** : Retire une note précédemment validée de la progression
 - ✅ **Emoji animé <a:no:1328152539660554363>** : Affiché lors de la suppression de boss/notes
 - ✅ **Guide mis à jour** : Les 4 commandes de progression sont maintenant listées dans le Guide
+- ✅ **Autocomplétion Admin** : Les commandes `/retirer_boss` et `/retirer_note` ont maintenant des menus déroulants
 - ✅ **Total : 27 commandes** slash disponibles
 
 ### 17 octobre 2025 - Gestion Intelligente des Fiches Tribu
