@@ -1078,6 +1078,44 @@ async def personnaliser_tribu(inter: discord.Interaction):
 async def guide(inter: discord.Interaction):
     await afficher_guide(inter)
 
+@tree.command(name="mon_nom_ingame", description="Ajouter ou modifier ton nom In Game")
+@app_commands.describe(nom_ingame="Ton nom dans le jeu (ex: Raptor_Killer42)")
+async def mon_nom_ingame(inter: discord.Interaction, nom_ingame: str):
+    db_init()
+    
+    # Trouver les tribus dont l'utilisateur est membre
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.id, t.nom FROM tribus t
+            JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND m.user_id = ?
+        """, (inter.guild_id, inter.user.id))
+        tribus = c.fetchall()
+    
+    if not tribus:
+        await inter.response.send_message("❌ Tu n'es membre d'aucune tribu.", ephemeral=True)
+        return
+    
+    # Mettre à jour le nom in-game pour toutes les tribus dont l'utilisateur est membre
+    nom_ingame_clean = nom_ingame.strip()
+    with db_connect() as conn:
+        c = conn.cursor()
+        for tribu in tribus:
+            c.execute("UPDATE membres SET nom_in_game = ? WHERE tribu_id = ? AND user_id = ?",
+                     (nom_ingame_clean, tribu["id"], inter.user.id))
+        conn.commit()
+    
+    # Ajouter à l'historique pour chaque tribu
+    for tribu in tribus:
+        ajouter_historique(tribu["id"], inter.user.id, "Mise à jour nom in-game", f"Nom in-game: {nom_ingame_clean}")
+    
+    if len(tribus) == 1:
+        await inter.response.send_message(f"✅ Ton nom in-game **{nom_ingame_clean}** a été mis à jour dans la tribu **{tribus[0]['nom']}** !", ephemeral=True)
+    else:
+        noms_tribus = ", ".join([t["nom"] for t in tribus])
+        await inter.response.send_message(f"✅ Ton nom in-game **{nom_ingame_clean}** a été mis à jour dans tes tribus : {noms_tribus}", ephemeral=True)
+
 @tree.command(name="quitter_tribu", description="Quitter ta tribu")
 async def quitter_tribu(inter: discord.Interaction):
     db_init()
