@@ -90,6 +90,80 @@ def db_init():
             c.execute("ALTER TABLE tribus ADD COLUMN channel_id INTEGER DEFAULT 0")
         except sqlite3.OperationalError:
             pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN devise TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN ouvert_recrutement INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN photo_base TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN objectif TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN progression_boss TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN progression_notes TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE membres ADD COLUMN nom_in_game TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        
+        # Tables pour boss et notes
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS boss (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id INTEGER NOT NULL,
+            nom TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(guild_id, nom)
+        )
+        """)
+        
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id INTEGER NOT NULL,
+            nom TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(guild_id, nom)
+        )
+        """)
+        
+        # Table d'historique
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS historique (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tribu_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            action TEXT NOT NULL,
+            details TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (tribu_id) REFERENCES tribus(id) ON DELETE CASCADE
+        )
+        """)
+        
+        # Boss par défaut
+        default_boss = ["Broodmother", "Megapithecus", "Dragon", "Cave Tek", "Manticore", "Rockwell", "King Titan", "Boss Astraeos"]
+        for boss_name in default_boss:
+            c.execute("INSERT OR IGNORE INTO boss (guild_id, nom, created_at) VALUES (?, ?, ?)",
+                     (0, boss_name, dt.datetime.utcnow().isoformat()))
+        
+        # Notes par défaut
+        default_notes = ["Notes Island", "Notes Scorched", "Notes Abbération", "Extinction", "Bob"]
+        for note_name in default_notes:
+            c.execute("INSERT OR IGNORE INTO notes (guild_id, nom, created_at) VALUES (?, ?, ?)",
+                     (0, note_name, dt.datetime.utcnow().isoformat()))
         
         # Ajouter les maps par défaut si elles n'existent pas
         default_maps = [
