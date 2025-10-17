@@ -366,7 +366,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     
     # Ouvert au recrutement
     if "ouvert_recrutement" in tribu.keys():
-        recrutement = "✅ Oui" if tribu["ouvert_recrutement"] else "❌ Non"
+        recrutement = "<a:utility4:1194399266152644698> Oui" if tribu["ouvert_recrutement"] else "<a:logoa_error:1194398790665379891> Non"
         e.add_field(name="**📢 RECRUTEMENT**", value=recrutement, inline=True)
     
     # Progression Boss
