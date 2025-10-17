@@ -420,14 +420,31 @@ class HistoriqueView(discord.ui.View):
         else:
             await inter.response.send_message("📜 Fin de l'historique atteint.", ephemeral=True)
 
-# ---------- Boutons de la fiche tribu ----------
-class BoutonsFicheTribu(discord.ui.View):
+# ---------- Menu déroulant pour la fiche tribu ----------
+class MenuFicheTribu(discord.ui.View):
     def __init__(self, tribu_id: int, timeout: Optional[float] = None):
         super().__init__(timeout=timeout)
         self.tribu_id = tribu_id
     
-    @discord.ui.button(label="Quitter tribu", style=discord.ButtonStyle.danger, emoji="🚪")
-    async def btn_quitter(self, inter: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.select(
+        placeholder="Sélectionne une action...",
+        options=[
+            discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
+            discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
+            discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
+        ]
+    )
+    async def menu_callback(self, inter: discord.Interaction, select: discord.ui.Select):
+        choice = select.values[0]
+        
+        if choice == "quitter":
+            await self.action_quitter(inter)
+        elif choice == "historique":
+            await self.action_historique(inter)
+        elif choice == "staff":
+            await self.action_staff(inter)
+    
+    async def action_quitter(self, inter: discord.Interaction):
         # Vérifier que l'utilisateur est membre
         with db_connect() as conn:
             c = conn.cursor()
@@ -454,8 +471,7 @@ class BoutonsFicheTribu(discord.ui.View):
         ajouter_historique(self.tribu_id, inter.user.id, "Quitter tribu", f"<@{inter.user.id}> a quitté la tribu")
         await inter.response.send_message(f"✅ Tu as quitté la tribu **{tribu['nom']}**.", ephemeral=True)
     
-    @discord.ui.button(label="Historique", style=discord.ButtonStyle.secondary, emoji="📜")
-    async def btn_historique(self, inter: discord.Interaction, button: discord.ui.Button):
+    async def action_historique(self, inter: discord.Interaction):
         # Vérifier les permissions (managers, admin ou modo)
         with db_connect() as conn:
             c = conn.cursor()
@@ -484,8 +500,7 @@ class BoutonsFicheTribu(discord.ui.View):
         
         await inter.response.send_message(embed=embed, view=view, ephemeral=True)
     
-    @discord.ui.button(label="Staff", style=discord.ButtonStyle.primary, emoji="⚙️")
-    async def btn_staff(self, inter: discord.Interaction, button: discord.ui.Button):
+    async def action_staff(self, inter: discord.Interaction):
         # Vérifie si admin ou modo
         if not est_admin_ou_modo(inter):
             await inter.response.send_message("❌ Cette fonction est réservée aux admins et modos.", ephemeral=True)
@@ -600,7 +615,7 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         
         # Envoyer le nouveau message avec la fiche et les boutons
         embed = embed_tribu(tribu, membres, avant_postes)
-        view = BoutonsFicheTribu(tribu_id, timeout=None)
+        view = MenuFicheTribu(tribu_id, timeout=None)
         
         # Répondre à l'interaction
         await inter.response.send_message(message_prefix, embed=embed, view=view, ephemeral=ephemeral)
