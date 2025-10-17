@@ -451,6 +451,56 @@ async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
     await inter.response.send_message("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
     return False
 
+def parser_membre_info(texte: str, guild: discord.Guild):
+    """Parse le format: @pseudo NomInGame autorisé:oui/non"""
+    if not texte or not texte.strip():
+        return None
+    
+    parts = texte.strip().split()
+    if len(parts) < 3:
+        return None
+    
+    # Extraire mention (@pseudo ou ID)
+    mention = parts[0]
+    user_id = None
+    
+    # Essayer d'extraire l'ID de la mention
+    if mention.startswith('<@') and mention.endswith('>'):
+        user_id = int(mention.replace('<@', '').replace('!', '').replace('>', ''))
+    elif mention.isdigit():
+        user_id = int(mention)
+    
+    if not user_id:
+        return None
+    
+    # Vérifier que l'utilisateur existe
+    member = guild.get_member(user_id)
+    if not member:
+        return None
+    
+    # Trouver l'index du "autorisé:"
+    autorise_idx = -1
+    for i, part in enumerate(parts):
+        if part.lower().startswith("autorisé:"):
+            autorise_idx = i
+            break
+    
+    if autorise_idx == -1:
+        return None
+    
+    # Nom in-game = tout entre la mention et "autorisé:"
+    nom_ingame = " ".join(parts[1:autorise_idx]).strip()
+    
+    # Autorisation
+    autorise_val = parts[autorise_idx].split(':')[1].lower() if ':' in parts[autorise_idx] else 'non'
+    manager_flag = 1 if autorise_val == 'oui' else 0
+    
+    return {
+        'user_id': user_id,
+        'nom_ingame': nom_ingame,
+        'manager': manager_flag
+    }
+
 async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, message_prefix: str = "✅ **Fiche mise à jour !**", ephemeral: bool = False):
     """Affiche la fiche tribu mise à jour et supprime l'ancienne si elle existe"""
     with db_connect() as conn:
