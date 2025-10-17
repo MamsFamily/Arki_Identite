@@ -394,6 +394,7 @@ class HistoriqueView(discord.ui.View):
         self.tribu_nom = tribu_nom
         self.offset = offset
         self.page_size = 10
+        self.total_entries = 0
     
     async def create_embed(self):
         """Crée l'embed de l'historique pour la page actuelle"""
@@ -401,9 +402,9 @@ class HistoriqueView(discord.ui.View):
             c = conn.cursor()
             # Compter le total d'entrées
             c.execute("SELECT COUNT(*) as total FROM historique WHERE tribu_id=?", (self.tribu_id,))
-            total = c.fetchone()["total"]
+            self.total_entries = c.fetchone()["total"]
             
-            if total == 0:
+            if self.total_entries == 0:
                 return None
             
             # Récupérer les entrées pour cette page
@@ -437,14 +438,19 @@ class HistoriqueView(discord.ui.View):
         
         # Footer avec info de pagination
         page_actuelle = (self.offset // self.page_size) + 1
-        total_pages = (total + self.page_size - 1) // self.page_size
+        total_pages = (self.total_entries + self.page_size - 1) // self.page_size
         entries_debut = self.offset + 1
-        entries_fin = min(self.offset + self.page_size, total)
-        e.set_footer(text=f"Entrées {entries_debut}-{entries_fin} sur {total} • Page {page_actuelle}/{total_pages}")
+        entries_fin = min(self.offset + self.page_size, self.total_entries)
+        e.set_footer(text=f"Entrées {entries_debut}-{entries_fin} sur {self.total_entries} • Page {page_actuelle}/{total_pages}")
         
         # Activer/désactiver le bouton "Voir +" selon s'il reste des entrées
-        has_more = (self.offset + self.page_size) < total
-        self.voir_plus_btn.disabled = not has_more
+        has_more = (self.offset + self.page_size) < self.total_entries
+        
+        # Chercher le bouton dans les enfants de la vue
+        for child in self.children:
+            if isinstance(child, discord.ui.Button) and child.label == "Voir +":
+                child.disabled = not has_more
+                break
         
         return e
     
