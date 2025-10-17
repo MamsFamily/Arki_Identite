@@ -1044,6 +1044,96 @@ async def retirer_note(inter: discord.Interaction, nom: str):
             conn.commit()
             await inter.response.send_message(f"✅ Note **{nom}** supprimée de la liste !", ephemeral=True)
 
+@tree.command(name="boss_validé_tribu", description="Valider un boss complété pour ta tribu")
+@app_commands.describe(boss="Boss complété")
+async def boss_valide_tribu(inter: discord.Interaction, boss: str):
+    db_init()
+    
+    # Trouver la tribu de l'utilisateur
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            LEFT JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+        """, (inter.guild_id, inter.user.id, inter.user.id))
+        row = c.fetchone()
+    
+    if not row:
+        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+        return
+    
+    # Récupérer la progression actuelle
+    progression_actuelle = row["progression_boss"] if row["progression_boss"] else ""
+    boss_list = [b.strip() for b in progression_actuelle.split(",") if b.strip()]
+    
+    # Vérifier si le boss est déjà validé
+    if boss in boss_list:
+        await inter.response.send_message(f"ℹ️ Le boss **{boss}** est déjà validé pour {row['nom']}.", ephemeral=True)
+        return
+    
+    # Ajouter le boss
+    boss_list.append(boss)
+    nouvelle_progression = ", ".join(boss_list)
+    
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE tribus SET progression_boss=? WHERE id=?", (nouvelle_progression, row["id"]))
+        conn.commit()
+    
+    ajouter_historique(row["id"], inter.user.id, "Boss validé", boss)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Boss {boss} validé pour {row['nom']} !**")
+
+@boss_valide_tribu.autocomplete('boss')
+async def boss_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_boss_choices(inter.guild_id)
+
+@tree.command(name="note_validé_tribu", description="Valider une note complétée pour ta tribu")
+@app_commands.describe(note="Note complétée")
+async def note_valide_tribu(inter: discord.Interaction, note: str):
+    db_init()
+    
+    # Trouver la tribu de l'utilisateur
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            LEFT JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+        """, (inter.guild_id, inter.user.id, inter.user.id))
+        row = c.fetchone()
+    
+    if not row:
+        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+        return
+    
+    # Récupérer la progression actuelle
+    progression_actuelle = row["progression_notes"] if row["progression_notes"] else ""
+    notes_list = [n.strip() for n in progression_actuelle.split(",") if n.strip()]
+    
+    # Vérifier si la note est déjà validée
+    if note in notes_list:
+        await inter.response.send_message(f"ℹ️ La note **{note}** est déjà validée pour {row['nom']}.", ephemeral=True)
+        return
+    
+    # Ajouter la note
+    notes_list.append(note)
+    nouvelle_progression = ", ".join(notes_list)
+    
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE tribus SET progression_notes=? WHERE id=?", (nouvelle_progression, row["id"]))
+        conn.commit()
+    
+    ajouter_historique(row["id"], inter.user.id, "Note validée", note)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Note {note} validée pour {row['nom']} !**")
+
+@note_valide_tribu.autocomplete('note')
+async def note_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_notes_choices(inter.guild_id)
+
 @tree.command(name="aide", description="Afficher la liste des commandes du bot")
 async def aide(inter: discord.Interaction):
     e = discord.Embed(
