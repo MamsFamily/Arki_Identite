@@ -633,13 +633,13 @@ async def tribu_modifier(
 @app_commands.describe(
     utilisateur="Membre à ajouter", 
     nom_ingame="Nom in-game du joueur", 
-    autorise="Autoriser à modifier la fiche ? (oui/non)"
+    autorisé_à_modifier_fiche="Autoriser à modifier la fiche ? (oui/non)"
 )
-@app_commands.choices(autorise=[
+@app_commands.choices(autorisé_à_modifier_fiche=[
     app_commands.Choice(name="Oui", value="oui"),
     app_commands.Choice(name="Non", value="non")
 ])
-async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.Member, nom_ingame: str, autorise: str):
+async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.Member, nom_ingame: str, autorisé_à_modifier_fiche: str):
     db_init()
     
     # Trouver la tribu du propriétaire/manager
@@ -664,7 +664,7 @@ async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.
     row = tribus[0]
     
     # Convertir oui/non en 1/0 pour la base de données
-    manager_flag = 1 if autorise.lower() == "oui" else 0
+    manager_flag = 1 if autorisé_à_modifier_fiche.lower() == "oui" else 0
     
     with db_connect() as conn:
         c = conn.cursor()
