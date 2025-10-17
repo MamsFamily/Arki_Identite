@@ -1390,7 +1390,11 @@ async def panneau(inter: discord.Interaction):
     
     # Si admin, supprimer les anciens panneaux et afficher pour tout le monde
     if est_admin(inter):
+        # Répondre d'abord à l'interaction pour éviter le timeout
+        await inter.response.defer(ephemeral=False)
+        
         # Supprimer tous les anciens panneaux dans le canal
+        panneaux_supprimes = 0
         try:
             async for msg in inter.channel.history(limit=50):
                 if msg.embeds and len(msg.embeds) > 0:
@@ -1398,13 +1402,17 @@ async def panneau(inter: discord.Interaction):
                     if embed.title == "🧭 Panneau — Fiches Tribu":
                         try:
                             await msg.delete()
-                        except:
-                            pass
-        except:
-            pass
+                            panneaux_supprimes += 1
+                            print(f"Panneau supprimé : {msg.id}")
+                        except Exception as e:
+                            print(f"Erreur suppression panneau {msg.id}: {e}")
+        except Exception as e:
+            print(f"Erreur lors de la recherche de panneaux: {e}")
+        
+        print(f"Total panneaux supprimés: {panneaux_supprimes}")
         
         e.set_footer(text="👑 Panneau admin — Visible par tous")
-        await inter.response.send_message(embed=e, view=v, ephemeral=False)
+        await inter.followup.send(embed=e, view=v)
     else:
         e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
         await inter.response.send_message(embed=e, view=v, ephemeral=True)
