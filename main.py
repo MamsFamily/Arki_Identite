@@ -1381,19 +1381,6 @@ class PanneauTribu(discord.ui.View):
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
-    # Supprimer tous les anciens panneaux dans le canal
-    try:
-        async for msg in inter.channel.history(limit=50):
-            if msg.embeds and len(msg.embeds) > 0:
-                embed = msg.embeds[0]
-                if embed.title == "🧭 Panneau — Fiches Tribu":
-                    try:
-                        await msg.delete()
-                    except:
-                        pass
-    except:
-        pass
-    
     v = PanneauTribu(timeout=None)  # Pas de timeout pour un panneau permanent
     e = discord.Embed(
         title="🧭 Panneau — Fiches Tribu",
@@ -1401,8 +1388,21 @@ async def panneau(inter: discord.Interaction):
         color=0x2B2D31
     )
     
-    # Si admin, afficher pour tout le monde, sinon en privé
+    # Si admin, supprimer les anciens panneaux et afficher pour tout le monde
     if est_admin(inter):
+        # Supprimer tous les anciens panneaux dans le canal
+        try:
+            async for msg in inter.channel.history(limit=50):
+                if msg.embeds and len(msg.embeds) > 0:
+                    embed = msg.embeds[0]
+                    if embed.title == "🧭 Panneau — Fiches Tribu":
+                        try:
+                            await msg.delete()
+                        except:
+                            pass
+        except:
+            pass
+        
         e.set_footer(text="👑 Panneau admin — Visible par tous")
         await inter.response.send_message(embed=e, view=v, ephemeral=False)
     else:
