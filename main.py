@@ -1279,40 +1279,57 @@ async def note_autocomplete(inter: discord.Interaction, current: str):
 async def aide(inter: discord.Interaction):
     e = discord.Embed(
         title="❓ Aide — Commandes disponibles",
-        description="Commandes rapides pour gérer les fiches tribu :",
+        description="Voici toutes les commandes pour gérer les fiches tribu :",
         color=0x5865F2
     )
-    lignes = [
-        "**Gestion des tribus :**",
-        "• **/créer_tribu** — créer une nouvelle tribu",
-        "• **/tribu_voir** — afficher une fiche tribu complète",
-        "• **/modifier_tribu** — éditer les infos de base",
-        "• **/personnaliser_tribu** — personnaliser (description, devise, logo, couleur)",
-        "• **/guide** — afficher le guide pour personnaliser ta tribu",
-        "• **/quitter_tribu** — quitter ta tribu",
-        "• **/tribu_transférer** — transférer la propriété",
-        "• **/tribu_supprimer** — supprimer une tribu (avec confirmation)",
-        "",
-        "**Membres et avant-postes :**",
-        "• **/ajouter_membre_tribu** — ajouter un membre à ta tribu",
-        "• **/supprimer_membre_tribu** — retirer un membre de la tribu",
-        "• **/ajouter_avant_poste** — ajouter ton avant-poste",
-        "• **/supprimer_avant_poste** — retirer un avant-poste",
-        "",
-        "**Interface :**",
-        "• **/panneau** — ouvre les boutons (Créer / Modifier / Personnaliser / Détailler)",
-        "",
-        "**Commandes Admin :**",
-        "• **/ajout_map** — ajouter une map personnalisée",
-        "• **/retirer_map** — supprimer une map",
-        "• **/ajout_boss** — ajouter un boss",
-        "• **/retirer_boss** — supprimer un boss",
-        "• **/ajout_note** — ajouter une note",
-        "• **/retirer_note** — supprimer une note",
-        "• **/changer_bannière_panneau** — modifier la bannière du panneau"
-    ]
-    e.add_field(name="Résumé", value="\n".join(lignes), inline=False)
-    e.set_footer(text="💡 Les maps ont des menus déroulants pour faciliter la sélection")
+    
+    # Gestion des tribus
+    e.add_field(
+        name="🏕️ Gestion des tribus",
+        value=(
+            "• **/créer_tribu** — créer une nouvelle tribu\n"
+            "• **/tribu_voir** — afficher une fiche tribu complète\n"
+            "• **/modifier_tribu** — éditer les infos de base\n"
+            "• **/personnaliser_tribu** — personnaliser ta tribu\n"
+            "• **/guide** — afficher le guide\n"
+            "• **/quitter_tribu** — quitter ta tribu\n"
+            "• **/tribu_transférer** — transférer la propriété\n"
+            "• **/tribu_supprimer** — supprimer une tribu"
+        ),
+        inline=False
+    )
+    
+    # Membres et avant-postes
+    e.add_field(
+        name="👥 Membres & avant-postes",
+        value=(
+            "• **/ajouter_membre_tribu** — ajouter un membre\n"
+            "• **/supprimer_membre_tribu** — retirer un membre\n"
+            "• **/ajouter_avant_poste** — ajouter un avant-poste\n"
+            "• **/supprimer_avant_poste** — retirer un avant-poste\n"
+            "• **/boss_validé_tribu** — valider un boss\n"
+            "• **/note_validé_tribu** — valider une note"
+        ),
+        inline=False
+    )
+    
+    # Interface et Admin
+    e.add_field(
+        name="🎛️ Interface & Admin",
+        value=(
+            "• **/panneau** — ouvrir le panneau interactif\n"
+            "• **/ajout_map** — ajouter une map (Admin)\n"
+            "• **/retirer_map** — supprimer une map (Admin)\n"
+            "• **/ajout_boss** — ajouter un boss (Admin)\n"
+            "• **/retirer_boss** — supprimer un boss (Admin)\n"
+            "• **/ajout_note** — ajouter une note (Admin)\n"
+            "• **/retirer_note** — supprimer une note (Admin)\n"
+            "• **/changer_bannière_panneau** — changer la bannière (Admin)"
+        ),
+        inline=False
+    )
+    
+    e.set_footer(text="💡 Utilise /panneau pour un accès rapide aux fonctions principales")
     await inter.response.send_message(embed=e, ephemeral=True)
 
 # ---------- UI (boutons + modals) ----------
