@@ -316,19 +316,17 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
         recrutement = "✅ Oui" if tribu["ouvert_recrutement"] else "❌ Non"
         e.add_field(name="Recrutement", value=recrutement, inline=True)
     
-    # Avant-postes (sans nom de joueur)
+    # Avant-postes (liste simple avec tiret)
     if avant_postes is not None and len(avant_postes) > 0:
         ap_lines = []
         for ap in avant_postes:
-            ap_text = f"• **{ap['nom']}**"
             ap_info = []
             if ap['map']:
                 ap_info.append(f"{ap['map']}")
             if ap['coords']:
                 ap_info.append(f"📍 {ap['coords']}")
             if ap_info:
-                ap_text += f"\n  {' | '.join(ap_info)}"
-            ap_lines.append(ap_text)
+                ap_lines.append(f"• {' | '.join(ap_info)}")
         if ap_lines:
             e.add_field(name=f"⛺ AVANT-POSTES ({len(ap_lines)})", value="\n".join(ap_lines)[:1024], inline=False)
     
@@ -795,20 +793,17 @@ async def ajouter_avant_poste(
     
     row = tribus[0]
     
-    # Générer un nom d'avant-poste automatique basé sur le nombre d'avant-postes existants
+    # Ajouter l'avant-poste sans nom
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (row["id"],))
-        count = c.fetchone()["count"]
-        nom_avant_poste = f"Avant-Poste {count + 1}"
-        
         c.execute("""
             INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (row["id"], inter.user.id, nom_avant_poste, map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
+            VALUES (?, ?, NULL, ?, ?, ?)
+        """, (row["id"], inter.user.id, map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
         conn.commit()
     
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {nom_avant_poste} ajouté à {row['nom']} !**")
+    ajouter_historique(row["id"], inter.user.id, "Ajout avant-poste", f"{map.strip()} | {coords.strip()}")
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste ajouté : {map.strip()} !**")
 
 @ajouter_avant_poste.autocomplete('map')
 async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str):
@@ -816,8 +811,8 @@ async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str)
     return get_maps_choices(inter.guild_id)
 
 @tree.command(name="supprimer_avant_poste", description="Retirer un avant-poste d'une tribu")
-@app_commands.describe(nom_tribu="Nom de la tribu", nom_avant_poste="Nom de l'avant-poste à retirer")
-async def supprimer_avant_poste(inter: discord.Interaction, nom_tribu: str, nom_avant_poste: str):
+@app_commands.describe(nom_tribu="Nom de la tribu", map="Map de l'avant-poste à retirer")
+async def supprimer_avant_poste(inter: discord.Interaction, nom_tribu: str, map: str):
     db_init()
     row = tribu_par_nom(inter.guild_id, nom_tribu)
     if not row:
@@ -827,13 +822,14 @@ async def supprimer_avant_poste(inter: discord.Interaction, nom_tribu: str, nom_
         return
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("DELETE FROM avant_postes WHERE tribu_id=? AND LOWER(nom)=LOWER(?)", (row["id"], nom_avant_poste))
+        c.execute("DELETE FROM avant_postes WHERE tribu_id=? AND LOWER(map)=LOWER(?)", (row["id"], map))
         if c.rowcount == 0:
-            await inter.response.send_message(f"❌ Aucun avant-poste trouvé avec le nom **{nom_avant_poste}**.", ephemeral=True)
+            await inter.response.send_message(f"❌ Aucun avant-poste trouvé avec la map **{map}**.", ephemeral=True)
             return
         conn.commit()
     
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {nom_avant_poste} retiré de {row['nom']} !**")
+    ajouter_historique(row["id"], inter.user.id, "Retrait avant-poste", f"{map}")
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {map} retiré de {row['nom']} !**")
 
 @tree.command(name="tribu_transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
