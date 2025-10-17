@@ -1338,7 +1338,7 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     map_base = discord.ui.TextInput(label="Base principale - Map", placeholder="Ex: The Island", required=True)
     coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", placeholder="Ex: 45.5, 32.6", required=True)
     description = discord.ui.TextInput(label="Une petite description", style=discord.TextStyle.paragraph, required=False)
-    devise = discord.ui.TextInput(label="Devise de la tribu", required=False, placeholder="Ex: Unis pour survivre")
+    devise = discord.ui.TextInput(label="Recrutement ouvert", required=False, placeholder="Ex: Oui, nous recrutons !")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
