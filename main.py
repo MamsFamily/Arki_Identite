@@ -372,14 +372,14 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     # Progression Boss
     if "progression_boss" in tribu.keys() and tribu["progression_boss"]:
         boss_list = tribu["progression_boss"].split(",")
-        boss_display = ", ".join([f"✅ {b.strip()}" for b in boss_list if b.strip()])
+        boss_display = ", ".join([f"<a:ok:1328152449785008189> {b.strip()}" for b in boss_list if b.strip()])
         if boss_display:
             e.add_field(name="**🐉 PROGRESSION BOSS**", value=boss_display[:1024], inline=False)
     
     # Progression Notes
     if "progression_notes" in tribu.keys() and tribu["progression_notes"]:
         notes_list = tribu["progression_notes"].split(",")
-        notes_display = ", ".join([f"✅ {n.strip()}" for n in notes_list if n.strip()])
+        notes_display = ", ".join([f"<a:ok:1328152449785008189> {n.strip()}" for n in notes_list if n.strip()])
         if notes_display:
             e.add_field(name="**📝 PROGRESSION NOTES**", value=notes_display[:1024], inline=False)
 
