@@ -49,6 +49,7 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - ✅ **Nouveau champ "Ton nom In Game"** : Demande le nom in-game du créateur lors de la création d'une tribu
 - ✅ **Affichage dans la fiche** : Le nom in-game s'affiche à côté du nom d'utilisateur Discord dans la liste des membres
 - ✅ **Champs optionnels** : Map base et coords base sont maintenant optionnels lors de la création (peuvent être ajoutés via Modifier)
+- ✅ **Nouvelle commande /mon_nom_ingame** : Permet à tout membre de modifier son nom in-game affiché dans ses tribus
 
 ### 17 octobre 2025 - Amélioration du Guide
 **Ajout de sections informatives** :
