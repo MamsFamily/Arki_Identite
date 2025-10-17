@@ -661,8 +661,26 @@ async def map_autocomplete(inter: discord.Interaction, current: str):
     db_init()
     return get_maps_choices(inter.guild_id)
 
+async def autocomplete_tribus(inter: discord.Interaction, current: str):
+    """Autocomplétion pour les noms de tribus"""
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT nom FROM tribus WHERE guild_id=? ORDER BY LOWER(nom) ASC", (inter.guild_id,))
+        tribus = [row["nom"] for row in c.fetchall()]
+    
+    # Filtrer selon ce que l'utilisateur tape
+    if current:
+        filtered = [t for t in tribus if current.lower() in t.lower()]
+    else:
+        filtered = tribus
+    
+    # Discord limite à 25 choix
+    return [app_commands.Choice(name=t, value=t) for t in filtered[:25]]
+
 @tree.command(name="tribu_voir", description="[ADMIN/MODO] Afficher la fiche d'une tribu")
 @app_commands.describe(nom="Nom de la tribu")
+@app_commands.autocomplete(nom=autocomplete_tribus)
 async def tribu_voir(inter: discord.Interaction, nom: str):
     if not est_admin_ou_modo(inter):
         await inter.response.send_message("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)

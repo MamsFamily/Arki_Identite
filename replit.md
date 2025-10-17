@@ -41,3 +41,20 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 ## External Dependencies
 - **Discord API:** Le bot interagit directement avec l'API Discord via la bibliothèque `discord.py`.
 - **SQLite:** Base de données embarquée pour la persistance des données.
+
+## Recent Changes
+
+### 17 octobre 2025 - Autocomplétion pour /tribu_voir
+**Amélioration de la commande /tribu_voir** :
+- ✅ **Menu déroulant** : Sélection des tribus existantes via autocomplétion
+- ✅ **Recherche intelligente** : Filtre les tribus en temps réel pendant la frappe
+- ✅ **Limite Discord** : Affiche jusqu'à 25 tribus dans la liste déroulante
+- ✅ **Tri alphabétique** : Les tribus sont affichées par ordre alphabétique
+
+### 17 octobre 2025 - Pagination de l'Historique
+**Amélioration du bouton Historique** :
+- ✅ **Pagination ajoutée** : Affiche 10 entrées par page au lieu de 20 fixes
+- ✅ **Bouton "Voir +"** : Permet de charger les entrées plus anciennes
+- ✅ **Navigation complète** : Remonte jusqu'à la création de la tribu
+- ✅ **Compteur d'entrées** : Affiche "Entrées 1-10 sur 50 • Page 1/5"
+- ✅ **Bouton auto-désactivé** : Le bouton "Voir +" se désactive quand il n'y a plus d'entrées
