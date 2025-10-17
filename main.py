@@ -732,10 +732,10 @@ async def autocomplete_tribus(inter: discord.Interaction, current: str):
     # Discord limite à 25 choix
     return [app_commands.Choice(name=t, value=t) for t in filtered[:25]]
 
-@tree.command(name="tribu_voir", description="[ADMIN/MODO] Afficher la fiche d'une tribu")
+@tree.command(name="fiche_tribu", description="[ADMIN/MODO] Afficher la fiche d'une tribu")
 @app_commands.describe(nom="Nom de la tribu")
 @app_commands.autocomplete(nom=autocomplete_tribus)
-async def tribu_voir(inter: discord.Interaction, nom: str):
+async def fiche_tribu(inter: discord.Interaction, nom: str):
     if not est_admin_ou_modo(inter):
         await inter.response.send_message("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
         return
@@ -1288,7 +1288,7 @@ async def aide(inter: discord.Interaction):
         name="🏕️ Gestion des tribus",
         value=(
             "• **/créer_tribu** — créer une nouvelle tribu\n"
-            "• **/tribu_voir** — afficher une fiche tribu complète\n"
+            "• **/fiche_tribu** — afficher une fiche tribu complète\n"
             "• **/modifier_tribu** — éditer les infos de base\n"
             "• **/personnaliser_tribu** — personnaliser ta tribu\n"
             "• **/guide** — afficher le guide\n"
