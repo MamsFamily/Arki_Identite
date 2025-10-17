@@ -249,53 +249,104 @@ tree = bot.tree
 # ---------- Helpers UI ----------
 def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     color = tribu["couleur"] if tribu["couleur"] else 0x2F3136
+    
+    # Titre et description
+    titre = f"🏕️ Tribu — {tribu['nom']}"
+    desc_parts = []
+    if tribu["description"]:
+        desc_parts.append(tribu["description"])
+    if "devise" in tribu.keys() and tribu["devise"]:
+        desc_parts.append(f"*« {tribu['devise']} »*")
+    description = "\n".join(desc_parts) if desc_parts else "—"
+    
     e = discord.Embed(
-        title=f"🏕️ Tribu — {tribu['nom']}",
-        description=tribu["description"] or "—",
+        title=titre,
+        description=description,
         color=color,
         timestamp=dt.datetime.utcnow()
     )
+    
+    # Logo
     if tribu["logo_url"]:
         e.set_thumbnail(url=tribu["logo_url"])
     
-    base_value = tribu["base"] if tribu["base"] else "—"
+    # Photo de la base
+    if "photo_base" in tribu.keys() and tribu["photo_base"]:
+        e.set_image(url=tribu["photo_base"])
+    
+    # Base principale
     map_base = tribu["map_base"] if "map_base" in tribu.keys() and tribu["map_base"] else ""
     coords_base = tribu["coords_base"] if "coords_base" in tribu.keys() and tribu["coords_base"] else ""
-    if map_base and coords_base:
-        base_value = f"{base_value}\n🗺️ Map: **{map_base}**\n📍 Coords: **{coords_base}**"
-    elif map_base:
-        base_value = f"{base_value}\n🗺️ Map: **{map_base}**"
-    elif coords_base:
-        base_value = f"{base_value}\n📍 Coords: **{coords_base}**"
-    
+    base_info = []
+    if map_base:
+        base_info.append(f"🗺️ **{map_base}**")
+    if coords_base:
+        base_info.append(f"📍 **{coords_base}**")
+    base_value = "\n".join(base_info) if base_info else "—"
     e.add_field(name="🏰 Base Principale", value=base_value, inline=False)
-    e.add_field(name="👑 Propriétaire", value=f"<@{tribu['proprietaire_id']}>", inline=True)
-
+    
+    # Objectif
+    if "objectif" in tribu.keys() and tribu["objectif"]:
+        e.add_field(name="🎯 Objectif", value=tribu["objectif"], inline=False)
+    
+    # Ouvert au recrutement
+    if "ouvert_recrutement" in tribu.keys():
+        recrutement = "✅ Oui" if tribu["ouvert_recrutement"] else "❌ Non"
+        e.add_field(name="📢 Recrutement", value=recrutement, inline=True)
+    
+    # Membres avec référent
     if membres is not None:
         lines = []
+        referent_id = tribu['proprietaire_id']
         for m in membres:
-            line = f"• <@{m['user_id']}>"
-            if m["role"]:
-                line += f" — {m['role']}"
-            lines.append(line)
+            if m['user_id'] == referent_id:
+                # Référent tribu
+                line = f"👑 <@{m['user_id']}>"
+                if "nom_in_game" in m.keys() and m["nom_in_game"]:
+                    line += f" ({m['nom_in_game']})"
+                line += " — Référent Tribu"
+                lines.insert(0, line)  # En premier
+            else:
+                line = f"• <@{m['user_id']}>"
+                if "nom_in_game" in m.keys() and m["nom_in_game"]:
+                    line += f" ({m['nom_in_game']})"
+                if m["role"]:
+                    line += f" — {m['role']}"
+                lines.append(line)
         if lines:
             e.add_field(name=f"👥 Membres ({len(lines)})", value="\n".join(lines)[:1024], inline=False)
     
+    # Avant-postes (sans nom de joueur)
     if avant_postes is not None and len(avant_postes) > 0:
         ap_lines = []
         for ap in avant_postes:
             ap_text = f"• **{ap['nom']}**"
-            if ap['map'] and ap['coords']:
-                ap_text += f"\n  🗺️ {ap['map']} | 📍 {ap['coords']}"
-            elif ap['map']:
-                ap_text += f"\n  🗺️ {ap['map']}"
-            elif ap['coords']:
-                ap_text += f"\n  📍 {ap['coords']}"
+            ap_info = []
+            if ap['map']:
+                ap_info.append(f"🗺️ {ap['map']}")
+            if ap['coords']:
+                ap_info.append(f"📍 {ap['coords']}")
+            if ap_info:
+                ap_text += f"\n  {' | '.join(ap_info)}"
             ap_lines.append(ap_text)
         if ap_lines:
             e.add_field(name=f"⛺ Avant-Postes ({len(ap_lines)})", value="\n".join(ap_lines)[:1024], inline=False)
+    
+    # Progression Boss
+    if "progression_boss" in tribu.keys() and tribu["progression_boss"]:
+        boss_list = tribu["progression_boss"].split(",")
+        boss_display = ", ".join([f"✅ {b.strip()}" for b in boss_list if b.strip()])
+        if boss_display:
+            e.add_field(name="🐉 Progression Boss", value=boss_display[:1024], inline=False)
+    
+    # Progression Notes
+    if "progression_notes" in tribu.keys() and tribu["progression_notes"]:
+        notes_list = tribu["progression_notes"].split(",")
+        notes_display = ", ".join([f"✅ {n.strip()}" for n in notes_list if n.strip()])
+        if notes_display:
+            e.add_field(name="📝 Progression Notes", value=notes_display[:1024], inline=False)
 
-    e.set_footer(text="Astuce : /tribu modifier ou le bouton « Modifier » pour mettre à jour la fiche")
+    e.set_footer(text="💡 Utilise les boutons ci-dessous pour gérer la tribu")
     return e
 
 async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
