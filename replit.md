@@ -44,6 +44,10 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 17 octobre 2025 - Ajout du label "Devise"
+**Amélioration visuelle de la fiche** :
+- ✅ **Label avant la devise** : Ajout de "💬 Devise :" avant la devise dans la fiche tribu
+
 ### 17 octobre 2025 - Autocomplétion pour /tribu_voir
 **Amélioration de la commande /tribu_voir** :
 - ✅ **Menu déroulant** : Sélection des tribus existantes via autocomplétion
