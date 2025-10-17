@@ -6,11 +6,13 @@ Bot Discord avancé pour la communauté Arki Family avec système complet de ges
 ## Fonctionnalités Principales
 
 ### Panneau Interactif
-Commande `/panneau` ouvre un panneau avec 4 boutons (supprime automatiquement tous les anciens panneaux) :
+Commande `/panneau` ouvre un panneau avec 4 boutons :
 - **✨ Créer** : Créer une nouvelle tribu (nom, couleur, logo, map base, coords base)
 - **🛠️ Modifier** : Modifier nom, couleur, logo, map/coords base (détection auto de ta tribu)
 - **🎨 Personnaliser** : Description, devise, logo, couleur, recrutement
 - **📋 Détailler** : Photo base, objectif (progression boss/notes via commandes dédiées)
+
+**Note Admin** : Quand un admin demande le panneau, tous les anciens panneaux sont automatiquement supprimés.
 
 ### Commandes Slash (/)
 
@@ -126,8 +128,9 @@ Le bot utilise SQLite avec les tables suivantes :
 ### 17 octobre 2025 - Optimisation des Modals et Auto-Suppression Panneaux
 **Amélioration de l'UX des modals** :
 
-#### Panneau - Suppression automatique
-- Lorsqu'un nouveau panneau est demandé avec `/panneau`, tous les anciens panneaux sont automatiquement supprimés (recherche dans les 50 derniers messages)
+#### Panneau - Suppression automatique (Admin uniquement)
+- Lorsqu'un **admin** demande un nouveau panneau avec `/panneau`, tous les anciens panneaux sont automatiquement supprimés (recherche dans les 50 derniers messages)
+- Les membres non-admin créent des panneaux privés sans supprimer les autres
 
 #### Modal "✨ Créer" - 5 champs
 - Nom de la tribu (obligatoire)
