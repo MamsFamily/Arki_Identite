@@ -1374,7 +1374,7 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
     map_base = discord.ui.TextInput(label="Base principale - Map", required=False)
     coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", required=False)
     description = discord.ui.TextInput(label="Une petite description", style=discord.TextStyle.paragraph, required=False)
-    recrutement = discord.ui.TextInput(label="Recrutement", required=False, placeholder="oui ou non")
+    recrutement = discord.ui.TextInput(label="Recrutement ouvert", required=False, placeholder="Ex: Oui, nous recrutons !")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
