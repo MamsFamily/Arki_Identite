@@ -44,6 +44,12 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 17 octobre 2025 - Commande Admin Bannière Panneau
+**Nouvelle commande admin** :
+- ✅ **/changer_bannière_panneau** : Permet aux admins de modifier la bannière du panneau avec une URL personnalisée
+- ✅ **Stockage en base de données** : La bannière est sauvegardée par serveur Discord
+- ✅ **Bannière par défaut** : Une bannière est définie par défaut pour tous les serveurs
+
 ### 17 octobre 2025 - Refonte Complète des Modals et UI
 **Réorganisation majeure des modals** :
 - ✅ **Modal Créer** : 5 champs (Nom, Map base, Coords base, Description, Devise)
