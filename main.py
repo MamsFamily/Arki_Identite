@@ -804,6 +804,30 @@ async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: st
         conn.commit()
     await inter.response.send_message(f"🗑️ La tribu **{nom}** a été supprimée.")
 
+@tribu_supprimer.autocomplete('nom')
+async def tribu_supprimer_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    with db_connect() as conn:
+        c = conn.cursor()
+        
+        # Si admin ou modo, afficher toutes les tribus
+        if est_admin_ou_modo(inter):
+            c.execute("SELECT nom FROM tribus WHERE guild_id=? ORDER BY LOWER(nom) ASC", (inter.guild_id,))
+        else:
+            # Sinon, afficher seulement les tribus où l'utilisateur est propriétaire ou manager
+            c.execute("""
+                SELECT DISTINCT t.nom FROM tribus t
+                LEFT JOIN membres m ON t.id = m.tribu_id
+                WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+                ORDER BY LOWER(t.nom) ASC
+            """, (inter.guild_id, inter.user.id, inter.user.id))
+        
+        tribus = c.fetchall()
+    
+    # Filtrer par la recherche de l'utilisateur
+    filtered = [t["nom"] for t in tribus if current.lower() in t["nom"].lower()][:25]
+    return [app_commands.Choice(name=nom, value=nom) for nom in filtered]
+
 # ---- Commandes Admin (maps) ----
 
 @tree.command(name="ajout_map", description="[ADMIN] Ajouter une map à la liste")
