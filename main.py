@@ -294,7 +294,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
                     line += f" — {m['role']}"
                 lines.append(line)
         if lines:
-            e.add_field(name=f"👥 Membres ({len(lines)})", value="\n".join(lines)[:1024], inline=False)
+            e.add_field(name=f"👥 MEMBRES ({len(lines)})", value="\n".join(lines)[:1024], inline=False)
     
     # Base principale
     map_base = tribu["map_base"] if "map_base" in tribu.keys() and tribu["map_base"] else ""
@@ -305,7 +305,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     if coords_base:
         base_info.append(f"📍 **{coords_base}**")
     base_value = "\n".join(base_info) if base_info else "—"
-    e.add_field(name="🏠 Base Principale", value=base_value, inline=False)
+    e.add_field(name="🏠 BASE PRINCIPALE", value=base_value, inline=False)
     
     # Objectif
     if "objectif" in tribu.keys() and tribu["objectif"]:
@@ -330,7 +330,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
                 ap_text += f"\n  {' | '.join(ap_info)}"
             ap_lines.append(ap_text)
         if ap_lines:
-            e.add_field(name=f"⛺ Avant-Postes ({len(ap_lines)})", value="\n".join(ap_lines)[:1024], inline=False)
+            e.add_field(name=f"⛺ AVANT-POSTES ({len(ap_lines)})", value="\n".join(ap_lines)[:1024], inline=False)
     
     # Progression Boss
     if "progression_boss" in tribu.keys() and tribu["progression_boss"]:
@@ -1069,9 +1069,9 @@ async def aide(inter: discord.Interaction):
 # ---------- UI (boutons + modals) ----------
 class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", max_length=64, required=True)
-    membres = discord.ui.TextInput(label="Membre à ajouter (optionnel)", placeholder="@pseudo NomInGame autorisé:oui/non", required=False, style=discord.TextStyle.short)
-    map_base = discord.ui.TextInput(label="🗺️ Map base principale", placeholder="Ex: The Island", max_length=50, required=True)
-    coords_base = discord.ui.TextInput(label="📍 Coordonnées base", placeholder="Ex: 45.5, 32.6", max_length=50, required=True)
+    membres = discord.ui.TextInput(label="👥 MEMBRES — Ajouter (optionnel)", placeholder="@pseudo NomInGame autorisé:oui/non", required=False, style=discord.TextStyle.short)
+    map_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Map", placeholder="Ex: The Island", max_length=50, required=True)
+    coords_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Coords", placeholder="Ex: 45.5, 32.6", max_length=50, required=True)
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1110,10 +1110,10 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
 
 class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
     nom = discord.ui.TextInput(label="Nom tribu (optionnel)", required=False)
-    ajouter_membre = discord.ui.TextInput(label="Ajouter membre (optionnel)", placeholder="@pseudo NomInGame autorisé:oui/non", required=False)
-    supprimer_membre = discord.ui.TextInput(label="Supprimer membre (optionnel)", placeholder="@pseudo", required=False)
-    map_base = discord.ui.TextInput(label="Map base (optionnel)", required=False)
-    coords_base = discord.ui.TextInput(label="Coords base (optionnel)", required=False)
+    ajouter_membre = discord.ui.TextInput(label="👥 MEMBRES — Ajouter (optionnel)", placeholder="@pseudo NomInGame autorisé:oui/non", required=False)
+    supprimer_membre = discord.ui.TextInput(label="👥 MEMBRES — Supprimer (optionnel)", placeholder="@pseudo", required=False)
+    map_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Map (optionnel)", required=False)
+    coords_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Coords (optionnel)", required=False)
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
