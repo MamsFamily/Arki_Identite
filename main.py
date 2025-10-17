@@ -256,7 +256,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     if tribu["description"]:
         desc_parts.append(tribu["description"])
     if "devise" in tribu.keys() and tribu["devise"]:
-        desc_parts.append(f"*« {tribu['devise']} »*")
+        desc_parts.append(f"💬 Devise : *« {tribu['devise']} »*")
     description = "\n".join(desc_parts) if desc_parts else "—"
     
     e = discord.Embed(
