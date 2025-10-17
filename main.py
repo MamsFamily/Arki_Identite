@@ -1054,7 +1054,7 @@ async def retirer_map(inter: discord.Interaction, nom: str):
 
 @tree.command(name="test_bot", description="Vérifier si le bot répond")
 async def tribu_test(inter: discord.Interaction):
-    await inter.response.send_message("🏓 Pong !")
+    await inter.response.send_message("🐔 Tout roule ma poule")
 
 @tree.command(name="personnaliser_tribu", description="Personnaliser ta tribu (description, devise, logo, couleur)")
 async def personnaliser_tribu(inter: discord.Interaction):
