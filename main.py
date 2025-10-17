@@ -1315,6 +1315,96 @@ async def note_autocomplete(inter: discord.Interaction, current: str):
     db_init()
     return get_notes_choices(inter.guild_id)
 
+@tree.command(name="boss_non_validé_tribu", description="Retirer un boss validé pour ta tribu")
+@app_commands.describe(boss="Boss à retirer")
+async def boss_non_valide_tribu(inter: discord.Interaction, boss: str):
+    db_init()
+    
+    # Trouver la tribu de l'utilisateur
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            LEFT JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+        """, (inter.guild_id, inter.user.id, inter.user.id))
+        row = c.fetchone()
+    
+    if not row:
+        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+        return
+    
+    # Récupérer la progression actuelle
+    progression_actuelle = row["progression_boss"] if row["progression_boss"] else ""
+    boss_list = [b.strip() for b in progression_actuelle.split(",") if b.strip()]
+    
+    # Vérifier si le boss est dans la liste
+    if boss not in boss_list:
+        await inter.response.send_message(f"ℹ️ Le boss **{boss}** n'est pas validé pour {row['nom']}.", ephemeral=True)
+        return
+    
+    # Retirer le boss
+    boss_list.remove(boss)
+    nouvelle_progression = ", ".join(boss_list)
+    
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE tribus SET progression_boss=? WHERE id=?", (nouvelle_progression, row["id"]))
+        conn.commit()
+    
+    ajouter_historique(row["id"], inter.user.id, "Boss retiré", boss)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Boss {boss} retiré pour {row['nom']} !**")
+
+@boss_non_valide_tribu.autocomplete('boss')
+async def boss_non_valide_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_boss_choices(inter.guild_id)
+
+@tree.command(name="notes_non_validé_tribu", description="Retirer une note validée pour ta tribu")
+@app_commands.describe(note="Note à retirer")
+async def notes_non_valide_tribu(inter: discord.Interaction, note: str):
+    db_init()
+    
+    # Trouver la tribu de l'utilisateur
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            LEFT JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
+        """, (inter.guild_id, inter.user.id, inter.user.id))
+        row = c.fetchone()
+    
+    if not row:
+        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+        return
+    
+    # Récupérer la progression actuelle
+    progression_actuelle = row["progression_notes"] if row["progression_notes"] else ""
+    notes_list = [n.strip() for n in progression_actuelle.split(",") if n.strip()]
+    
+    # Vérifier si la note est dans la liste
+    if note not in notes_list:
+        await inter.response.send_message(f"ℹ️ La note **{note}** n'est pas validée pour {row['nom']}.", ephemeral=True)
+        return
+    
+    # Retirer la note
+    notes_list.remove(note)
+    nouvelle_progression = ", ".join(notes_list)
+    
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE tribus SET progression_notes=? WHERE id=?", (nouvelle_progression, row["id"]))
+        conn.commit()
+    
+    ajouter_historique(row["id"], inter.user.id, "Note retirée", note)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Note {note} retirée pour {row['nom']} !**")
+
+@notes_non_valide_tribu.autocomplete('note')
+async def notes_non_valide_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
+    return get_notes_choices(inter.guild_id)
+
 @tree.command(name="aide", description="Afficher la liste des commandes du bot")
 async def aide(inter: discord.Interaction):
     e = discord.Embed(
@@ -1345,10 +1435,13 @@ async def aide(inter: discord.Interaction):
         value=(
             "• **/ajouter_membre_tribu** — ajouter un membre\n"
             "• **/supprimer_membre_tribu** — retirer un membre\n"
+            "• **/mon_nom_ingame** — modifier ton nom in-game\n"
             "• **/ajouter_avant_poste** — ajouter un avant-poste\n"
             "• **/supprimer_avant_poste** — retirer un avant-poste\n"
             "• **/boss_validé_tribu** — valider un boss\n"
-            "• **/note_validé_tribu** — valider une note"
+            "• **/boss_non_validé_tribu** — retirer un boss\n"
+            "• **/note_validé_tribu** — valider une note\n"
+            "• **/notes_non_validé_tribu** — retirer une note"
         ),
         inline=False
     )
@@ -1530,8 +1623,14 @@ async def afficher_guide(inter: discord.Interaction):
     )
     
     e.add_field(
-        name="📊 Ajouter les boss et les notes validées par la tribu",
-        value="Utilise ces commandes pour compléter la progression de ta fiche :\n• `/boss_validé_tribu`\n• `/note_validé_tribu`",
+        name="📊 Gérer la progression (Boss & Notes)",
+        value=(
+            "Utilise ces commandes pour compléter la progression de ta fiche :\n"
+            "• `/boss_validé_tribu` — ajouter un boss complété\n"
+            "• `/boss_non_validé_tribu` — retirer un boss\n"
+            "• `/note_validé_tribu` — ajouter une note complétée\n"
+            "• `/notes_non_validé_tribu` — retirer une note"
+        ),
         inline=False
     )
     
