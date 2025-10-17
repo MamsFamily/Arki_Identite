@@ -294,7 +294,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
                     line += f" — {m['role']}"
                 lines.append(line)
         if lines:
-            e.add_field(name=f"👥 MEMBRES ({len(lines)})", value="\n".join(lines)[:1024], inline=False)
+            e.add_field(name=f"**👥 MEMBRES ({len(lines)})**", value="\n".join(lines)[:1024], inline=False)
     
     # Base principale
     map_base = tribu["map_base"] if "map_base" in tribu.keys() and tribu["map_base"] else ""
@@ -305,18 +305,9 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
     if coords_base:
         base_info.append(f"📍 **{coords_base}**")
     base_value = "\n".join(base_info) if base_info else "—"
-    e.add_field(name="🏠 BASE PRINCIPALE", value=base_value, inline=False)
+    e.add_field(name="**🏠 BASE PRINCIPALE**", value=base_value, inline=False)
     
-    # Objectif
-    if "objectif" in tribu.keys() and tribu["objectif"]:
-        e.add_field(name="🎯 Objectif", value=tribu["objectif"], inline=False)
-    
-    # Ouvert au recrutement
-    if "ouvert_recrutement" in tribu.keys():
-        recrutement = "✅ Oui" if tribu["ouvert_recrutement"] else "❌ Non"
-        e.add_field(name="Recrutement", value=recrutement, inline=True)
-    
-    # Avant-postes (liste simple avec tiret)
+    # Avant-postes (liste simple avec tiret) - DÉPLACÉ ICI après BASE PRINCIPALE
     if avant_postes is not None and len(avant_postes) > 0:
         ap_lines = []
         for ap in avant_postes:
@@ -328,21 +319,30 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
             if ap_info:
                 ap_lines.append(f"• {' | '.join(ap_info)}")
         if ap_lines:
-            e.add_field(name=f"⛺ AVANT-POSTES ({len(ap_lines)})", value="\n".join(ap_lines)[:1024], inline=False)
+            e.add_field(name=f"**⛺ AVANT-POSTES ({len(ap_lines)})**", value="\n".join(ap_lines)[:1024], inline=False)
+    
+    # Objectif
+    if "objectif" in tribu.keys() and tribu["objectif"]:
+        e.add_field(name="**🎯 OBJECTIF**", value=tribu["objectif"], inline=False)
+    
+    # Ouvert au recrutement
+    if "ouvert_recrutement" in tribu.keys():
+        recrutement = "✅ Oui" if tribu["ouvert_recrutement"] else "❌ Non"
+        e.add_field(name="**📢 RECRUTEMENT**", value=recrutement, inline=True)
     
     # Progression Boss
     if "progression_boss" in tribu.keys() and tribu["progression_boss"]:
         boss_list = tribu["progression_boss"].split(",")
         boss_display = ", ".join([f"✅ {b.strip()}" for b in boss_list if b.strip()])
         if boss_display:
-            e.add_field(name="🐉 Progression Boss", value=boss_display[:1024], inline=False)
+            e.add_field(name="**🐉 PROGRESSION BOSS**", value=boss_display[:1024], inline=False)
     
     # Progression Notes
     if "progression_notes" in tribu.keys() and tribu["progression_notes"]:
         notes_list = tribu["progression_notes"].split(",")
         notes_display = ", ".join([f"✅ {n.strip()}" for n in notes_list if n.strip()])
         if notes_display:
-            e.add_field(name="📝 Progression Notes", value=notes_display[:1024], inline=False)
+            e.add_field(name="**📝 PROGRESSION NOTES**", value=notes_display[:1024], inline=False)
 
     e.set_footer(text="💡 Utilise les boutons ci-dessous pour gérer la tribu")
     return e
