@@ -1244,10 +1244,10 @@ async def aide(inter: discord.Interaction):
 # ---------- UI (boutons + modals) ----------
 class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", required=True)
-    couleur_hex = discord.ui.TextInput(label="Couleur (optionnel)", required=False, placeholder="Ex: #00AAFF")
-    logo_url = discord.ui.TextInput(label="Logo URL (optionnel)", required=False, placeholder="https://...")
-    map_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Map", placeholder="Ex: The Island", required=True)
-    coords_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Coords", placeholder="Ex: 45.5, 32.6", required=True)
+    map_base = discord.ui.TextInput(label="Base principale - Map", placeholder="Ex: The Island", required=True)
+    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", placeholder="Ex: 45.5, 32.6", required=True)
+    description = discord.ui.TextInput(label="Une petite description", style=discord.TextStyle.paragraph, required=False)
+    devise = discord.ui.TextInput(label="Devise de la tribu", required=False, placeholder="Ex: Unis pour survivre")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1255,22 +1255,14 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
             await inter.response.send_message("❌ Ce nom de tribu est déjà pris.", ephemeral=True)
             return
         
-        # Gérer la couleur
-        couleur = None
-        if str(self.couleur_hex).strip():
-            try:
-                couleur = int(str(self.couleur_hex).replace("#", ""), 16)
-            except ValueError:
-                await inter.response.send_message("❌ Couleur invalide. Utilise un format hex comme #00AAFF", ephemeral=True)
-                return
-        
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("""
-                INSERT INTO tribus (guild_id, nom, map_base, coords_base, couleur, logo_url, proprietaire_id, created_at)
+                INSERT INTO tribus (guild_id, nom, map_base, coords_base, description, devise, proprietaire_id, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (inter.guild_id, str(self.nom).strip(), str(self.map_base).strip(), 
-                  str(self.coords_base).strip(), couleur, str(self.logo_url).strip() if str(self.logo_url).strip() else None, 
+                  str(self.coords_base).strip(), str(self.description).strip() if str(self.description).strip() else None,
+                  str(self.devise).strip() if str(self.devise).strip() else None, 
                   inter.user.id, dt.datetime.utcnow().isoformat()))
             tid = c.lastrowid
             
@@ -1283,15 +1275,15 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
         ajouter_historique(tid, inter.user.id, "Création tribu", f"Tribu {str(self.nom)} créée")
         
         # Note d'information
-        note = "ℹ️ **Autres options disponibles** : Utilise les boutons « Modifier », « Personnaliser » et « Détailler » pour compléter ta fiche !"
+        note = "ℹ️ **Autres options disponibles** : Utilise les boutons « Modifier », « Personnaliser » et « Guide » pour compléter ta fiche !"
         await afficher_fiche_mise_a_jour(inter, tid, f"✅ **Tribu {str(self.nom)} créée !**\n{note}", ephemeral=False)
 
 class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
-    nom = discord.ui.TextInput(label="Nom tribu (optionnel)", required=False)
-    couleur_hex = discord.ui.TextInput(label="Couleur (optionnel)", required=False, placeholder="Ex: #00AAFF")
-    logo_url = discord.ui.TextInput(label="Logo URL (optionnel)", required=False, placeholder="https://...")
-    map_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Map (optionnel)", required=False)
-    coords_base = discord.ui.TextInput(label="🏠 BASE PRINCIPALE — Coords (optionnel)", required=False)
+    nom = discord.ui.TextInput(label="Nom de la tribu", required=False)
+    map_base = discord.ui.TextInput(label="Base principale - Map", required=False)
+    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", required=False)
+    description = discord.ui.TextInput(label="Une petite description", style=discord.TextStyle.paragraph, required=False)
+    recrutement = discord.ui.TextInput(label="Recrutement", required=False, placeholder="oui ou non")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1316,14 +1308,10 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             updates["map_base"] = str(self.map_base).strip()
         if str(self.coords_base).strip():
             updates["coords_base"] = str(self.coords_base).strip()
-        if str(self.logo_url).strip():
-            updates["logo_url"] = str(self.logo_url).strip()
-        if str(self.couleur_hex).strip():
-            try:
-                updates["couleur"] = int(str(self.couleur_hex).replace("#", ""), 16)
-            except ValueError:
-                await inter.response.send_message("❌ Couleur invalide. Utilise un format hex comme #00AAFF", ephemeral=True)
-                return
+        if str(self.description).strip():
+            updates["description"] = str(self.description).strip()
+        if str(self.recrutement).strip().lower() in ["oui", "non"]:
+            updates["ouvert_recrutement"] = 1 if str(self.recrutement).strip().lower() == "oui" else 0
         
         with db_connect() as conn:
             c = conn.cursor()
@@ -1339,11 +1327,11 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
                 await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"):
-    description = discord.ui.TextInput(label="Description", required=False, style=discord.TextStyle.short)
-    devise = discord.ui.TextInput(label="Devise de la tribu", required=False)
-    logo_url = discord.ui.TextInput(label="Logo (URL image)", required=False, placeholder="https://...")
-    couleur_hex = discord.ui.TextInput(label="Couleur hex (ex: #00AAFF)", required=False)
-    recrutement = discord.ui.TextInput(label="Ouvert recrutement? (oui/non)", required=False, placeholder="oui ou non")
+    couleur_hex = discord.ui.TextInput(label="Couleur", required=False, placeholder="Ex: #00AAFF")
+    logo_url = discord.ui.TextInput(label="Logo", required=False, placeholder="https://...")
+    objectif = discord.ui.TextInput(label="Objectif de tribu", required=False, style=discord.TextStyle.paragraph)
+    devise = discord.ui.TextInput(label="Devise de tribu", required=False)
+    photo_base = discord.ui.TextInput(label="Photo base principale", required=False, placeholder="https://...")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1361,20 +1349,20 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             return
         
         updates = {}
-        if str(self.description).strip():
-            updates["description"] = str(self.description).strip()
-        if str(self.devise).strip():
-            updates["devise"] = str(self.devise).strip()
-        if str(self.logo_url).strip():
-            updates["logo_url"] = str(self.logo_url).strip()
         if str(self.couleur_hex).strip():
             try:
                 updates["couleur"] = int(str(self.couleur_hex).replace("#", ""), 16)
             except ValueError:
                 await inter.response.send_message("❌ Couleur invalide.", ephemeral=True)
                 return
-        if str(self.recrutement).strip().lower() in ["oui", "non"]:
-            updates["ouvert_recrutement"] = 1 if str(self.recrutement).strip().lower() == "oui" else 0
+        if str(self.logo_url).strip():
+            updates["logo_url"] = str(self.logo_url).strip()
+        if str(self.objectif).strip():
+            updates["objectif"] = str(self.objectif).strip()
+        if str(self.devise).strip():
+            updates["devise"] = str(self.devise).strip()
+        if str(self.photo_base).strip():
+            updates["photo_base"] = str(self.photo_base).strip()
         
         with db_connect() as conn:
             c = conn.cursor()
@@ -1386,6 +1374,31 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
         
         await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu personnalisée !**", ephemeral=False)
 
+class ModalGuideTribu(discord.ui.Modal, title="📖 Guide"):
+    site_couleur = discord.ui.TextInput(
+        label="Site pour la couleur",
+        default="https://htmlcolorcodes.com/fr/selecteur-de-couleur/",
+        required=False,
+        style=discord.TextStyle.short
+    )
+    site_images = discord.ui.TextInput(
+        label="Site pour publier un logo ou une image",
+        default="https://postimages.org (Recopier le lien direct)",
+        required=False,
+        style=discord.TextStyle.short
+    )
+    commandes_progression = discord.ui.TextInput(
+        label="Ajouter boss et notes validées",
+        default="/boss_validé_tribu et /note_validé_tribu",
+        required=False,
+        style=discord.TextStyle.short
+    )
+
+    async def on_submit(self, inter: discord.Interaction):
+        # Ce modal est juste informatif, pas de sauvegarde
+        await inter.response.send_message("ℹ️ **Guide consulté** : Utilise les liens et commandes indiqués pour compléter ta fiche !", ephemeral=True)
+
+# Ancien modal Détailler conservé temporairement pour compatibilité
 class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
     photo_base = discord.ui.TextInput(label="Photo base (URL)", required=False, placeholder="https://...")
     objectif = discord.ui.TextInput(label="Objectif", required=False)
