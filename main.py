@@ -518,11 +518,121 @@ class PanneauMembre(discord.ui.View):
     
     @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=3)
     async def btn_aide(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/aide` pour voir la liste complète des 27 commandes disponibles.", ephemeral=True)
+        # Afficher directement l'embed de la commande /aide
+        e = discord.Embed(
+            title="❓ Aide — Commandes disponibles",
+            description="Voici toutes les commandes pour gérer les fiches tribu :",
+            color=0x5865F2
+        )
+        
+        # Gestion des tribus
+        e.add_field(
+            name="🏕️ Gestion des tribus",
+            value=(
+                "• **/créer_tribu** — créer une nouvelle tribu\n"
+                "• **/fiche_tribu** — afficher une fiche tribu complète\n"
+                "• **/modifier_tribu** — éditer les infos de base\n"
+                "• **/personnaliser_tribu** — personnaliser ta tribu\n"
+                "• **/guide** — afficher le guide\n"
+                "• **/quitter_tribu** — quitter ta tribu\n"
+                "• **/tribu_transférer** — transférer la propriété\n"
+                "• **/tribu_supprimer** — supprimer une tribu"
+            ),
+            inline=False
+        )
+        
+        # Membres et avant-postes
+        e.add_field(
+            name="👥 Membres & avant-postes",
+            value=(
+                "• **/ajouter_membre_tribu** — ajouter un membre\n"
+                "• **/supprimer_membre_tribu** — retirer un membre\n"
+                "• **/mon_nom_ingame** — modifier ton nom in-game\n"
+                "• **/ajouter_avant_poste** — ajouter un avant-poste\n"
+                "• **/supprimer_avant_poste** — retirer un avant-poste"
+            ),
+            inline=False
+        )
+        
+        # Progression
+        e.add_field(
+            name="📊 Progression boss & notes",
+            value=(
+                "• **/boss_validé_tribu** — marquer un boss comme validé\n"
+                "• **/boss_non_validé_tribu** — marquer un boss comme non-validé\n"
+                "• **/note_validé_tribu** — marquer une note comme validée\n"
+                "• **/notes_non_validé_tribu** — marquer une note comme non-validée"
+            ),
+            inline=False
+        )
+        
+        # Gestion admin
+        e.add_field(
+            name="🔧 Gestion admin (modos/admins)",
+            value=(
+                "• **/ajout_boss** — ajouter un boss à la liste\n"
+                "• **/retirer_boss** — retirer un boss de la liste\n"
+                "• **/ajout_note** — ajouter une note à la liste\n"
+                "• **/retirer_note** — retirer une note de la liste\n"
+                "• **/ajout_map** — ajouter une map\n"
+                "• **/retirer_map** — retirer une map\n"
+                "• **/changer_bannière_panneau** — personnaliser la bannière"
+            ),
+            inline=False
+        )
+        
+        # Utilitaires
+        e.add_field(
+            name="🛠️ Utilitaires",
+            value="• **/test_bot** — vérifier que le bot répond\n• **/panneau** — ouvre le panneau interactif\n• **/aide** — afficher cette aide",
+            inline=False
+        )
+        
+        e.set_footer(text="Total : 27 commandes disponibles • Utilise /guide pour les conseils de personnalisation")
+        await inter.response.send_message(embed=e, ephemeral=True)
     
     @discord.ui.button(label="Consulter le guide", style=discord.ButtonStyle.secondary, emoji="📚", row=3)
     async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/guide` pour consulter le guide complet du système de gestion des tribus.", ephemeral=True)
+        # Afficher directement l'embed de la commande /guide
+        e = discord.Embed(
+            title="📖 Guide — Personnaliser ta tribu",
+            description="Voici les informations utiles pour compléter et personnaliser ta fiche tribu :",
+            color=0x5865F2
+        )
+        
+        e.add_field(
+            name="🎨 Site pour la couleur",
+            value="https://htmlcolorcodes.com/fr/selecteur-de-couleur/",
+            inline=False
+        )
+        
+        e.add_field(
+            name="🖼️ Site pour publier un logo ou une image",
+            value="https://postimages.org\n*N'oublie pas de recopier le lien direct pour ajouter une photo ou un logo.*",
+            inline=False
+        )
+        
+        e.add_field(
+            name="📊 Gérer la progression (Boss & Notes)",
+            value=(
+                "Utilise ces commandes pour compléter la progression de ta fiche :\n"
+                "• `/boss_validé_tribu` — ajouter un boss complété\n"
+                "• `/boss_non_validé_tribu` — retirer un boss\n"
+                "• `/note_validé_tribu` — ajouter une note complétée\n"
+                "• `/notes_non_validé_tribu` — retirer une note"
+            ),
+            inline=False
+        )
+        
+        e.add_field(
+            name="👥 Gérer les membres et avant-postes",
+            value="Pour ajouter ou retirer des membres et avant-postes, utilise :\n• `/ajouter_membre_tribu`\n• `/supprimer_membre_tribu`\n• `/ajouter_avant_poste`\n• `/supprimer_avant_poste`",
+            inline=False
+        )
+        
+        e.set_footer(text="💡 Utilise /aide pour voir toutes les commandes disponibles")
+        
+        await inter.response.send_message(embed=e, ephemeral=True)
 
 # ---------- Panneau Staff pour gérer une tribu spécifique ----------
 class PanneauStaff(discord.ui.View):
