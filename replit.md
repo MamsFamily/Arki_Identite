@@ -44,6 +44,14 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 18 octobre 2025 - Panneau Staff Contextuel
+**Nouveau système de gestion staff** :
+- ✅ **Panneau staff éphémère** : Quand un admin/modo clique sur "Staff" dans le menu déroulant d'une fiche, un panneau temporaire s'ouvre (visible uniquement par lui)
+- ✅ **Nom de la tribu dans le titre** : Le panneau affiche clairement "⚙️ Panneau Staff — [Nom de la tribu]"
+- ✅ **8 boutons d'actions** : Modifier, Personnaliser, Ajouter membre, Supprimer membre, Ajouter avant-poste, Supprimer avant-poste, Réafficher fiche, Supprimer tribu
+- ✅ **Actions contextuelles** : Toutes les actions s'appliquent à la tribu affichée, plus besoin de retaper le nom
+- ✅ **Rappels automatiques** : Les boutons indiquent quelle commande utiliser avec le nom de la tribu pré-rempli
+
 ### 18 octobre 2025 - Système de Double Suivi Boss/Notes
 **Nouveau système de progression avec deux états** :
 - ✅ **Boss/Notes validés** : Affichés avec l'emoji <a:ok:1328152449785008189>

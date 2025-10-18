@@ -486,6 +486,50 @@ class HistoriqueView(discord.ui.View):
         else:
             await inter.response.send_message("📜 Fin de l'historique atteint.", ephemeral=True)
 
+# ---------- Panneau Staff pour gérer une tribu spécifique ----------
+class PanneauStaff(discord.ui.View):
+    def __init__(self, tribu_id: int, tribu_nom: str, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.tribu_id = tribu_id
+        self.tribu_nom = tribu_nom
+    
+    @discord.ui.button(label="Modifier", style=discord.ButtonStyle.primary, emoji="🛠️", row=0)
+    async def btn_modifier(self, inter: discord.Interaction, button: discord.ui.Button):
+        # Pré-remplir le modal avec le nom de la tribu
+        modal = ModalModifierTribu()
+        # On ne peut pas pré-remplir directement, mais on peut créer un modal spécifique
+        await inter.response.send_message(f"ℹ️ Utilise `/modifier_tribu` et sélectionne **{self.tribu_nom}** pour modifier cette tribu.", ephemeral=True)
+    
+    @discord.ui.button(label="Personnaliser", style=discord.ButtonStyle.primary, emoji="🎨", row=0)
+    async def btn_personnaliser(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/personnaliser_tribu` et sélectionne **{self.tribu_nom}** pour personnaliser cette tribu.", ephemeral=True)
+    
+    @discord.ui.button(label="Ajouter membre", style=discord.ButtonStyle.success, emoji="👤", row=1)
+    async def btn_ajouter_membre(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_membre_tribu` et sélectionne **{self.tribu_nom}** pour ajouter un membre.", ephemeral=True)
+    
+    @discord.ui.button(label="Supprimer membre", style=discord.ButtonStyle.secondary, emoji="👥", row=1)
+    async def btn_supprimer_membre(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_membre_tribu` et sélectionne **{self.tribu_nom}** pour supprimer un membre.", ephemeral=True)
+    
+    @discord.ui.button(label="Ajouter avant-poste", style=discord.ButtonStyle.success, emoji="🏘️", row=2)
+    async def btn_ajouter_ap(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_avant_poste` et sélectionne **{self.tribu_nom}** pour ajouter un avant-poste.", ephemeral=True)
+    
+    @discord.ui.button(label="Supprimer avant-poste", style=discord.ButtonStyle.secondary, emoji="🏚️", row=2)
+    async def btn_supprimer_ap(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_avant_poste` et sélectionne **{self.tribu_nom}** pour supprimer un avant-poste.", ephemeral=True)
+    
+    @discord.ui.button(label="Réafficher fiche", style=discord.ButtonStyle.primary, emoji="🔄", row=3)
+    async def btn_afficher(self, inter: discord.Interaction, button: discord.ui.Button):
+        # Réafficher la fiche de cette tribu
+        await inter.response.defer(ephemeral=False)
+        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"📋 **Fiche tribu : {self.tribu_nom}**", ephemeral=False)
+    
+    @discord.ui.button(label="Supprimer tribu", style=discord.ButtonStyle.danger, emoji="🗑️", row=3)
+    async def btn_supprimer(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"⚠️ Utilise `/tribu_supprimer` et confirme avec **{self.tribu_nom}** pour supprimer définitivement cette tribu.", ephemeral=True)
+
 # ---------- Menu déroulant pour la fiche tribu ----------
 class MenuFicheTribu(discord.ui.View):
     def __init__(self, tribu_id: int, timeout: Optional[float] = None):
@@ -576,7 +620,26 @@ class MenuFicheTribu(discord.ui.View):
             await inter.response.send_message("❌ Cette fonction est réservée aux admins et modos.", ephemeral=True)
             return
         
-        await inter.response.send_message("⚙️ **Mode Staff activé** : Tu as maintenant tous les droits sur cette tribu pour la modifier.", ephemeral=True)
+        # Récupérer les infos de la tribu
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            tribu = c.fetchone()
+            if not tribu:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+        
+        # Afficher le panneau staff
+        view = PanneauStaff(self.tribu_id, tribu['nom'])
+        
+        e = discord.Embed(
+            title=f"⚙️ Panneau Staff — {tribu['nom']}",
+            description="Utilise les boutons ci-dessous pour gérer cette tribu directement.\n\n**Actions disponibles :**\n• Modifier / Personnaliser\n• Gérer membres et avant-postes\n• Réafficher ou supprimer la tribu",
+            color=0xFF6B6B
+        )
+        e.set_footer(text="🔒 Panneau visible uniquement par toi • Les actions s'appliquent à cette tribu")
+        
+        await inter.response.send_message(embed=e, view=view, ephemeral=True)
 
 async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
     if est_admin(inter) or inter.user.id == tribu["proprietaire_id"] or est_manager(tribu["id"], inter.user.id):
