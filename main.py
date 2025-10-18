@@ -500,11 +500,27 @@ class PanneauMembre(discord.ui.View):
     async def btn_fiche(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_message(f"ℹ️ Utilise `/fiche_tribu` et sélectionne **{self.tribu_nom}** pour afficher la fiche complète de ta tribu.", ephemeral=True)
     
-    @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=1)
+    @discord.ui.button(label="Ajouter membre", style=discord.ButtonStyle.success, emoji="👤", row=1)
+    async def btn_ajouter_membre(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_membre_tribu` et sélectionne **{self.tribu_nom}** pour ajouter un membre à ta tribu.", ephemeral=True)
+    
+    @discord.ui.button(label="Supprimer membre", style=discord.ButtonStyle.secondary, emoji="👥", row=1)
+    async def btn_supprimer_membre(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_membre_tribu` et sélectionne **{self.tribu_nom}** pour retirer un membre de ta tribu.", ephemeral=True)
+    
+    @discord.ui.button(label="Ajouter avant-poste", style=discord.ButtonStyle.success, emoji="🏘️", row=2)
+    async def btn_ajouter_ap(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_avant_poste` et sélectionne **{self.tribu_nom}** pour ajouter un avant-poste.", ephemeral=True)
+    
+    @discord.ui.button(label="Supprimer avant-poste", style=discord.ButtonStyle.secondary, emoji="🏚️", row=2)
+    async def btn_supprimer_ap(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_avant_poste` et sélectionne **{self.tribu_nom}** pour retirer un avant-poste.", ephemeral=True)
+    
+    @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=3)
     async def btn_aide(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_message(f"ℹ️ Utilise `/aide` pour voir la liste complète des 27 commandes disponibles.", ephemeral=True)
     
-    @discord.ui.button(label="Consulter le guide", style=discord.ButtonStyle.secondary, emoji="📚", row=1)
+    @discord.ui.button(label="Consulter le guide", style=discord.ButtonStyle.secondary, emoji="📚", row=3)
     async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_message(f"ℹ️ Utilise `/guide` pour consulter le guide complet du système de gestion des tribus.", ephemeral=True)
 
@@ -600,7 +616,7 @@ class MenuFicheTribu(discord.ui.View):
         
         e = discord.Embed(
             title=f"💡 Mes Commandes — {tribu['nom']}",
-            description="Voici les commandes utiles pour gérer ta participation dans cette tribu.\n\n**Actions disponibles :**\n• Modifier ton nom in-game\n• Afficher ta fiche tribu\n• Consulter l'aide et le guide",
+            description="Voici les commandes utiles pour gérer ta tribu.\n\n**Actions disponibles :**\n• Modifier ton nom in-game\n• Afficher ta fiche tribu\n• Gérer membres et avant-postes\n• Consulter l'aide et le guide",
             color=0x5865F2
         )
         e.set_footer(text="💡 Panneau visible uniquement par toi • Utilise les boutons pour plus d'infos")
