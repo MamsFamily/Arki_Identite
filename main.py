@@ -318,7 +318,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
 # ---------- Helpers UI ----------
-def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None) -> discord.Embed:
+def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None, photos=None, photo_index=0) -> discord.Embed:
     color = tribu["couleur"] if tribu["couleur"] else 0x2F3136
     
     # Titre et description
@@ -344,8 +344,20 @@ def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None
         # Afficher la photo du créateur si pas de logo
         e.set_thumbnail(url=createur_avatar_url)
     
-    # Photo de la base en grand en bas (image principale)
-    if "photo_base" in tribu.keys() and tribu["photo_base"]:
+    # Galerie photo - Afficher la photo sélectionnée
+    if photos and len(photos) > 0:
+        # S'assurer que l'index est valide
+        if 0 <= photo_index < len(photos):
+            photo_url = photos[photo_index]['url']
+            e.set_image(url=photo_url)
+            # Ajouter un footer pour indiquer la position dans la galerie
+            if len(photos) > 1:
+                footer_text = f"📸 Photo {photo_index + 1}/{len(photos)}"
+                if e.footer:
+                    footer_text = f"{e.footer.text} • {footer_text}"
+                e.set_footer(text=footer_text)
+    elif "photo_base" in tribu.keys() and tribu["photo_base"]:
+        # Fallback sur l'ancienne photo_base si pas de galerie
         e.set_image(url=tribu["photo_base"])
     
     # Membres avec référent (DÉPLACÉ ICI - après description/devise)
@@ -702,11 +714,12 @@ class PanneauStaff(discord.ui.View):
     async def btn_supprimer(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_message(f"⚠️ Utilise `/tribu_supprimer` et confirme avec **{self.tribu_nom}** pour supprimer définitivement cette tribu.", ephemeral=True)
 
-# ---------- Menu déroulant pour la fiche tribu ----------
+# ---------- Menu déroulant pour la fiche tribu avec galerie photo ----------
 class MenuFicheTribu(discord.ui.View):
-    def __init__(self, tribu_id: int, timeout: Optional[float] = None):
+    def __init__(self, tribu_id: int, photo_index: int = 0, timeout: Optional[float] = None):
         super().__init__(timeout=timeout)
         self.tribu_id = tribu_id
+        self.photo_index = photo_index
         
         # Créer dynamiquement le select avec un custom_id incluant le tribu_id
         select = discord.ui.Select(
@@ -717,10 +730,81 @@ class MenuFicheTribu(discord.ui.View):
                 discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
                 discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
                 discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
-            ]
+            ],
+            row=0
         )
         select.callback = self.menu_callback
         self.add_item(select)
+        
+        # Ajouter les boutons de navigation de galerie
+        btn_prev = discord.ui.Button(
+            label="Photo précédente",
+            emoji="◀️",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"galerie_prev:{tribu_id}",
+            row=1
+        )
+        btn_prev.callback = self.photo_precedente
+        self.add_item(btn_prev)
+        
+        btn_next = discord.ui.Button(
+            label="Photo suivante",
+            emoji="▶️",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"galerie_next:{tribu_id}",
+            row=1
+        )
+        btn_next.callback = self.photo_suivante
+        self.add_item(btn_next)
+    
+    async def photo_precedente(self, inter: discord.Interaction):
+        """Afficher la photo précédente dans la galerie"""
+        await self._changer_photo(inter, -1)
+    
+    async def photo_suivante(self, inter: discord.Interaction):
+        """Afficher la photo suivante dans la galerie"""
+        await self._changer_photo(inter, 1)
+    
+    async def _changer_photo(self, inter: discord.Interaction, direction: int):
+        """Change la photo affichée (direction: -1 pour précédent, +1 pour suivant)"""
+        with db_connect() as conn:
+            c = conn.cursor()
+            # Récupérer toutes les photos de cette tribu
+            c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (self.tribu_id,))
+            photos = c.fetchall()
+            
+            if not photos:
+                await inter.response.send_message("📷 Aucune photo dans la galerie. Utilise `/ajouter_photo` pour en ajouter.", ephemeral=True)
+                return
+            
+            # Calculer le nouvel index
+            nouvel_index = (self.photo_index + direction) % len(photos)
+            
+            # Récupérer les infos de la tribu et les autres données
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            tribu = c.fetchone()
+            c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (self.tribu_id,))
+            membres = c.fetchall()
+            c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (self.tribu_id,))
+            avant_postes = c.fetchall()
+        
+        # Récupérer l'avatar du créateur
+        createur_avatar_url = None
+        try:
+            createur = await inter.client.fetch_user(tribu['proprietaire_id'])
+            if createur:
+                createur_avatar_url = createur.display_avatar.url
+        except:
+            pass
+        
+        # Créer le nouvel embed avec la nouvelle photo
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, nouvel_index)
+        
+        # Mettre à jour la vue avec le nouvel index
+        new_view = MenuFicheTribu(self.tribu_id, nouvel_index, timeout=None)
+        
+        # Mettre à jour le message
+        await inter.response.edit_message(embed=embed, view=new_view)
     
     async def menu_callback(self, inter: discord.Interaction):
         select = [item for item in self.children if isinstance(item, discord.ui.Select)][0]
@@ -912,6 +996,8 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         membres = c.fetchall()
         c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
         avant_postes = c.fetchall()
+        c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
+        photos = c.fetchall()
         
         # Récupérer l'ancien salon et message
         old_message_id = tribu["message_id"] if "message_id" in tribu.keys() else 0
@@ -946,8 +1032,8 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
             pass
         
         # Envoyer le nouveau message avec la fiche et les boutons
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url)
-        view = MenuFicheTribu(tribu_id, timeout=None)
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        view = MenuFicheTribu(tribu_id, 0, timeout=None)
         
         # Répondre à l'interaction (vérifier si déjà différée)
         if inter.response.is_done():
@@ -1883,7 +1969,6 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
     logo_url = discord.ui.TextInput(label="Logo", required=False, placeholder="https://...")
     objectif = discord.ui.TextInput(label="Objectif de tribu", required=False, style=discord.TextStyle.paragraph)
     devise = discord.ui.TextInput(label="Devise de tribu", required=False)
-    photo_base = discord.ui.TextInput(label="Photo base principale", required=False, placeholder="https://...")
 
     async def on_submit(self, inter: discord.Interaction):
         db_init()
@@ -1913,8 +1998,6 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             updates["objectif"] = str(self.objectif).strip()
         if str(self.devise).strip():
             updates["devise"] = str(self.devise).strip()
-        if str(self.photo_base).strip():
-            updates["photo_base"] = str(self.photo_base).strip()
         
         if updates:
             with db_connect() as conn:
@@ -2205,17 +2288,34 @@ async def panneau(inter: discord.Interaction):
 async def on_interaction(inter: discord.Interaction):
     """
     Listener global pour intercepter les interactions avec les menus de fiche tribu
-    même après redémarrage du bot. Permet de reconnecter les anciennes vues.
+    et les boutons de galerie photo même après redémarrage du bot.
     """
-    # Vérifier si c'est une interaction avec un SelectMenu
+    # Vérifier si c'est une interaction avec un composant
     if inter.type != discord.InteractionType.component:
         return
     
-    # Vérifier si le custom_id commence par "menu_fiche:"
     if not inter.data or 'custom_id' not in inter.data:
         return
     
     custom_id = inter.data['custom_id']
+    
+    # Gérer les boutons de galerie photo
+    if custom_id.startswith("galerie_prev:") or custom_id.startswith("galerie_next:"):
+        try:
+            tribu_id = int(custom_id.split(":")[1])
+        except (IndexError, ValueError):
+            return
+        
+        # Déterminer la direction
+        direction = -1 if custom_id.startswith("galerie_prev:") else 1
+        
+        # Recréer la vue et exécuter la navigation
+        # On commence à l'index 0 par défaut, la méthode _changer_photo calculera le bon index
+        view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        await view._changer_photo(inter, direction)
+        return
+    
+    # Gérer les menus déroulants
     if not custom_id.startswith("menu_fiche:"):
         return
     
@@ -2232,7 +2332,7 @@ async def on_interaction(inter: discord.Interaction):
     choice = inter.data['values'][0]
     
     # Recréer dynamiquement la vue et exécuter l'action
-    view = MenuFicheTribu(tribu_id, timeout=None)
+    view = MenuFicheTribu(tribu_id, 0, timeout=None)
     
     if choice == "commandes":
         await view.action_commandes(inter)
