@@ -491,6 +491,7 @@ class MenuFicheTribu(discord.ui.View):
     
     @discord.ui.select(
         placeholder="Sélectionne une action...",
+        custom_id="menu_fiche:actions",
         options=[
             discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
             discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
@@ -1734,19 +1735,19 @@ class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout=timeout)
 
-    @discord.ui.button(label="Créer", style=discord.ButtonStyle.success, emoji="✨")
+    @discord.ui.button(label="Créer", style=discord.ButtonStyle.success, emoji="✨", custom_id="panneau:creer")
     async def btn_creer(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalCreerTribu())
 
-    @discord.ui.button(label="Modifier", style=discord.ButtonStyle.primary, emoji="🛠️")
+    @discord.ui.button(label="Modifier", style=discord.ButtonStyle.primary, emoji="🛠️", custom_id="panneau:modifier")
     async def btn_modifier(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalModifierTribu())
     
-    @discord.ui.button(label="Personnaliser", style=discord.ButtonStyle.primary, emoji="🎨")
+    @discord.ui.button(label="Personnaliser", style=discord.ButtonStyle.primary, emoji="🎨", custom_id="panneau:personnaliser")
     async def btn_personnaliser(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_modal(ModalPersonnaliserTribu())
     
-    @discord.ui.button(label="Guide", style=discord.ButtonStyle.secondary, emoji="📖")
+    @discord.ui.button(label="Guide", style=discord.ButtonStyle.secondary, emoji="📖", custom_id="panneau:guide")
     async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
         await afficher_guide(inter)
 
@@ -1801,6 +1802,14 @@ async def panneau(inter: discord.Interaction):
 @bot.event
 async def on_ready():
     db_init()  # Initialiser la DB au démarrage
+    
+    # Ajouter les vues persistantes pour qu'elles fonctionnent après redémarrage
+    bot.add_view(PanneauTribu(timeout=None))
+    
+    # Note: MenuFicheTribu ne peut pas être rendu persistant car chaque fiche
+    # a un tribu_id différent. Les menus cesseront de fonctionner après un redémarrage
+    # mais redeviendront actifs dès qu'on affiche à nouveau la fiche.
+    
     try:
         synced = await tree.sync()
         print(f"Commandes synchronisées : {len(synced)}")
