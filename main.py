@@ -1853,7 +1853,9 @@ async def aide(inter: discord.Interaction):
             "• **/boss_validé_tribu** — valider un boss\n"
             "• **/boss_non_validé_tribu** — retirer un boss\n"
             "• **/note_validé_tribu** — valider une note\n"
-            "• **/notes_non_validé_tribu** — retirer une note"
+            "• **/notes_non_validé_tribu** — retirer une note\n"
+            "• **/ajouter_photo** — ajouter une photo à ta galerie\n"
+            "• **/supprimer_photo** — retirer une photo"
         ),
         inline=False
     )
@@ -2046,6 +2048,12 @@ async def afficher_guide(inter: discord.Interaction):
     e.add_field(
         name="👥 Gérer les membres et avant-postes",
         value="Pour ajouter ou retirer des membres et avant-postes, utilise :\n• `/ajouter_membre_tribu`\n• `/supprimer_membre_tribu`\n• `/ajouter_avant_poste`\n• `/supprimer_avant_poste`",
+        inline=False
+    )
+    
+    e.add_field(
+        name="📸 Galerie photo (jusqu'à 10 photos)",
+        value="Gérer les photos de ta base :\n• `/ajouter_photo` — ajouter une photo à ta galerie\n• `/supprimer_photo` — retirer une photo\n\nNavigue dans la galerie avec les boutons ◀️ ▶️ sous ta fiche tribu !",
         inline=False
     )
     
