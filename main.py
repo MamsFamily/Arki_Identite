@@ -2438,6 +2438,7 @@ async def on_interaction(inter: discord.Interaction):
     """
     Listener global pour intercepter les interactions avec les menus de fiche tribu
     et les boutons de galerie photo même après redémarrage du bot.
+    Ce listener ne s'active QUE si l'interaction n'a pas déjà été traitée par une vue active.
     """
     # Vérifier si c'est une interaction avec un composant
     if inter.type != discord.InteractionType.component:
@@ -2450,6 +2451,10 @@ async def on_interaction(inter: discord.Interaction):
     
     # Gérer les boutons de galerie photo
     if custom_id.startswith("galerie_prev:") or custom_id.startswith("galerie_next:"):
+        # Vérifier si l'interaction a déjà été traitée (par une vue active)
+        if inter.response.is_done():
+            return
+        
         try:
             tribu_id = int(custom_id.split(":")[1])
         except (IndexError, ValueError):
@@ -2466,6 +2471,10 @@ async def on_interaction(inter: discord.Interaction):
     
     # Gérer les menus déroulants
     if not custom_id.startswith("menu_fiche:"):
+        return
+    
+    # Vérifier si l'interaction a déjà été traitée (par une vue active)
+    if inter.response.is_done():
         return
     
     # Extraire le tribu_id du custom_id
