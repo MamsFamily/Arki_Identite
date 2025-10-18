@@ -313,16 +313,16 @@ def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None
         timestamp=dt.datetime.utcnow()
     )
     
-    # Logo (agrandi) - Si pas de logo, afficher la photo du créateur
+    # Logo en haut à droite (thumbnail) - Si pas de logo, afficher l'avatar du créateur
     if tribu["logo_url"]:
-        e.set_image(url=tribu["logo_url"])
+        e.set_thumbnail(url=tribu["logo_url"])
     elif createur_avatar_url:
         # Afficher la photo du créateur si pas de logo
-        e.set_image(url=createur_avatar_url)
+        e.set_thumbnail(url=createur_avatar_url)
     
-    # Photo de la base (en thumbnail si logo existe)
+    # Photo de la base en grand en bas (image principale)
     if "photo_base" in tribu.keys() and tribu["photo_base"]:
-        e.set_thumbnail(url=tribu["photo_base"])
+        e.set_image(url=tribu["photo_base"])
     
     # Membres avec référent (DÉPLACÉ ICI - après description/devise)
     if membres is not None:
