@@ -81,11 +81,11 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - ✅ **Stockage en base de données** : La bannière est sauvegardée par serveur Discord
 - ✅ **Bannière par défaut** : Une bannière est définie par défaut pour tous les serveurs
 
-### 18 octobre 2025 - Logo Agrandi et Avatar du Créateur
+### 18 octobre 2025 - Logo et Avatar du Créateur
 **Amélioration visuelle de la fiche** :
-- ✅ **Logo agrandi** : Le logo s'affiche maintenant en grand (image principale) au lieu de petit (thumbnail)
+- ✅ **Logo en haut** : Le logo s'affiche en haut à droite (thumbnail)
 - ✅ **Avatar du créateur par défaut** : Si aucun logo n'est ajouté, la photo du créateur s'affiche à sa place
-- ✅ **Photo de base en thumbnail** : La photo de base s'affiche en petit à côté (thumbnail)
+- ✅ **Photo de base en grand** : La photo de base s'affiche en grand en bas (image principale)
 - ✅ **Champs Base obligatoires** : Map base et Coordonnées base sont maintenant obligatoires lors de la création
 
 ### 18 octobre 2025 - Modal Créer : Recrutement et Nom In-Game Obligatoire
