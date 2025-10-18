@@ -523,10 +523,121 @@ class HistoriqueView(discord.ui.View):
             await inter.response.send_message("📜 Fin de l'historique atteint.", ephemeral=True)
 
 # ---------- Panneau Membre pour afficher les commandes utiles ----------
+class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
+    url_photo = discord.ui.TextInput(
+        label="URL de la photo",
+        placeholder="https://... (postimages.org recommandé)",
+        required=True,
+        style=discord.TextStyle.short
+    )
+    
+    def __init__(self, tribu_id: int, tribu_nom: str):
+        super().__init__()
+        self.tribu_id = tribu_id
+        self.tribu_nom = tribu_nom
+    
+    async def on_submit(self, inter: discord.Interaction):
+        db_init()
+        
+        # Vérifier les droits
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            row = c.fetchone()
+            
+            if not row:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+            
+            # Vérifier les permissions
+            if not (est_admin(inter) or inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, inter.user.id)):
+                await inter.response.send_message("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
+                return
+            
+            # Vérifier le nombre de photos (max 10)
+            c.execute("SELECT COUNT(*) as count FROM photos_tribu WHERE tribu_id=?", (self.tribu_id,))
+            count = c.fetchone()["count"]
+            
+            if count >= 10:
+                await inter.response.send_message("❌ Cette tribu a déjà 10 photos. Supprime-en une avant d'en ajouter une nouvelle.", ephemeral=True)
+                return
+            
+            # Calculer le prochain ordre
+            c.execute("SELECT COALESCE(MAX(ordre), -1) as max_ordre FROM photos_tribu WHERE tribu_id=?", (self.tribu_id,))
+            max_ordre = c.fetchone()["max_ordre"]
+            nouvel_ordre = max_ordre + 1
+            
+            # Ajouter la photo
+            c.execute("""
+            INSERT INTO photos_tribu (tribu_id, url, ordre, created_at)
+            VALUES (?, ?, ?, ?)
+            """, (self.tribu_id, str(self.url_photo).strip(), nouvel_ordre, dt.datetime.utcnow().isoformat()))
+            conn.commit()
+        
+        ajouter_historique(self.tribu_id, inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
+        await inter.response.send_message(f"✅ Photo #{nouvel_ordre + 1} ajoutée à la galerie de **{self.tribu_nom}** ! ({count + 1}/10 photos)", ephemeral=True)
+
+class SelectSupprimerPhoto(discord.ui.Select):
+    def __init__(self, tribu_id: int, tribu_nom: str, photos: list):
+        self.tribu_id = tribu_id
+        self.tribu_nom = tribu_nom
+        
+        # Créer les options à partir des photos
+        options = []
+        for photo in photos:
+            label = f"Photo #{photo['ordre'] + 1}"
+            url_display = photo['url'][:50] + "..." if len(photo['url']) > 50 else photo['url']
+            options.append(discord.SelectOption(
+                label=label,
+                description=url_display,
+                value=str(photo['id'])
+            ))
+        
+        super().__init__(
+            placeholder="Sélectionne la photo à supprimer...",
+            options=options,
+            min_values=1,
+            max_values=1
+        )
+    
+    async def callback(self, inter: discord.Interaction):
+        photo_id = int(self.values[0])
+        
+        with db_connect() as conn:
+            c = conn.cursor()
+            # Vérifier que la photo appartient bien à cette tribu
+            c.execute("SELECT * FROM photos_tribu WHERE id=? AND tribu_id=?", (photo_id, self.tribu_id))
+            photo = c.fetchone()
+            
+            if not photo:
+                await inter.response.send_message("❌ Photo introuvable.", ephemeral=True)
+                return
+            
+            # Supprimer la photo
+            c.execute("DELETE FROM photos_tribu WHERE id=?", (photo_id,))
+            
+            # Réorganiser les ordres
+            c.execute("SELECT id FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (self.tribu_id,))
+            photos_restantes = c.fetchall()
+            for i, p in enumerate(photos_restantes):
+                c.execute("UPDATE photos_tribu SET ordre=? WHERE id=?", (i, p["id"]))
+            
+            conn.commit()
+            count_restant = len(photos_restantes)
+        
+        ajouter_historique(self.tribu_id, inter.user.id, "Photo supprimée", f"Photo supprimée de la galerie")
+        await inter.response.send_message(f"✅ Photo supprimée de la galerie de **{self.tribu_nom}** ! ({count_restant}/10 photos restantes)", ephemeral=True)
+
+class ViewSupprimerPhoto(discord.ui.View):
+    def __init__(self, tribu_id: int, tribu_nom: str, photos: list):
+        super().__init__(timeout=180)
+        self.add_item(SelectSupprimerPhoto(tribu_id, tribu_nom, photos))
+
 class PanneauMembre(discord.ui.View):
-    def __init__(self, tribu_nom: str, timeout: Optional[float] = 180):
+    def __init__(self, tribu_nom: str, tribu_id: int = None, timeout: Optional[float] = 180):
         super().__init__(timeout=timeout)
         self.tribu_nom = tribu_nom
+        self.tribu_id = tribu_id
     
     @discord.ui.button(label="Changer mon nom in-game", style=discord.ButtonStyle.primary, emoji="✏️", row=0)
     async def btn_nom_ingame(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -554,11 +665,33 @@ class PanneauMembre(discord.ui.View):
     
     @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
     async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_photo` et sélectionne **{self.tribu_nom}** pour ajouter une photo à ta galerie (max 10 photos).", ephemeral=True)
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Ouvrir le modal pour ajouter une photo
+        modal = ModalAjouterPhoto(self.tribu_id, self.tribu_nom)
+        await inter.response.send_modal(modal)
     
     @discord.ui.button(label="Supprimer photo", style=discord.ButtonStyle.secondary, emoji="🗑️", row=3)
     async def btn_supprimer_photo(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_photo` et sélectionne **{self.tribu_nom}** pour retirer une photo de ta galerie.", ephemeral=True)
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer les photos de la tribu
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (self.tribu_id,))
+            photos = c.fetchall()
+        
+        if not photos:
+            await inter.response.send_message("📷 Aucune photo dans la galerie. Utilise le bouton **Ajouter photo** pour en ajouter une.", ephemeral=True)
+            return
+        
+        # Afficher le menu de sélection
+        view = ViewSupprimerPhoto(self.tribu_id, self.tribu_nom, photos)
+        await inter.response.send_message("🗑️ Sélectionne la photo à supprimer :", view=view, ephemeral=True)
     
     @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=4)
     async def btn_aide(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -838,7 +971,7 @@ class MenuFicheTribu(discord.ui.View):
                 return
         
         # Afficher le panneau d'aide membre
-        view = PanneauMembre(tribu['nom'])
+        view = PanneauMembre(tribu['nom'], self.tribu_id)
         
         e = discord.Embed(
             title=f"💡 Mes Commandes — {tribu['nom']}",

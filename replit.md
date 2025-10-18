@@ -24,7 +24,7 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 - **Member Management:** Adding (with in-game name and manager authorization), removal, and ability to leave a tribe.
 - **Outpost Management:** Addition (with auto-generated name) and deletion.
 - **Progression System:** Tracking of completed bosses and notes with dual states (validated/not validated).
-- **Interactive Photo Gallery:** Up to 10 photos per tribe with ◀️ ▶️ navigation directly on the profile. Add/remove via `/ajouter_photo` and `/supprimer_photo`. Position indicator "📸 Photo X/Y" in the footer.
+- **Interactive Photo Gallery:** Up to 10 photos per tribe with ◀️ ▶️ navigation directly on the profile. Add/remove via `/ajouter_photo` and `/supprimer_photo`, or directly from the "Mes commandes" panel with interactive modal and select menu. Position indicator "📸 Photo X/Y" in the footer.
 - **Action History:** Detailed logging of modifications with user, action, details, and timestamp, viewable via pagination.
 - **Permission System:**
     - **Tribe Referent:** Creator, full control.
