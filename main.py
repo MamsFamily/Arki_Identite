@@ -294,7 +294,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
 # ---------- Helpers UI ----------
-def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
+def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None) -> discord.Embed:
     color = tribu["couleur"] if tribu["couleur"] else 0x2F3136
     
     # Titre et description
@@ -313,13 +313,16 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
         timestamp=dt.datetime.utcnow()
     )
     
-    # Logo
+    # Logo (agrandi) - Si pas de logo, afficher la photo du créateur
     if tribu["logo_url"]:
-        e.set_thumbnail(url=tribu["logo_url"])
+        e.set_image(url=tribu["logo_url"])
+    elif createur_avatar_url:
+        # Afficher la photo du créateur si pas de logo
+        e.set_image(url=createur_avatar_url)
     
-    # Photo de la base
+    # Photo de la base (en thumbnail si logo existe)
     if "photo_base" in tribu.keys() and tribu["photo_base"]:
-        e.set_image(url=tribu["photo_base"])
+        e.set_thumbnail(url=tribu["photo_base"])
     
     # Membres avec référent (DÉPLACÉ ICI - après description/devise)
     if membres is not None:
@@ -668,8 +671,17 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         
         # Si on affiche dans un salon différent, ne rien supprimer (laisser l'ancienne fiche)
         
+        # Récupérer l'avatar du créateur
+        createur_avatar_url = None
+        try:
+            createur = await inter.client.fetch_user(tribu['proprietaire_id'])
+            if createur:
+                createur_avatar_url = createur.display_avatar.url
+        except:
+            pass
+        
         # Envoyer le nouveau message avec la fiche et les boutons
-        embed = embed_tribu(tribu, membres, avant_postes)
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url)
         view = MenuFicheTribu(tribu_id, timeout=None)
         
         # Répondre à l'interaction
@@ -1514,8 +1526,8 @@ async def aide(inter: discord.Interaction):
 class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", required=True)
     nom_ingame = discord.ui.TextInput(label="Ton nom In Game", placeholder="Ex: Raptor_Killer42", required=True)
-    map_base = discord.ui.TextInput(label="Base principale - Map", placeholder="Ex: The Island", required=False)
-    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", placeholder="Ex: 45.5, 32.6", required=False)
+    map_base = discord.ui.TextInput(label="Base principale - Map", placeholder="Ex: The Island", required=True)
+    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", placeholder="Ex: 45.5, 32.6", required=True)
     recrutement = discord.ui.TextInput(label="Recrutement ouvert", placeholder="Ex: Oui, nous recrutons !", required=False)
 
     async def on_submit(self, inter: discord.Interaction):
@@ -1530,8 +1542,8 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
                 INSERT INTO tribus (guild_id, nom, map_base, coords_base, recrutement, proprietaire_id, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (inter.guild_id, str(self.nom).strip(), 
-                  str(self.map_base).strip() if str(self.map_base).strip() else None,
-                  str(self.coords_base).strip() if str(self.coords_base).strip() else None,
+                  str(self.map_base).strip(),
+                  str(self.coords_base).strip(),
                   str(self.recrutement).strip() if str(self.recrutement).strip() else None,
                   inter.user.id, dt.datetime.utcnow().isoformat()))
             tid = c.lastrowid

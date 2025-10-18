@@ -81,17 +81,24 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - ✅ **Stockage en base de données** : La bannière est sauvegardée par serveur Discord
 - ✅ **Bannière par défaut** : Une bannière est définie par défaut pour tous les serveurs
 
+### 18 octobre 2025 - Logo Agrandi et Avatar du Créateur
+**Amélioration visuelle de la fiche** :
+- ✅ **Logo agrandi** : Le logo s'affiche maintenant en grand (image principale) au lieu de petit (thumbnail)
+- ✅ **Avatar du créateur par défaut** : Si aucun logo n'est ajouté, la photo du créateur s'affiche à sa place
+- ✅ **Photo de base en thumbnail** : La photo de base s'affiche en petit à côté (thumbnail)
+- ✅ **Champs Base obligatoires** : Map base et Coordonnées base sont maintenant obligatoires lors de la création
+
 ### 18 octobre 2025 - Modal Créer : Recrutement et Nom In-Game Obligatoire
 **Amélioration du modal de création** :
 - ✅ **Champ "Recrutement ouvert"** : Remplace "Description" dans le modal Créer pour capturer directement le statut de recrutement
 - ✅ **Nom In-Game obligatoire** : Le champ "Ton nom In Game" est maintenant requis lors de la création d'une tribu
-- ✅ **Modal Créer actualisé** : 5 champs (Nom, Ton nom In Game*, Map base, Coords base, Recrutement ouvert)
+- ✅ **Modal Créer actualisé** : 5 champs obligatoires (Nom*, Ton nom In Game*, Map base*, Coords base*, Recrutement ouvert)
 
 ### 17 octobre 2025 - Refonte Complète des Modals et UI
 **Réorganisation majeure des modals** :
-- ✅ **Modal Créer** : 5 champs (Nom, Ton nom In Game, Map base, Coords base, Recrutement ouvert)
-- ✅ **Modal Modifier** : 5 champs (Nom, Map base, Coords base, Description, Recrutement)
-- ✅ **Modal Personnaliser** : 5 champs (Couleur, Logo, Objectif, Devise, Photo base)
+- ✅ **Modal Créer** : 5 champs - Nom*, Ton nom In Game*, Map base*, Coords base*, Recrutement ouvert
+- ✅ **Modal Modifier** : 5 champs - Nom, Map base, Coords base, Description, Recrutement
+- ✅ **Modal Personnaliser** : 5 champs - Couleur, Logo, Objectif, Devise, Photo base
 - ✅ **Guide** : Affichage en lecture seule via embed avec 3 sections d'information (site couleur, site images, commandes progression)
 
 **Changements de commandes** :
