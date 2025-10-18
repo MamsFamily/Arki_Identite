@@ -44,12 +44,16 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
-### 17 octobre 2025 - Commandes de Retrait de Progression
-**Nouvelles commandes pour retirer la validation** :
-- ✅ **/boss_non_validé_tribu** : Retire un boss précédemment validé de la progression
-- ✅ **/notes_non_validé_tribu** : Retire une note précédemment validée de la progression
-- ✅ **Emoji animé <a:no:1328152539660554363>** : Affiché lors de la suppression de boss/notes
-- ✅ **Guide mis à jour** : Les 4 commandes de progression sont maintenant listées dans le Guide
+### 18 octobre 2025 - Système de Double Suivi Boss/Notes
+**Nouveau système de progression avec deux états** :
+- ✅ **Boss/Notes validés** : Affichés avec l'emoji <a:ok:1328152449785008189>
+- ✅ **Boss/Notes non-validés** : Affichés avec l'emoji <a:no:1328152539660554363>
+- ✅ **Changement d'état dynamique** : Les boss/notes passent d'une liste à l'autre selon la commande utilisée
+- ✅ **/boss_validé_tribu** : Déplace un boss vers la liste "validé"
+- ✅ **/boss_non_validé_tribu** : Déplace un boss vers la liste "non-validé"
+- ✅ **/note_validé_tribu** : Déplace une note vers la liste "validé"
+- ✅ **/notes_non_validé_tribu** : Déplace une note vers la liste "non-validé"
+- ✅ **Affichage unique** : Les deux listes s'affichent ensemble sur la fiche tribu
 - ✅ **Autocomplétion Admin** : Les commandes `/retirer_boss` et `/retirer_note` ont maintenant des menus déroulants
 - ✅ **Total : 27 commandes** slash disponibles
 

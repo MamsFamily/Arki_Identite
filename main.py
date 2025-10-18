@@ -115,6 +115,14 @@ def db_init():
         except sqlite3.OperationalError:
             pass
         try:
+            c.execute("ALTER TABLE tribus ADD COLUMN progression_boss_non_valides TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            c.execute("ALTER TABLE tribus ADD COLUMN progression_notes_non_valides TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
             c.execute("ALTER TABLE membres ADD COLUMN nom_in_game TEXT DEFAULT ''")
         except sqlite3.OperationalError:
             pass
@@ -369,18 +377,28 @@ def embed_tribu(tribu, membres=None, avant_postes=None) -> discord.Embed:
         e.add_field(name="**📢 RECRUTEMENT OUVERT**", value=tribu["recrutement"], inline=False)
     
     # Progression Boss
+    boss_valides = []
+    boss_non_valides = []
     if "progression_boss" in tribu.keys() and tribu["progression_boss"]:
-        boss_list = tribu["progression_boss"].split(",")
-        boss_display = ", ".join([f"<a:ok:1328152449785008189> {b.strip()}" for b in boss_list if b.strip()])
-        if boss_display:
-            e.add_field(name="**🐉 PROGRESSION BOSS**", value=boss_display[:1024], inline=False)
+        boss_valides = [f"<a:ok:1328152449785008189> {b.strip()}" for b in tribu["progression_boss"].split(",") if b.strip()]
+    if "progression_boss_non_valides" in tribu.keys() and tribu["progression_boss_non_valides"]:
+        boss_non_valides = [f"<a:no:1328152539660554363> {b.strip()}" for b in tribu["progression_boss_non_valides"].split(",") if b.strip()]
+    
+    if boss_valides or boss_non_valides:
+        boss_display = ", ".join(boss_valides + boss_non_valides)
+        e.add_field(name="**🐉 PROGRESSION BOSS**", value=boss_display[:1024], inline=False)
     
     # Progression Notes
+    notes_valides = []
+    notes_non_valides = []
     if "progression_notes" in tribu.keys() and tribu["progression_notes"]:
-        notes_list = tribu["progression_notes"].split(",")
-        notes_display = ", ".join([f"<a:ok:1328152449785008189> {n.strip()}" for n in notes_list if n.strip()])
-        if notes_display:
-            e.add_field(name="**📝 PROGRESSION NOTES**", value=notes_display[:1024], inline=False)
+        notes_valides = [f"<a:ok:1328152449785008189> {n.strip()}" for n in tribu["progression_notes"].split(",") if n.strip()]
+    if "progression_notes_non_valides" in tribu.keys() and tribu["progression_notes_non_valides"]:
+        notes_non_valides = [f"<a:no:1328152539660554363> {n.strip()}" for n in tribu["progression_notes_non_valides"].split(",") if n.strip()]
+    
+    if notes_valides or notes_non_valides:
+        notes_display = ", ".join(notes_valides + notes_non_valides)
+        e.add_field(name="**📝 PROGRESSION NOTES**", value=notes_display[:1024], inline=False)
 
     e.set_footer(text="💡 Utilise les boutons ci-dessous pour gérer la tribu")
     return e
@@ -1254,22 +1272,26 @@ async def boss_valide_tribu(inter: discord.Interaction, boss: str):
         await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
         return
     
-    # Récupérer la progression actuelle
-    progression_actuelle = row["progression_boss"] if row["progression_boss"] else ""
-    boss_list = [b.strip() for b in progression_actuelle.split(",") if b.strip()]
+    # Récupérer les deux listes
+    boss_valides = [b.strip() for b in (row["progression_boss"] or "").split(",") if b.strip()]
+    boss_non_valides = [b.strip() for b in (row["progression_boss_non_valides"] or "").split(",") if b.strip()]
     
     # Vérifier si le boss est déjà validé
-    if boss in boss_list:
+    if boss in boss_valides:
         await inter.response.send_message(f"ℹ️ Le boss **{boss}** est déjà validé pour {row['nom']}.", ephemeral=True)
         return
     
-    # Ajouter le boss
-    boss_list.append(boss)
-    nouvelle_progression = ", ".join(boss_list)
+    # Retirer de la liste non-validés si présent
+    if boss in boss_non_valides:
+        boss_non_valides.remove(boss)
+    
+    # Ajouter à la liste des validés
+    boss_valides.append(boss)
     
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_boss=? WHERE id=?", (nouvelle_progression, row["id"]))
+        c.execute("UPDATE tribus SET progression_boss=?, progression_boss_non_valides=? WHERE id=?", 
+                 (", ".join(boss_valides), ", ".join(boss_non_valides), row["id"]))
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Boss validé", boss)
@@ -1299,22 +1321,26 @@ async def note_valide_tribu(inter: discord.Interaction, note: str):
         await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
         return
     
-    # Récupérer la progression actuelle
-    progression_actuelle = row["progression_notes"] if row["progression_notes"] else ""
-    notes_list = [n.strip() for n in progression_actuelle.split(",") if n.strip()]
+    # Récupérer les deux listes
+    notes_valides = [n.strip() for n in (row["progression_notes"] or "").split(",") if n.strip()]
+    notes_non_valides = [n.strip() for n in (row["progression_notes_non_valides"] or "").split(",") if n.strip()]
     
     # Vérifier si la note est déjà validée
-    if note in notes_list:
+    if note in notes_valides:
         await inter.response.send_message(f"ℹ️ La note **{note}** est déjà validée pour {row['nom']}.", ephemeral=True)
         return
     
-    # Ajouter la note
-    notes_list.append(note)
-    nouvelle_progression = ", ".join(notes_list)
+    # Retirer de la liste non-validés si présent
+    if note in notes_non_valides:
+        notes_non_valides.remove(note)
+    
+    # Ajouter à la liste des validés
+    notes_valides.append(note)
     
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_notes=? WHERE id=?", (nouvelle_progression, row["id"]))
+        c.execute("UPDATE tribus SET progression_notes=?, progression_notes_non_valides=? WHERE id=?", 
+                 (", ".join(notes_valides), ", ".join(notes_non_valides), row["id"]))
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Note validée", note)
@@ -1325,8 +1351,8 @@ async def note_autocomplete(inter: discord.Interaction, current: str):
     db_init()
     return get_notes_choices(inter.guild_id)
 
-@tree.command(name="boss_non_validé_tribu", description="Retirer un boss validé pour ta tribu")
-@app_commands.describe(boss="Boss à retirer")
+@tree.command(name="boss_non_validé_tribu", description="Marquer un boss comme non-validé pour ta tribu")
+@app_commands.describe(boss="Boss à marquer comme non-validé")
 async def boss_non_valide_tribu(inter: discord.Interaction, boss: str):
     db_init()
     
@@ -1344,34 +1370,38 @@ async def boss_non_valide_tribu(inter: discord.Interaction, boss: str):
         await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
         return
     
-    # Récupérer la progression actuelle
-    progression_actuelle = row["progression_boss"] if row["progression_boss"] else ""
-    boss_list = [b.strip() for b in progression_actuelle.split(",") if b.strip()]
+    # Récupérer les deux listes
+    boss_valides = [b.strip() for b in (row["progression_boss"] or "").split(",") if b.strip()]
+    boss_non_valides = [b.strip() for b in (row["progression_boss_non_valides"] or "").split(",") if b.strip()]
     
-    # Vérifier si le boss est dans la liste
-    if boss not in boss_list:
-        await inter.response.send_message(f"ℹ️ Le boss **{boss}** n'est pas validé pour {row['nom']}.", ephemeral=True)
+    # Vérifier si le boss est déjà non-validé
+    if boss in boss_non_valides:
+        await inter.response.send_message(f"ℹ️ Le boss **{boss}** est déjà marqué comme non-validé pour {row['nom']}.", ephemeral=True)
         return
     
-    # Retirer le boss
-    boss_list.remove(boss)
-    nouvelle_progression = ", ".join(boss_list)
+    # Retirer de la liste validés si présent
+    if boss in boss_valides:
+        boss_valides.remove(boss)
+    
+    # Ajouter à la liste des non-validés
+    boss_non_valides.append(boss)
     
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_boss=? WHERE id=?", (nouvelle_progression, row["id"]))
+        c.execute("UPDATE tribus SET progression_boss=?, progression_boss_non_valides=? WHERE id=?", 
+                 (", ".join(boss_valides), ", ".join(boss_non_valides), row["id"]))
         conn.commit()
     
-    ajouter_historique(row["id"], inter.user.id, "Boss retiré", boss)
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Boss {boss} retiré pour {row['nom']} !**")
+    ajouter_historique(row["id"], inter.user.id, "Boss non-validé", boss)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Boss {boss} marqué comme non-validé pour {row['nom']} !**")
 
 @boss_non_valide_tribu.autocomplete('boss')
 async def boss_non_valide_autocomplete(inter: discord.Interaction, current: str):
     db_init()
     return get_boss_choices(inter.guild_id)
 
-@tree.command(name="notes_non_validé_tribu", description="Retirer une note validée pour ta tribu")
-@app_commands.describe(note="Note à retirer")
+@tree.command(name="notes_non_validé_tribu", description="Marquer une note comme non-validée pour ta tribu")
+@app_commands.describe(note="Note à marquer comme non-validée")
 async def notes_non_valide_tribu(inter: discord.Interaction, note: str):
     db_init()
     
@@ -1389,26 +1419,30 @@ async def notes_non_valide_tribu(inter: discord.Interaction, note: str):
         await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
         return
     
-    # Récupérer la progression actuelle
-    progression_actuelle = row["progression_notes"] if row["progression_notes"] else ""
-    notes_list = [n.strip() for n in progression_actuelle.split(",") if n.strip()]
+    # Récupérer les deux listes
+    notes_valides = [n.strip() for n in (row["progression_notes"] or "").split(",") if n.strip()]
+    notes_non_valides = [n.strip() for n in (row["progression_notes_non_valides"] or "").split(",") if n.strip()]
     
-    # Vérifier si la note est dans la liste
-    if note not in notes_list:
-        await inter.response.send_message(f"ℹ️ La note **{note}** n'est pas validée pour {row['nom']}.", ephemeral=True)
+    # Vérifier si la note est déjà non-validée
+    if note in notes_non_valides:
+        await inter.response.send_message(f"ℹ️ La note **{note}** est déjà marquée comme non-validée pour {row['nom']}.", ephemeral=True)
         return
     
-    # Retirer la note
-    notes_list.remove(note)
-    nouvelle_progression = ", ".join(notes_list)
+    # Retirer de la liste validés si présent
+    if note in notes_valides:
+        notes_valides.remove(note)
+    
+    # Ajouter à la liste des non-validés
+    notes_non_valides.append(note)
     
     with db_connect() as conn:
         c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_notes=? WHERE id=?", (nouvelle_progression, row["id"]))
+        c.execute("UPDATE tribus SET progression_notes=?, progression_notes_non_valides=? WHERE id=?", 
+                 (", ".join(notes_valides), ", ".join(notes_non_valides), row["id"]))
         conn.commit()
     
-    ajouter_historique(row["id"], inter.user.id, "Note retirée", note)
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Note {note} retirée pour {row['nom']} !**")
+    ajouter_historique(row["id"], inter.user.id, "Note non-validée", note)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Note {note} marquée comme non-validée pour {row['nom']} !**")
 
 @notes_non_valide_tribu.autocomplete('note')
 async def notes_non_valide_autocomplete(inter: discord.Interaction, current: str):
