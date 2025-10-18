@@ -1760,10 +1760,10 @@ async def panneau(inter: discord.Interaction):
         # Répondre d'abord à l'interaction pour éviter le timeout
         await inter.response.defer(ephemeral=False)
         
-        # Supprimer tous les anciens panneaux dans le canal
+        # Supprimer tous les anciens panneaux dans le canal (cherche dans les 200 derniers messages)
         panneaux_supprimes = 0
         try:
-            async for msg in inter.channel.history(limit=50):
+            async for msg in inter.channel.history(limit=200):
                 if msg.embeds and len(msg.embeds) > 0:
                     for embed in msg.embeds:
                         if embed.title == "🧭 Panneau — Fiches Tribu":
