@@ -552,7 +552,15 @@ class PanneauMembre(discord.ui.View):
     async def btn_supprimer_ap(self, inter: discord.Interaction, button: discord.ui.Button):
         await inter.response.send_message(f"ℹ️ Utilise `/supprimer_avant_poste` et sélectionne **{self.tribu_nom}** pour retirer un avant-poste.", ephemeral=True)
     
-    @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=3)
+    @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
+    async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_photo` et sélectionne **{self.tribu_nom}** pour ajouter une photo à ta galerie (max 10 photos).", ephemeral=True)
+    
+    @discord.ui.button(label="Supprimer photo", style=discord.ButtonStyle.secondary, emoji="🗑️", row=3)
+    async def btn_supprimer_photo(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_photo` et sélectionne **{self.tribu_nom}** pour retirer une photo de ta galerie.", ephemeral=True)
+    
+    @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=4)
     async def btn_aide(self, inter: discord.Interaction, button: discord.ui.Button):
         # Afficher directement l'embed de la commande /aide
         e = discord.Embed(
@@ -627,7 +635,7 @@ class PanneauMembre(discord.ui.View):
         e.set_footer(text="Total : 27 commandes disponibles • Utilise /guide pour les conseils de personnalisation")
         await inter.response.send_message(embed=e, ephemeral=True)
     
-    @discord.ui.button(label="Consulter le guide", style=discord.ButtonStyle.secondary, emoji="📚", row=3)
+    @discord.ui.button(label="Consulter le guide", style=discord.ButtonStyle.secondary, emoji="📚", row=4)
     async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
         # Afficher directement l'embed de la commande /guide
         e = discord.Embed(
