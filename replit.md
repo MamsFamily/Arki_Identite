@@ -20,10 +20,11 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - **Menus Déroulants:** Pour la sélection de maps et tribus avec autocomplétion.
 
 **Technical Implementations & Feature Specifications:**
-- **Gestion des Tribus:** Création, modification (nom, couleur, logo, map/coords de base, description, devise, recrutement, photo, objectif), transfert de propriété, et suppression.
+- **Gestion des Tribus:** Création, modification (nom, couleur, logo, map/coords de base, description, devise, recrutement, objectif), transfert de propriété, et suppression.
 - **Gestion des Membres:** Ajout (avec nom in-game et autorisation manager), suppression, et possibilité de quitter une tribu.
 - **Gestion des Avant-Postes:** Ajout (avec nom auto-généré) et suppression.
 - **Système de Progression:** Suivi des boss et des notes complétés.
+- **Galerie Photo Interactive:** Jusqu'à 10 photos par tribu avec navigation ◀️ ▶️ directement sur la fiche. Ajout/suppression via `/ajouter_photo` et `/supprimer_photo`. Indicateur de position "📸 Photo X/Y" dans le footer.
 - **Historique des Actions:** Enregistrement détaillé des modifications avec utilisateur, action, détails et horodatage, consultable via pagination.
 - **Système de Permissions:**
     - **Référent Tribu:** Créateur, contrôle total.
@@ -34,15 +35,33 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 - **Données par Défaut:** Listes pré-définies de boss, notes et maps, extensibles via commandes admin.
 
 **System Design Choices:**
-- **Base de Données SQLite (`tribus.db`):** Utilisée pour persister toutes les données du bot (tribus, membres, avant-postes, historique, boss, notes, maps).
+- **Base de Données SQLite (`tribus.db`):** Utilisée pour persister toutes les données du bot (tribus, membres, avant-postes, historique, boss, notes, maps, photos_tribu).
+- **Table photos_tribu:** Stocke les photos de galerie avec colonnes `id`, `tribu_id`, `url`, `ordre` pour gérer l'ordre d'affichage et limiter à 10 photos par tribu.
 - **Suivi des Fiches:** Les colonnes `message_id` et `channel_id` dans la table `tribus` permettent de mettre à jour dynamiquement les fiches affichées et de supprimer les anciennes.
 - **Flexibilité des Champs:** Suppression des limitations de caractères pour la plupart des champs textuels (description, devise, objectif, etc.).
+- **Navigation Persistante:** Les boutons de galerie photo utilisent des custom_id avec `tribu_id` pour rester fonctionnels après redémarrage du bot via le listener global `on_interaction`.
 
 ## External Dependencies
 - **Discord API:** Le bot interagit directement avec l'API Discord via la bibliothèque `discord.py`.
 - **SQLite:** Base de données embarquée pour la persistance des données.
 
 ## Recent Changes
+
+### 18 octobre 2025 - Galerie Photo Interactive
+**Nouveau système de galerie avec navigation** :
+- ✅ **Galerie multi-photos** : Jusqu'à 10 photos par tribu au lieu d'une seule photo fixe
+- ✅ **Table photos_tribu** : Nouvelle table SQLite avec colonnes `tribu_id`, `url`, `ordre` pour gérer l'ordre d'affichage
+- ✅ **Migration automatique** : Les anciennes photos `photo_base` sont automatiquement migrées vers la galerie
+- ✅ **Boutons de navigation** : Boutons ◀️ "Photo précédente" et ▶️ "Photo suivante" directement sous la fiche tribu
+- ✅ **Navigation cyclique** : La galerie boucle automatiquement (dernière photo → première photo)
+- ✅ **Indicateur de position** : Footer "📸 Photo 2/5" pour afficher la position actuelle
+- ✅ **Commandes dédiées** :
+  - `/ajouter_photo` — Ajouter une photo à la galerie (limite 10)
+  - `/supprimer_photo` — Retirer une photo avec autocomplétion
+- ✅ **Réorganisation automatique** : L'ordre des photos est automatiquement recalculé après suppression
+- ✅ **Persistance des boutons** : Les boutons de galerie restent fonctionnels après redémarrage du bot
+- ✅ **Modal Personnaliser mis à jour** : Suppression du champ photo_base (remplacé par la galerie)
+- ✅ **Guide et Aide mis à jour** : Section "📸 Galerie photo" ajoutée avec explications complètes
 
 ### 18 octobre 2025 - Panneau "Mes Commandes" pour les Membres
 **Nouveau panneau d'aide pour les membres** :
