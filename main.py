@@ -535,17 +535,22 @@ class MenuFicheTribu(discord.ui.View):
     def __init__(self, tribu_id: int, timeout: Optional[float] = None):
         super().__init__(timeout=timeout)
         self.tribu_id = tribu_id
+        
+        # Créer dynamiquement le select avec un custom_id incluant le tribu_id
+        select = discord.ui.Select(
+            placeholder="Sélectionne une action...",
+            custom_id=f"menu_fiche:{tribu_id}",
+            options=[
+                discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
+                discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
+                discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
+            ]
+        )
+        select.callback = self.menu_callback
+        self.add_item(select)
     
-    @discord.ui.select(
-        placeholder="Sélectionne une action...",
-        custom_id="menu_fiche:actions",
-        options=[
-            discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
-            discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
-            discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
-        ]
-    )
-    async def menu_callback(self, inter: discord.Interaction, select: discord.ui.Select):
+    async def menu_callback(self, inter: discord.Interaction):
+        select = [item for item in self.children if isinstance(item, discord.ui.Select)][0]
         choice = select.values[0]
         
         if choice == "quitter":
@@ -1875,15 +1880,54 @@ async def panneau(inter: discord.Interaction):
         await inter.response.send_message(embed=e, view=v, ephemeral=True)
 
 @bot.event
+async def on_interaction(inter: discord.Interaction):
+    """
+    Listener global pour intercepter les interactions avec les menus de fiche tribu
+    même après redémarrage du bot. Permet de reconnecter les anciennes vues.
+    """
+    # Vérifier si c'est une interaction avec un SelectMenu
+    if inter.type != discord.InteractionType.component:
+        return
+    
+    # Vérifier si le custom_id commence par "menu_fiche:"
+    if not inter.data or 'custom_id' not in inter.data:
+        return
+    
+    custom_id = inter.data['custom_id']
+    if not custom_id.startswith("menu_fiche:"):
+        return
+    
+    # Extraire le tribu_id du custom_id
+    try:
+        tribu_id = int(custom_id.split(":")[1])
+    except (IndexError, ValueError):
+        return
+    
+    # Récupérer le choix sélectionné
+    if 'values' not in inter.data or len(inter.data['values']) == 0:
+        return
+    
+    choice = inter.data['values'][0]
+    
+    # Recréer dynamiquement la vue et exécuter l'action
+    view = MenuFicheTribu(tribu_id, timeout=None)
+    
+    if choice == "quitter":
+        await view.action_quitter(inter)
+    elif choice == "historique":
+        await view.action_historique(inter)
+    elif choice == "staff":
+        await view.action_staff(inter)
+
+@bot.event
 async def on_ready():
     db_init()  # Initialiser la DB au démarrage
     
     # Ajouter les vues persistantes pour qu'elles fonctionnent après redémarrage
     bot.add_view(PanneauTribu(timeout=None))
     
-    # Note: MenuFicheTribu ne peut pas être rendu persistant car chaque fiche
-    # a un tribu_id différent. Les menus cesseront de fonctionner après un redémarrage
-    # mais redeviendront actifs dès qu'on affiche à nouveau la fiche.
+    # MenuFicheTribu est maintenant géré par le listener on_interaction
+    # qui intercepte les interactions même après redémarrage
     
     try:
         synced = await tree.sync()

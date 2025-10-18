@@ -44,6 +44,13 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 18 octobre 2025 - Persistance des Menus après Redémarrage
+**Système de persistance avancé** :
+- ✅ **Menus déroulants persistants** : Les menus sous les fiches tribu restent **fonctionnels même après redémarrage** du bot
+- ✅ **Custom ID dynamique** : Chaque menu inclut l'ID de la tribu dans son identifiant unique (`menu_fiche:{tribu_id}`)
+- ✅ **Listener global** : Un événement `on_interaction` intercepte les interactions avec les anciens menus et recrée dynamiquement la logique
+- ✅ **Zéro maintenance** : Plus besoin de réafficher les fiches pour réactiver les menus après un redémarrage
+
 ### 18 octobre 2025 - Panneau Staff Contextuel
 **Nouveau système de gestion staff** :
 - ✅ **Panneau staff éphémère** : Quand un admin/modo clique sur "Staff" dans le menu déroulant d'une fiche, un panneau temporaire s'ouvre (visible uniquement par lui)
