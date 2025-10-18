@@ -198,6 +198,30 @@ def db_init():
             c.execute("INSERT OR IGNORE INTO maps (guild_id, nom, created_at) VALUES (?, ?, ?)",
                      (0, map_name, dt.datetime.utcnow().isoformat()))
         
+        # Table pour les photos de la galerie (jusqu'à 10 photos par tribu)
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS photos_tribu (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tribu_id INTEGER NOT NULL,
+            url TEXT NOT NULL,
+            ordre INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (tribu_id) REFERENCES tribus(id) ON DELETE CASCADE
+        )
+        """)
+        
+        # Migrer les photos existantes depuis photo_base vers la nouvelle table
+        c.execute("SELECT id, photo_base FROM tribus WHERE photo_base IS NOT NULL AND photo_base != ''")
+        tribus_avec_photo = c.fetchall()
+        for tribu in tribus_avec_photo:
+            # Vérifier si la photo n'existe pas déjà dans la nouvelle table
+            c.execute("SELECT COUNT(*) as count FROM photos_tribu WHERE tribu_id=?", (tribu["id"],))
+            if c.fetchone()["count"] == 0:
+                c.execute("""
+                INSERT INTO photos_tribu (tribu_id, url, ordre, created_at)
+                VALUES (?, ?, 0, ?)
+                """, (tribu["id"], tribu["photo_base"], dt.datetime.utcnow().isoformat()))
+        
         conn.commit()
 
 def get_maps_choices(guild_id: int):
@@ -2007,6 +2031,127 @@ class PanneauTribu(discord.ui.View):
     @discord.ui.button(label="Guide", style=discord.ButtonStyle.secondary, emoji="📖", custom_id="panneau:guide")
     async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
         await afficher_guide(inter)
+
+@tree.command(name="ajouter_photo", description="Ajouter une photo à la galerie de ta tribu (max 10 photos)")
+@app_commands.describe(
+    nom="Nom de la tribu",
+    url_photo="URL de la photo (postimages.org recommandé)"
+)
+@app_commands.autocomplete(nom=autocomplete_tribus)
+async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: str):
+    db_init()
+    row = tribu_par_nom(inter.guild_id, nom)
+    if not row:
+        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        return
+    
+    # Vérifier les droits
+    if not await verifier_droits(inter, row):
+        return
+    
+    # Vérifier le nombre de photos (max 10)
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) as count FROM photos_tribu WHERE tribu_id=?", (row["id"],))
+        count = c.fetchone()["count"]
+        
+        if count >= 10:
+            await inter.response.send_message("❌ Cette tribu a déjà 10 photos. Supprime-en une avant d'en ajouter une nouvelle avec `/supprimer_photo`.", ephemeral=True)
+            return
+        
+        # Calculer le prochain ordre
+        c.execute("SELECT COALESCE(MAX(ordre), -1) as max_ordre FROM photos_tribu WHERE tribu_id=?", (row["id"],))
+        max_ordre = c.fetchone()["max_ordre"]
+        nouvel_ordre = max_ordre + 1
+        
+        # Ajouter la photo
+        c.execute("""
+        INSERT INTO photos_tribu (tribu_id, url, ordre, created_at)
+        VALUES (?, ?, ?, ?)
+        """, (row["id"], url_photo.strip(), nouvel_ordre, dt.datetime.utcnow().isoformat()))
+        conn.commit()
+    
+    ajouter_historique(row["id"], inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
+    await inter.response.send_message(f"✅ Photo #{nouvel_ordre + 1} ajoutée à la galerie de **{row['nom']}** ! ({count + 1}/10 photos)", ephemeral=True)
+
+async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
+    """Autocomplétion pour les photos d'une tribu"""
+    db_init()
+    
+    # Récupérer le nom de la tribu depuis le namespace
+    nom_tribu = inter.namespace.nom if hasattr(inter.namespace, 'nom') else None
+    if not nom_tribu:
+        return []
+    
+    row = tribu_par_nom(inter.guild_id, nom_tribu)
+    if not row:
+        return []
+    
+    # Récupérer les photos de cette tribu
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (row["id"],))
+        photos = c.fetchall()
+    
+    choices = []
+    for photo in photos:
+        # Afficher "Photo #1", "Photo #2", etc.
+        label = f"Photo #{photo['ordre'] + 1}"
+        # Tronquer l'URL si trop longue
+        url_display = photo['url'][:50] + "..." if len(photo['url']) > 50 else photo['url']
+        choices.append(app_commands.Choice(name=f"{label} — {url_display}", value=str(photo['id'])))
+    
+    return choices[:25]
+
+@tree.command(name="supprimer_photo", description="Supprimer une photo de la galerie de ta tribu")
+@app_commands.describe(
+    nom="Nom de la tribu",
+    photo_id="Sélectionne la photo à supprimer"
+)
+@app_commands.autocomplete(nom=autocomplete_tribus, photo_id=autocomplete_photos_tribu)
+async def supprimer_photo(inter: discord.Interaction, nom: str, photo_id: str):
+    db_init()
+    row = tribu_par_nom(inter.guild_id, nom)
+    if not row:
+        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        return
+    
+    # Vérifier les droits
+    if not await verifier_droits(inter, row):
+        return
+    
+    # Supprimer la photo
+    try:
+        photo_id_int = int(photo_id)
+    except ValueError:
+        await inter.response.send_message("❌ ID de photo invalide.", ephemeral=True)
+        return
+    
+    with db_connect() as conn:
+        c = conn.cursor()
+        # Vérifier que la photo appartient bien à cette tribu
+        c.execute("SELECT * FROM photos_tribu WHERE id=? AND tribu_id=?", (photo_id_int, row["id"]))
+        photo = c.fetchone()
+        
+        if not photo:
+            await inter.response.send_message("❌ Photo introuvable ou n'appartient pas à cette tribu.", ephemeral=True)
+            return
+        
+        # Supprimer la photo
+        c.execute("DELETE FROM photos_tribu WHERE id=?", (photo_id_int,))
+        
+        # Réorganiser les ordres
+        c.execute("SELECT id FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (row["id"],))
+        photos_restantes = c.fetchall()
+        for i, p in enumerate(photos_restantes):
+            c.execute("UPDATE photos_tribu SET ordre=? WHERE id=?", (i, p["id"]))
+        
+        conn.commit()
+        
+        count_restant = len(photos_restantes)
+    
+    ajouter_historique(row["id"], inter.user.id, "Photo supprimée", f"Photo supprimée de la galerie")
+    await inter.response.send_message(f"✅ Photo supprimée de la galerie de **{row['nom']}** ! ({count_restant}/10 photos restantes)", ephemeral=True)
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
