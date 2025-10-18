@@ -44,6 +44,14 @@ Le bot utilise `discord.py` et s'appuie sur une architecture basée sur des inte
 
 ## Recent Changes
 
+### 18 octobre 2025 - Panneau "Mes Commandes" pour les Membres
+**Nouveau panneau d'aide pour les membres** :
+- ✅ **Option "Mes commandes"** : Nouvelle option dans le menu déroulant sous les fiches tribu (en 1ère position)
+- ✅ **Panneau temporaire d'aide** : Accessible à tous les membres, affiche un panneau éphémère avec des rappels de commandes utiles
+- ✅ **4 boutons d'aide** : Changer nom in-game, Voir fiche tribu, Voir toutes les commandes, Consulter le guide
+- ✅ **Interface cohérente** : Design similaire au panneau staff, mais adapté aux besoins des membres réguliers
+- ✅ **Menu complet** : Le menu déroulant contient maintenant 4 options (Mes commandes, Quitter tribu, Historique, Staff)
+
 ### 18 octobre 2025 - Persistance des Menus après Redémarrage
 **Système de persistance avancé** :
 - ✅ **Menus déroulants persistants** : Les menus sous les fiches tribu restent **fonctionnels même après redémarrage** du bot

@@ -486,6 +486,28 @@ class HistoriqueView(discord.ui.View):
         else:
             await inter.response.send_message("📜 Fin de l'historique atteint.", ephemeral=True)
 
+# ---------- Panneau Membre pour afficher les commandes utiles ----------
+class PanneauMembre(discord.ui.View):
+    def __init__(self, tribu_nom: str, timeout: Optional[float] = 180):
+        super().__init__(timeout=timeout)
+        self.tribu_nom = tribu_nom
+    
+    @discord.ui.button(label="Changer mon nom in-game", style=discord.ButtonStyle.primary, emoji="✏️", row=0)
+    async def btn_nom_ingame(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/mon_nom_ingame` pour modifier ton nom in-game affiché dans tes tribus.", ephemeral=True)
+    
+    @discord.ui.button(label="Voir ma fiche tribu", style=discord.ButtonStyle.primary, emoji="📋", row=0)
+    async def btn_fiche(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/fiche_tribu` et sélectionne **{self.tribu_nom}** pour afficher la fiche complète de ta tribu.", ephemeral=True)
+    
+    @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=1)
+    async def btn_aide(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/aide` pour voir la liste complète des 27 commandes disponibles.", ephemeral=True)
+    
+    @discord.ui.button(label="Consulter le guide", style=discord.ButtonStyle.secondary, emoji="📚", row=1)
+    async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.send_message(f"ℹ️ Utilise `/guide` pour consulter le guide complet du système de gestion des tribus.", ephemeral=True)
+
 # ---------- Panneau Staff pour gérer une tribu spécifique ----------
 class PanneauStaff(discord.ui.View):
     def __init__(self, tribu_id: int, tribu_nom: str, timeout: Optional[float] = 180):
@@ -541,6 +563,7 @@ class MenuFicheTribu(discord.ui.View):
             placeholder="Sélectionne une action...",
             custom_id=f"menu_fiche:{tribu_id}",
             options=[
+                discord.SelectOption(label="Mes commandes", value="commandes", emoji="💡", description="Aide et commandes utiles"),
                 discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
                 discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
                 discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
@@ -553,12 +576,36 @@ class MenuFicheTribu(discord.ui.View):
         select = [item for item in self.children if isinstance(item, discord.ui.Select)][0]
         choice = select.values[0]
         
-        if choice == "quitter":
+        if choice == "commandes":
+            await self.action_commandes(inter)
+        elif choice == "quitter":
             await self.action_quitter(inter)
         elif choice == "historique":
             await self.action_historique(inter)
         elif choice == "staff":
             await self.action_staff(inter)
+    
+    async def action_commandes(self, inter: discord.Interaction):
+        # Récupérer les infos de la tribu
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            tribu = c.fetchone()
+            if not tribu:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+        
+        # Afficher le panneau d'aide membre
+        view = PanneauMembre(tribu['nom'])
+        
+        e = discord.Embed(
+            title=f"💡 Mes Commandes — {tribu['nom']}",
+            description="Voici les commandes utiles pour gérer ta participation dans cette tribu.\n\n**Actions disponibles :**\n• Modifier ton nom in-game\n• Afficher ta fiche tribu\n• Consulter l'aide et le guide",
+            color=0x5865F2
+        )
+        e.set_footer(text="💡 Panneau visible uniquement par toi • Utilise les boutons pour plus d'infos")
+        
+        await inter.response.send_message(embed=e, view=view, ephemeral=True)
     
     async def action_quitter(self, inter: discord.Interaction):
         # Vérifier que l'utilisateur est membre
@@ -1912,7 +1959,9 @@ async def on_interaction(inter: discord.Interaction):
     # Recréer dynamiquement la vue et exécuter l'action
     view = MenuFicheTribu(tribu_id, timeout=None)
     
-    if choice == "quitter":
+    if choice == "commandes":
+        await view.action_commandes(inter)
+    elif choice == "quitter":
         await view.action_quitter(inter)
     elif choice == "historique":
         await view.action_historique(inter)
