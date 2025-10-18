@@ -799,9 +799,14 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url)
         view = MenuFicheTribu(tribu_id, timeout=None)
         
-        # Répondre à l'interaction
-        await inter.response.send_message(message_prefix, embed=embed, view=view, ephemeral=ephemeral)
-        msg = await inter.original_response()
+        # Répondre à l'interaction (vérifier si déjà différée)
+        if inter.response.is_done():
+            # L'interaction a déjà été différée ou répondue, utiliser followup
+            msg = await inter.followup.send(message_prefix, embed=embed, view=view, ephemeral=ephemeral, wait=True)
+        else:
+            # Première réponse
+            await inter.response.send_message(message_prefix, embed=embed, view=view, ephemeral=ephemeral)
+            msg = await inter.original_response()
         
         # Sauvegarder le nouveau message_id et channel_id (seulement si pas ephemeral)
         if not ephemeral:
@@ -882,17 +887,16 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
     if not est_admin_ou_modo(inter):
         await inter.response.send_message("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
         return
+    
+    # Defer pour éviter le timeout lors de la suppression des anciennes fiches
+    await inter.response.defer(ephemeral=False)
+    
     db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (row["id"],))
-        membres = c.fetchall()
-        c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (row["id"],))
-        avant_postes = c.fetchall()
+    
     await afficher_fiche_mise_a_jour(inter, row["id"], "📋 **Fiche tribu**", ephemeral=False)
 
 @tree.command(name="modifier_tribu", description="Modifier les infos d'une tribu")
