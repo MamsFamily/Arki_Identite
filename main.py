@@ -10,10 +10,28 @@ import os
 import sqlite3
 import datetime as dt
 from typing import Optional
+from threading import Thread
 
 import discord
 from discord import app_commands
 from discord.ext import commands
+from flask import Flask
+
+# ---------- Keep-alive HTTP (pour Replit) ----------
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "✅ Bot Discord en ligne"
+
+def keep_alive():
+    """Lance un mini serveur web pour maintenir le bot actif sur Replit"""
+    def run():
+        port = int(os.getenv("PORT", "8080"))
+        app.run(host="0.0.0.0", port=port, debug=False)
+    
+    t = Thread(target=run, daemon=True)
+    t.start()
 
 DB_PATH = os.getenv("TRIBU_BOT_DB", "tribus.db")
 
@@ -2526,6 +2544,7 @@ def main():
     if not token:
         print("ERREUR : définis la variable d'environnement DISCORD_BOT_TOKEN avec le token du bot.")
         return
+    keep_alive()  # Lance le serveur web pour éviter la mise en veille
     bot.run(token)
 
 if __name__ == "__main__":
