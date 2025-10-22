@@ -3,29 +3,6 @@ from discord.ext import commands
 import sqlite3
 import os
 import asyncio
-from dotenv import load_dotenv
-from flask import Flask
-from threading import Thread
-
-# --- Keep-alive HTTP (pour Replit + UptimeRobot) ---
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "OK - bot en ligne"
-
-def _run():
-    # Replit expose le webserver sur un port fourni (ou 8080 par défaut)
-    port = int(os.getenv("PORT", "8080"))
-    app.run(host="0.0.0.0", port=port)
-
-def keep_alive():
-    t = Thread(target=_run, daemon=True)
-    t.start()
-
-
-# --- Chargement du fichier .env ---
-load_dotenv()
 
 # --- Base de données SQLite ---
 def db_init():
@@ -124,10 +101,6 @@ def main():
     if not token:
         print("ERREUR : définis la variable d'environnement DISCORD_BOT_TOKEN avec le token du bot.")
         return
-
-    # >>> Ajout keep-alive pour Replit <<<
-    keep_alive()  # lance le mini serveur Flask pour éviter la mise en veille Replit
-
     bot.run(token)
 
 
