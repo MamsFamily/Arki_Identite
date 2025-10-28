@@ -12,8 +12,18 @@ The "Arki Family" Discord bot is designed for the Ark: Survival Ascended communi
 ## System Architecture
 The bot utilizes `discord.py` and is built on an architecture leveraging modern Discord interactions (slash commands, buttons, modals) for a rich user experience.
 
+**Command Optimization (October 2025):**
+- **Streamlined Commands:** Reduced from 31 to 23 slash commands by consolidating redundant features into interactive panels
+- **Commands Removed:** `/modifier_tribu`, `/personnaliser_tribu`, `/ajouter_membre_tribu`, `/retirer_membre_tribu`, `/ajouter_avant_poste`, `/supprimer_avant_poste`, `/supprimer_photo`, `/voir_historique`, `/modifier_base`, `/modifier_description`, `/modifier_couleur`, `/modifier_logo`, `/modifier_recrutement` (13 total)
+- **Functionality Preserved:** All removed command features remain accessible through interactive buttons and modals in the tribe profile panel
+
 **UI/UX Decisions:**
-- **Interactive Panel (`/panneau`):** A centralized entry point with buttons for main actions (Create, Modify, Customize, Guide). Admin panels self-delete to prevent clutter. Includes a visual banner.
+- **Interactive Panel (`/panneau`):** A centralized entry point with buttons for main actions (Create, Modify, Customize, Guide). Admin panels self-delete to prevent clutter. Includes customizable banner, color, and text.
+- **Admin Configuration Panel (`/parametres`):** New admin-only panel for bot configuration with buttons for: Banner, Color, Text, and Tribe Card Channel selection
+- **Customizable Main Panel:** Admins can personalize the main panel appearance using `/couleur_panneau`, `/texte_panneau`, and `/changer_bannière_panneau` commands, or through the new `/parametres` panel
+- **Configurable Tribe Card Channel:** New `/salon_fiche_tribu` command allows admins to define a dedicated channel for displaying all tribe cards (default: current channel)
+- **Auto-Refresh System:** Tribe cards automatically update after any modification using `rafraichir_fiche_tribu()` function
+- **Smart Deletion:** `/ma_tribu` command automatically deletes old tribe card in the same channel before displaying new one to prevent duplicates
 - **Detailed Tribe Profiles:** Information displayed in a structured order (Header, Description, Motto, Members, Main Base, Outposts, Objective, Recruitment, Boss/Notes Progression, Base Photo) with **BOLD CAPITALIZED** titles for readability.
 - **Dropdown Menu under Tribe Profile:** Menu with options for "Mes commandes" (member panel), "Personnaliser", "Leave Tribe", "History" (with pagination), and "Staff" (for admins/moderators).
 - **"Mes commandes" Panel:** All buttons in this panel replicate their corresponding slash command behavior (e.g., "Ajouter avant-poste" uses map dropdown selection like `/ajouter_avant_poste`).
@@ -38,7 +48,9 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 **System Design Choices:**
 - **SQLite Database (`tribus.db`):** Used for persisting all bot data (tribes, members, outposts, history, bosses, notes, maps, tribe photos).
 - **`photos_tribu` Table:** Stores gallery photos with `id`, `tribu_id`, `url`, `ordre` columns to manage display order and limit to 10 photos per tribe.
+- **`config` Table:** Stores bot configuration (panel banner, color, text, tribe card channel) with key-value structure per guild
 - **Profile Tracking:** `message_id` and `channel_id` columns in the `tribus` table allow dynamic updating of displayed profiles and deletion of old ones.
+- **Smart Channel Routing:** When a tribe card channel is configured, all tribe cards display there instead of the current channel
 - **Field Flexibility:** Removal of character limitations for most text fields.
 - **Persistent Navigation:** Photo gallery buttons use custom_id with `tribu_id` to remain functional after bot restarts via the global `on_interaction` listener.
 

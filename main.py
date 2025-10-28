@@ -340,29 +340,6 @@ def ajouter_historique(tribu_id: int, user_id: int, action: str, details: str = 
         """, (tribu_id, user_id, action, details, dt.datetime.utcnow().isoformat()))
         conn.commit()
 
-def get_config(guild_id: int, cle: str, defaut: str = "") -> str:
-    """Récupère une valeur de configuration"""
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("SELECT valeur FROM config WHERE guild_id=? AND cle=?", (guild_id, cle))
-        row = c.fetchone()
-        if row:
-            return row["valeur"]
-        # Essayer avec guild_id=0 (config globale)
-        c.execute("SELECT valeur FROM config WHERE guild_id=0 AND cle=?", (cle,))
-        row = c.fetchone()
-        return row["valeur"] if row else defaut
-
-def set_config(guild_id: int, cle: str, valeur: str):
-    """Définit une valeur de configuration"""
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("""
-            INSERT OR REPLACE INTO config (guild_id, cle, valeur)
-            VALUES (?, ?, ?)
-        """, (guild_id, cle, valeur))
-        conn.commit()
-
 # ---------- Bot ----------
 intents = discord.Intents.default()
 intents.guilds = True
