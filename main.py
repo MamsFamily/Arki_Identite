@@ -813,15 +813,45 @@ class PanneauMembre(discord.ui.View):
                 if c.fetchone():
                     await select_inter.response.send_message(f"❌ {selected_user.mention} est déjà membre de cette tribu.", ephemeral=True)
                     return
-                
-                # Ajouter le membre
-                c.execute("INSERT INTO membres (tribu_id, user_id) VALUES (?, ?)", 
-                         (self.tribu_id, selected_user.id))
-                conn.commit()
             
-            ajouter_historique(self.tribu_id, select_inter.user.id, "Membre ajouté", f"{selected_user.mention} ajouté à la tribu")
-            await select_inter.response.send_message(f"✅ {selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
-            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
+            # Demander si le membre est manager
+            class ViewManagerChoice(discord.ui.View):
+                def __init__(self, tribu_id: int, tribu_nom: str, user: discord.User):
+                    super().__init__(timeout=180)
+                    self.tribu_id = tribu_id
+                    self.tribu_nom = tribu_nom
+                    self.selected_user = user
+                
+                @discord.ui.button(label="Oui, manager", style=discord.ButtonStyle.success, emoji="✅")
+                async def btn_manager(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                    with db_connect() as conn:
+                        c = conn.cursor()
+                        c.execute("INSERT INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, 1)", 
+                                 (self.tribu_id, self.selected_user.id, "Manager"))
+                        conn.commit()
+                    
+                    ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté en tant que Manager")
+                    await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** en tant que **Manager** !", ephemeral=True)
+                    await rafraichir_fiche_tribu(btn_inter.client, self.tribu_id)
+                
+                @discord.ui.button(label="Non, membre simple", style=discord.ButtonStyle.secondary, emoji="👤")
+                async def btn_membre(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                    with db_connect() as conn:
+                        c = conn.cursor()
+                        c.execute("INSERT INTO membres (tribu_id, user_id) VALUES (?, ?)", 
+                                 (self.tribu_id, self.selected_user.id))
+                        conn.commit()
+                    
+                    ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté à la tribu")
+                    await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
+                    await rafraichir_fiche_tribu(btn_inter.client, self.tribu_id)
+            
+            e = discord.Embed(
+                title="👤 Autorisation de modification",
+                description=f"**{selected_user.mention}** sera-t-il autorisé à modifier la fiche de la tribu ?",
+                color=0x5865F2
+            )
+            await select_inter.response.send_message(embed=e, view=ViewManagerChoice(self.tribu_id, self.tribu_nom, selected_user), ephemeral=True)
         
         user_select.callback = user_select_callback
         view.add_item(user_select)
@@ -855,12 +885,24 @@ class PanneauMembre(discord.ui.View):
         # Créer un menu de sélection
         options = []
         for membre in membres:
-            role_display = f" — {membre['role']}" if membre['role'] else ""
-            options.append(discord.SelectOption(
-                label=f"@{membre['user_id']}",
-                description=f"User ID: {membre['user_id']}{role_display}",
-                value=str(membre['user_id'])
-            ))
+            # Récupérer le nom d'utilisateur Discord
+            user = inter.guild.get_member(membre['user_id'])
+            if user:
+                user_display = f"{user.display_name} (@{user.name})"
+                role_display = f" — {membre['role']}" if membre['role'] else ""
+                options.append(discord.SelectOption(
+                    label=user_display[:100],  # Discord limite à 100 caractères
+                    description=f"ID: {membre['user_id']}{role_display}",
+                    value=str(membre['user_id'])
+                ))
+            else:
+                # Fallback si le membre n'est plus sur le serveur
+                role_display = f" — {membre['role']}" if membre['role'] else ""
+                options.append(discord.SelectOption(
+                    label=f"Utilisateur {membre['user_id']}",
+                    description=f"(Membre absent du serveur){role_display}",
+                    value=str(membre['user_id'])
+                ))
         
         select = discord.ui.Select(placeholder="Sélectionne le membre à retirer...", options=options[:25])
         
@@ -2503,9 +2545,66 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             
             # Ajouter l'historique après avoir fermé la connexion
             ajouter_historique(row["id"], inter.user.id, "Personnalisation", f"Champs: {', '.join(updates.keys())}")
-        
-        await inter.response.send_message("✅ **Tribu personnalisée !**", ephemeral=True)
-        await rafraichir_fiche_tribu(inter.client, row["id"])
+            
+            # Vérifier si une fiche existe déjà
+            message_id = row.get("message_id", 0) or 0
+            channel_id = row.get("channel_id", 0) or 0
+            
+            if message_id and channel_id:
+                # Rafraîchir la fiche existante
+                await rafraichir_fiche_tribu(inter.client, row["id"])
+                await inter.response.send_message(
+                    "✅ **Tribu personnalisée !**\n\n✨ *La fiche tribu a été mise à jour automatiquement.*", 
+                    ephemeral=True
+                )
+            else:
+                # Pas de fiche existante - en créer une nouvelle
+                await inter.response.send_message(
+                    "✅ **Tribu personnalisée !**\n\n✨ *Affichage de ta fiche mise à jour...*", 
+                    ephemeral=True
+                )
+                
+                # Récupérer le salon configuré ou utiliser le salon actuel
+                salon_id = get_config(inter.guild_id, "salon_fiche_tribu")
+                target_channel = inter.channel
+                
+                if salon_id and salon_id != "0":
+                    configured_channel = inter.guild.get_channel(int(salon_id))
+                    if configured_channel:
+                        target_channel = configured_channel
+                
+                # Préparer les données de la tribu
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT * FROM tribus WHERE id=?", (row["id"],))
+                    tribu = c.fetchone()
+                    c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (row["id"],))
+                    membres = c.fetchall()
+                    c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (row["id"],))
+                    avant_postes = c.fetchall()
+                    c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (row["id"],))
+                    photos = c.fetchall()
+                    
+                    # Récupérer l'avatar du créateur
+                    createur_avatar_url = None
+                    try:
+                        createur = await inter.client.fetch_user(tribu['proprietaire_id'])
+                        if createur:
+                            createur_avatar_url = createur.display_avatar.url
+                    except:
+                        pass
+                    
+                    # Créer et envoyer la fiche
+                    embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+                    view = MenuFicheTribu(row["id"], 0, timeout=None)
+                    msg = await target_channel.send(embed=embed, view=view)
+                    
+                    # Sauvegarder le message_id et channel_id
+                    c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                             (msg.id, msg.channel.id, row["id"]))
+                    conn.commit()
+        else:
+            await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 async def afficher_guide(inter: discord.Interaction):
     """Affiche le guide d'information pour personnaliser sa tribu"""
