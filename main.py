@@ -1832,6 +1832,42 @@ def parser_membre_info(texte: str, guild: discord.Guild):
         'manager': manager_flag
     }
 
+async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: bool = False):
+    """Affiche la fiche tribu (utilisée par les boutons et commandes)"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
+        tribu = c.fetchone()
+        if not tribu:
+            await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+            return
+        
+        c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (tribu_id,))
+        membres = c.fetchall()
+        c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        avant_postes = c.fetchall()
+        c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
+        photos = c.fetchall()
+        
+        # Récupérer l'avatar du créateur
+        createur_avatar_url = None
+        try:
+            createur = await inter.client.fetch_user(tribu['proprietaire_id'])
+            if createur:
+                createur_avatar_url = createur.display_avatar.url
+        except:
+            pass
+        
+        # Créer l'embed et le menu
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        
+        # Envoyer la fiche
+        if inter.response.is_done():
+            await inter.followup.send(embed=embed, view=view, ephemeral=ephemeral)
+        else:
+            await inter.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
+
 async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, message_prefix: str = "✅ **Fiche mise à jour !**", ephemeral: bool = False):
     """Affiche la fiche tribu mise à jour et supprime TOUTES les anciennes fiches existantes"""
     with db_connect() as conn:
@@ -2740,6 +2776,27 @@ async def notes_non_valide_tribu(inter: discord.Interaction, note: str):
 async def notes_non_valide_autocomplete(inter: discord.Interaction, current: str):
     db_init()
     return get_notes_choices(inter.guild_id)
+
+@tree.command(name="ma_tribu", description="Afficher la fiche de ma tribu")
+async def ma_tribu(inter: discord.Interaction):
+    db_init()
+    
+    # Trouver la tribu de l'utilisateur
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT t.* FROM tribus t
+            LEFT JOIN membres m ON t.id = m.tribu_id
+            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR m.user_id = ?)
+        """, (inter.guild_id, inter.user.id, inter.user.id))
+        row = c.fetchone()
+    
+    if not row:
+        await inter.response.send_message("❌ Tu ne fais partie d'aucune tribu. Utilise `/panneau` pour créer ou rejoindre une tribu !", ephemeral=True)
+        return
+    
+    # Afficher la fiche de la tribu
+    await afficher_fiche(inter, row["id"], ephemeral=False)
 
 @tree.command(name="aide", description="Afficher la liste des commandes du bot")
 async def aide(inter: discord.Interaction):
