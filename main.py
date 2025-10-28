@@ -593,7 +593,7 @@ class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
             conn.commit()
         
         ajouter_historique(self.tribu_id, inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
-        await inter.response.send_message(f"✅ Photo #{nouvel_ordre + 1} ajoutée à la galerie de **{self.tribu_nom}** ! ({count + 1}/10 photos)", ephemeral=True)
+        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {self.tribu_nom} !** ({count + 1}/10)\n🔗 depuis une URL", ephemeral=False)
 
 class SelectSupprimerPhoto(discord.ui.Select):
     def __init__(self, tribu_id: int, tribu_nom: str, photos: list):
@@ -644,7 +644,7 @@ class SelectSupprimerPhoto(discord.ui.Select):
             count_restant = len(photos_restantes)
         
         ajouter_historique(self.tribu_id, inter.user.id, "Photo supprimée", f"Photo supprimée de la galerie")
-        await inter.response.send_message(f"✅ Photo supprimée de la galerie de **{self.tribu_nom}** ! ({count_restant}/10 photos restantes)", ephemeral=True)
+        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"✅ **Photo supprimée de {self.tribu_nom} !** ({count_restant}/10)", ephemeral=False)
 
 class ViewSupprimerPhoto(discord.ui.View):
     def __init__(self, tribu_id: int, tribu_nom: str, photos: list):
@@ -2745,7 +2745,7 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
     
     source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
     ajouter_historique(row["id"], inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée {source}")
-    await inter.response.send_message(f"✅ Photo #{nouvel_ordre + 1} ajoutée à la galerie de **{row['nom']}** ! ({count + 1}/10 photos)\n{source}", ephemeral=True)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {row['nom']} !** ({count + 1}/10)\n{source}", ephemeral=False)
 
 async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     """Autocomplétion pour les photos d'une tribu"""
@@ -2822,7 +2822,7 @@ async def supprimer_photo(inter: discord.Interaction, nom: str, photo_id: str):
         count_restant = len(photos_restantes)
     
     ajouter_historique(row["id"], inter.user.id, "Photo supprimée", f"Photo supprimée de la galerie")
-    await inter.response.send_message(f"✅ Photo supprimée de la galerie de **{row['nom']}** ! ({count_restant}/10 photos restantes)", ephemeral=True)
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Photo supprimée de {row['nom']} !** ({count_restant}/10)", ephemeral=False)
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
