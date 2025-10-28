@@ -1899,6 +1899,55 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
                      (msg.id, msg.channel.id, tribu_id))
             conn.commit()
 
+async def rafraichir_fiche_tribu(client, tribu_id: int):
+    """Rafraîchit automatiquement la fiche tribu existante après une modification"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
+        tribu = c.fetchone()
+        
+        if not tribu:
+            return
+        
+        # Récupérer message_id et channel_id
+        message_id = tribu.get("message_id", 0) or 0
+        channel_id = tribu.get("channel_id", 0) or 0
+        
+        # Si pas de message existant, ne rien faire
+        if not message_id or not channel_id:
+            return
+        
+        # Récupérer les données
+        c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (tribu_id,))
+        membres = c.fetchall()
+        c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        avant_postes = c.fetchall()
+        c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
+        photos = c.fetchall()
+        
+        # Récupérer l'avatar du créateur
+        createur_avatar_url = None
+        try:
+            createur = await client.fetch_user(tribu['proprietaire_id'])
+            if createur:
+                createur_avatar_url = createur.display_avatar.url
+        except:
+            pass
+        
+        # Créer l'embed mis à jour
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        
+        # Éditer le message existant
+        try:
+            channel = client.get_channel(channel_id)
+            if channel:
+                message = await channel.fetch_message(message_id)
+                await message.edit(embed=embed, view=view)
+        except:
+            # Message introuvable ou supprimé, ne rien faire
+            pass
+
 # ---------- Commandes slash standalone ----------
 
 @tree.command(name="créer_tribu", description="Créer une nouvelle tribu")
@@ -2534,7 +2583,8 @@ async def boss_valide_tribu(inter: discord.Interaction, boss: str):
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Boss validé", boss)
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Boss {boss} validé pour {row['nom']} !**")
+    await inter.response.send_message(f"✅ **Boss {boss} validé pour {row['nom']} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @boss_valide_tribu.autocomplete('boss')
 async def boss_autocomplete(inter: discord.Interaction, current: str):
@@ -2583,7 +2633,8 @@ async def note_valide_tribu(inter: discord.Interaction, note: str):
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Note validée", note)
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Note {note} validée pour {row['nom']} !**")
+    await inter.response.send_message(f"✅ **Note {note} validée pour {row['nom']} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @note_valide_tribu.autocomplete('note')
 async def note_autocomplete(inter: discord.Interaction, current: str):
@@ -2632,7 +2683,8 @@ async def boss_non_valide_tribu(inter: discord.Interaction, boss: str):
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Boss non-validé", boss)
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Boss {boss} marqué comme non-validé pour {row['nom']} !**")
+    await inter.response.send_message(f"❌ **Boss {boss} marqué comme non-validé pour {row['nom']} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @boss_non_valide_tribu.autocomplete('boss')
 async def boss_non_valide_autocomplete(inter: discord.Interaction, current: str):
@@ -2681,7 +2733,8 @@ async def notes_non_valide_tribu(inter: discord.Interaction, note: str):
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Note non-validée", note)
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"<a:no:1328152539660554363> **Note {note} marquée comme non-validée pour {row['nom']} !**")
+    await inter.response.send_message(f"❌ **Note {note} marquée comme non-validée pour {row['nom']} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @notes_non_valide_tribu.autocomplete('note')
 async def notes_non_valide_autocomplete(inter: discord.Interaction, current: str):
