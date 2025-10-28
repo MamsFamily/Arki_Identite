@@ -1521,9 +1521,29 @@ class MenuFicheTribu(discord.ui.View):
                 await inter.response.send_message("❌ Seuls le référent, les managers, admins et modos peuvent personnaliser la tribu.", ephemeral=True)
                 return
         
-        # Ouvrir le modal de personnalisation
-        modal = ModalPersonnaliserTribu()
-        await inter.response.send_modal(modal)
+        # Afficher un message avec le lien pour la couleur + bouton pour ouvrir le modal
+        e = discord.Embed(
+            title="🎨 Personnaliser ta tribu",
+            description="**Avant de personnaliser, voici un outil utile :**\n\n"
+                        "🎨 **Pour choisir ta couleur :**\n"
+                        "👉 [Cliquer ici pour le sélecteur de couleur](https://htmlcolorcodes.com/fr/selecteur-de-couleur/)\n\n"
+                        "💡 **Clique ensuite sur le bouton ci-dessous pour ouvrir le formulaire de personnalisation.**",
+            color=0x5865F2
+        )
+        e.set_footer(text="💡 Le sélecteur de couleur t'aidera à trouver le code hexadécimal parfait")
+        
+        # Créer un bouton pour ouvrir le modal
+        view = discord.ui.View(timeout=180)
+        btn = discord.ui.Button(label="Ouvrir le formulaire", style=discord.ButtonStyle.primary, emoji="📝")
+        
+        async def btn_callback(btn_inter: discord.Interaction):
+            modal = ModalPersonnaliserTribu()
+            await btn_inter.response.send_modal(modal)
+        
+        btn.callback = btn_callback
+        view.add_item(btn)
+        
+        await inter.response.send_message(embed=e, view=view, ephemeral=True)
     
     async def action_guide(self, inter: discord.Interaction):
         # Afficher le guide
