@@ -808,6 +808,7 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Membre ajouté", f"{selected_user.mention} ajouté à la tribu")
             await select_inter.response.send_message(f"✅ {selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         user_select.callback = user_select_callback
         view.add_item(user_select)
@@ -868,6 +869,7 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Membre retiré", f"<@{user_id}> retiré de la tribu")
             await select_inter.response.send_message(f"✅ <@{user_id}> a été retiré de **{self.tribu_nom}** !", ephemeral=True)
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
         view = discord.ui.View(timeout=180)
@@ -948,7 +950,8 @@ class PanneauMembre(discord.ui.View):
                     conn.commit()
                 
                 ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} — {map_selectionnee} | {coords}")
-                await afficher_fiche_mise_a_jour(modal_inter, self.tribu_id, f"✅ **{nom_ap} ajouté : {map_selectionnee} !**")
+                await modal_inter.response.send_message(f"✅ **{nom_ap} ajouté : {map_selectionnee} !**", ephemeral=True)
+                await rafraichir_fiche_tribu(modal_inter.client, self.tribu_id)
             
             modal.on_submit = modal_callback
             await select_inter.response.send_modal(modal)
@@ -1011,6 +1014,7 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Avant-poste supprimé", nom_ap)
             await select_inter.response.send_message(f"✅ **{nom_ap}** supprimé de **{self.tribu_nom}** !", ephemeral=True)
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
         view = discord.ui.View(timeout=180)
@@ -2137,7 +2141,8 @@ async def tribu_modifier(
         c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
         conn.commit()
 
-    await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Fiche mise à jour !**")
+    await inter.response.send_message("✅ **Fiche mise à jour !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="ajouter_membre_tribu", description="Ajouter un membre à ta tribu")
 @app_commands.describe(
@@ -2182,7 +2187,9 @@ async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.
                   (row["id"], utilisateur.id, nom_ingame.strip(), manager_flag))
         conn.commit()
     
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **<@{utilisateur.id}> ajouté à {row['nom']} !**")
+    ajouter_historique(row["id"], inter.user.id, "Membre ajouté", f"<@{utilisateur.id}> ajouté à la tribu")
+    await inter.response.send_message(f"✅ **<@{utilisateur.id}> ajouté à {row['nom']} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="supprimer_membre_tribu", description="Retirer un membre d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", utilisateur="Membre à retirer")
@@ -2199,7 +2206,9 @@ async def supprimer_membre_tribu(inter: discord.Interaction, nom: str, utilisate
         c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (row["id"], utilisateur.id))
         conn.commit()
     
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **<@{utilisateur.id}> retiré de {row['nom']} !**")
+    ajouter_historique(row["id"], inter.user.id, "Membre retiré", f"<@{utilisateur.id}> retiré de la tribu")
+    await inter.response.send_message(f"✅ **<@{utilisateur.id}> retiré de {row['nom']} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à ta tribu")
 @app_commands.describe(
@@ -2249,7 +2258,8 @@ async def ajouter_avant_poste(
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Ajout avant-poste", f"{nom_avant_poste} - {map.strip()} | {coords.strip()}")
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **{nom_avant_poste} ajouté : {map.strip()} !**")
+    await inter.response.send_message(f"✅ **{nom_avant_poste} ajouté : {map.strip()} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @ajouter_avant_poste.autocomplete('map')
 async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str):
@@ -2275,7 +2285,8 @@ async def supprimer_avant_poste(inter: discord.Interaction, nom_tribu: str, map:
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Retrait avant-poste", f"{map}")
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Avant-poste {map} retiré de {row['nom']} !**")
+    await inter.response.send_message(f"✅ **Avant-poste {map} retiré de {row['nom']} !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="tribu_transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
@@ -2952,7 +2963,8 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             
             # Ajouter l'historique après avoir fermé la connexion
             ajouter_historique(row["id"], inter.user.id, "Modification", f"Champs modifiés: {', '.join(updates.keys())}")
-            await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu modifiée !**", ephemeral=False)
+            await inter.response.send_message("✅ **Tribu modifiée !**", ephemeral=True)
+            await rafraichir_fiche_tribu(inter.client, row["id"])
         else:
             await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
@@ -3001,7 +3013,8 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             # Ajouter l'historique après avoir fermé la connexion
             ajouter_historique(row["id"], inter.user.id, "Personnalisation", f"Champs: {', '.join(updates.keys())}")
         
-        await afficher_fiche_mise_a_jour(inter, row["id"], "✅ **Tribu personnalisée !**", ephemeral=False)
+        await inter.response.send_message("✅ **Tribu personnalisée !**", ephemeral=True)
+        await rafraichir_fiche_tribu(inter.client, row["id"])
 
 async def afficher_guide(inter: discord.Interaction):
     """Affiche le guide d'information pour personnaliser sa tribu"""
