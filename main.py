@@ -1245,7 +1245,26 @@ class MenuFicheTribu(discord.ui.View):
         self.tribu_id = tribu_id
         self.photo_index = photo_index
         
-        # Créer dynamiquement le select avec un custom_id incluant le tribu_id
+        # Ajouter les boutons de navigation de galerie EN PREMIER (row=0, au-dessus)
+        btn_prev = discord.ui.Button(
+            emoji="◀️",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"galerie_prev:{tribu_id}",
+            row=0
+        )
+        btn_prev.callback = self.photo_precedente
+        self.add_item(btn_prev)
+        
+        btn_next = discord.ui.Button(
+            emoji="▶️",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"galerie_next:{tribu_id}",
+            row=0
+        )
+        btn_next.callback = self.photo_suivante
+        self.add_item(btn_next)
+        
+        # Créer dynamiquement le select avec un custom_id incluant le tribu_id (row=1, en dessous)
         select = discord.ui.Select(
             placeholder="Sélectionne une action...",
             custom_id=f"menu_fiche:{tribu_id}",
@@ -1256,29 +1275,10 @@ class MenuFicheTribu(discord.ui.View):
                 discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
                 discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
             ],
-            row=0
+            row=1
         )
         select.callback = self.menu_callback
         self.add_item(select)
-        
-        # Ajouter les boutons de navigation de galerie (discrets, sans texte)
-        btn_prev = discord.ui.Button(
-            emoji="◀️",
-            style=discord.ButtonStyle.secondary,
-            custom_id=f"galerie_prev:{tribu_id}",
-            row=1
-        )
-        btn_prev.callback = self.photo_precedente
-        self.add_item(btn_prev)
-        
-        btn_next = discord.ui.Button(
-            emoji="▶️",
-            style=discord.ButtonStyle.secondary,
-            custom_id=f"galerie_next:{tribu_id}",
-            row=1
-        )
-        btn_next.callback = self.photo_suivante
-        self.add_item(btn_next)
     
     async def photo_precedente(self, inter: discord.Interaction):
         """Afficher la photo précédente dans la galerie"""
