@@ -1175,48 +1175,157 @@ class PanneauMembre(discord.ui.View):
         e.set_footer(text="Total : 27 commandes disponibles • Utilise /guide pour les conseils de personnalisation")
         await inter.response.send_message(embed=e, ephemeral=True)
     
-    @discord.ui.button(label="Consulter le guide", style=discord.ButtonStyle.secondary, emoji="📚", row=4)
-    async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
-        # Afficher directement l'embed de la commande /guide
-        e = discord.Embed(
-            title="📖 Guide — Personnaliser ta tribu",
-            description="Voici les informations utiles pour compléter et personnaliser ta fiche tribu :",
-            color=0x5865F2
+    @discord.ui.button(label="Boss validé", style=discord.ButtonStyle.success, emoji="✅", row=4)
+    async def btn_boss_valide(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer tous les boss disponibles
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT nom FROM boss WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+            boss_list = [row["nom"] for row in c.fetchall()]
+        
+        if not boss_list:
+            await inter.response.send_message("❌ Aucun boss disponible. Contacte un admin pour en ajouter.", ephemeral=True)
+            return
+        
+        # Créer le menu déroulant des boss
+        options = []
+        for boss_nom in boss_list[:25]:  # Discord limite à 25 options
+            options.append(discord.SelectOption(
+                label=boss_nom,
+                value=boss_nom,
+                emoji="<a:yes:1328152490163601448>"
+            ))
+        
+        select = discord.ui.Select(
+            placeholder="<a:yes:1328152490163601448> Sélectionne le boss validé...",
+            options=options
         )
         
-        e.add_field(
-            name="🎨 Site pour la couleur",
-            value="https://htmlcolorcodes.com/fr/selecteur-de-couleur/",
-            inline=False
+        async def select_callback(select_inter: discord.Interaction):
+            boss_selectionne = select.values[0]
+            
+            # Vérifier les droits et ajouter le boss validé
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not row:
+                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    return
+                
+                if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
+                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    return
+                
+                # Récupérer les deux listes
+                boss_valides = [b.strip() for b in (row["progression_boss"] or "").split(",") if b.strip()]
+                boss_non_valides = [b.strip() for b in (row["progression_boss_non_valides"] or "").split(",") if b.strip()]
+                
+                # Vérifier si le boss est déjà validé
+                if boss_selectionne in boss_valides:
+                    await select_inter.response.send_message(f"ℹ️ Le boss **{boss_selectionne}** est déjà validé pour {row['nom']}.", ephemeral=True)
+                    return
+                
+                # Retirer de la liste non-validés si présent
+                if boss_selectionne in boss_non_valides:
+                    boss_non_valides.remove(boss_selectionne)
+                
+                # Ajouter à la liste des validés
+                boss_valides.append(boss_selectionne)
+                
+                c.execute("UPDATE tribus SET progression_boss=?, progression_boss_non_valides=? WHERE id=?", 
+                         (", ".join(boss_valides), ", ".join(boss_non_valides), row["id"]))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Boss validé", boss_selectionne)
+            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"✅ **Boss {boss_selectionne} validé pour {row['nom']} !**")
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=180)
+        view.add_item(select)
+        
+        await inter.response.send_message("✅ **Marquer un boss comme validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
+    
+    @discord.ui.button(label="Boss non validé", style=discord.ButtonStyle.danger, emoji="<a:no:1328152539660554363>", row=4)
+    async def btn_boss_non_valide(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer tous les boss disponibles
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT nom FROM boss WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+            boss_list = [row["nom"] for row in c.fetchall()]
+        
+        if not boss_list:
+            await inter.response.send_message("❌ Aucun boss disponible. Contacte un admin pour en ajouter.", ephemeral=True)
+            return
+        
+        # Créer le menu déroulant des boss
+        options = []
+        for boss_nom in boss_list[:25]:  # Discord limite à 25 options
+            options.append(discord.SelectOption(
+                label=boss_nom,
+                value=boss_nom,
+                emoji="<a:no:1328152539660554363>"
+            ))
+        
+        select = discord.ui.Select(
+            placeholder="<a:no:1328152539660554363> Sélectionne le boss non-validé...",
+            options=options
         )
         
-        e.add_field(
-            name="🖼️ Site pour publier un logo ou une image",
-            value="https://postimages.org\n*N'oublie pas de recopier le lien direct pour ajouter une photo ou un logo.*",
-            inline=False
-        )
+        async def select_callback(select_inter: discord.Interaction):
+            boss_selectionne = select.values[0]
+            
+            # Vérifier les droits et ajouter le boss non-validé
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not row:
+                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    return
+                
+                if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
+                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    return
+                
+                # Récupérer les deux listes
+                boss_valides = [b.strip() for b in (row["progression_boss"] or "").split(",") if b.strip()]
+                boss_non_valides = [b.strip() for b in (row["progression_boss_non_valides"] or "").split(",") if b.strip()]
+                
+                # Vérifier si le boss est déjà non-validé
+                if boss_selectionne in boss_non_valides:
+                    await select_inter.response.send_message(f"ℹ️ Le boss **{boss_selectionne}** est déjà marqué comme non-validé pour {row['nom']}.", ephemeral=True)
+                    return
+                
+                # Retirer de la liste validés si présent
+                if boss_selectionne in boss_valides:
+                    boss_valides.remove(boss_selectionne)
+                
+                # Ajouter à la liste des non-validés
+                boss_non_valides.append(boss_selectionne)
+                
+                c.execute("UPDATE tribus SET progression_boss=?, progression_boss_non_valides=? WHERE id=?", 
+                         (", ".join(boss_valides), ", ".join(boss_non_valides), row["id"]))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Boss non-validé", boss_selectionne)
+            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"<a:no:1328152539660554363> **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**")
         
-        e.add_field(
-            name="📊 Gérer la progression (Boss & Notes)",
-            value=(
-                "Utilise ces commandes pour compléter la progression de ta fiche :\n"
-                "• `/boss_validé_tribu` — ajouter un boss complété\n"
-                "• `/boss_non_validé_tribu` — retirer un boss\n"
-                "• `/note_validé_tribu` — ajouter une note complétée\n"
-                "• `/notes_non_validé_tribu` — retirer une note"
-            ),
-            inline=False
-        )
+        select.callback = select_callback
+        view = discord.ui.View(timeout=180)
+        view.add_item(select)
         
-        e.add_field(
-            name="👥 Gérer les membres et avant-postes",
-            value="Pour ajouter ou retirer des membres et avant-postes, utilise :\n• `/ajouter_membre_tribu`\n• `/supprimer_membre_tribu`\n• `/ajouter_avant_poste`\n• `/supprimer_avant_poste`",
-            inline=False
-        )
-        
-        e.set_footer(text="💡 Utilise /aide pour voir toutes les commandes disponibles")
-        
-        await inter.response.send_message(embed=e, ephemeral=True)
+        await inter.response.send_message("<a:no:1328152539660554363> **Marquer un boss comme non-validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
 
 # ---------- Panneau Staff pour gérer une tribu spécifique ----------
 class PanneauStaff(discord.ui.View):
@@ -1295,6 +1404,7 @@ class MenuFicheTribu(discord.ui.View):
             options=[
                 discord.SelectOption(label="Mes commandes", value="commandes", emoji="💡", description="Aide et commandes utiles"),
                 discord.SelectOption(label="Personnaliser", value="personnaliser", emoji="🎨", description="Personnaliser la tribu"),
+                discord.SelectOption(label="Guide", value="guide", emoji="📖", description="Consulter le guide"),
                 discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
                 discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
                 discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
@@ -1361,6 +1471,8 @@ class MenuFicheTribu(discord.ui.View):
             await self.action_commandes(inter)
         elif choice == "personnaliser":
             await self.action_personnaliser(inter)
+        elif choice == "guide":
+            await self.action_guide(inter)
         elif choice == "quitter":
             await self.action_quitter(inter)
         elif choice == "historique":
@@ -1412,6 +1524,10 @@ class MenuFicheTribu(discord.ui.View):
         # Ouvrir le modal de personnalisation
         modal = ModalPersonnaliserTribu()
         await inter.response.send_modal(modal)
+    
+    async def action_guide(self, inter: discord.Interaction):
+        # Afficher le guide
+        await afficher_guide(inter)
     
     async def action_quitter(self, inter: discord.Interaction):
         # Vérifier que l'utilisateur est membre
