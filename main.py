@@ -2820,7 +2820,7 @@ async def supprimer_photo(inter: discord.Interaction, nom: str, photo_id: str):
     if not await verifier_droits(inter, row):
         return
     
-    # Supprimer la photo
+    # Récupérer la photo
     try:
         photo_id_int = int(photo_id)
     except ValueError:
@@ -2836,22 +2836,22 @@ async def supprimer_photo(inter: discord.Interaction, nom: str, photo_id: str):
         if not photo:
             await inter.response.send_message("❌ Photo introuvable ou n'appartient pas à cette tribu.", ephemeral=True)
             return
-        
-        # Supprimer la photo
-        c.execute("DELETE FROM photos_tribu WHERE id=?", (photo_id_int,))
-        
-        # Réorganiser les ordres
-        c.execute("SELECT id FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (row["id"],))
-        photos_restantes = c.fetchall()
-        for i, p in enumerate(photos_restantes):
-            c.execute("UPDATE photos_tribu SET ordre=? WHERE id=?", (i, p["id"]))
-        
-        conn.commit()
-        
-        count_restant = len(photos_restantes)
     
-    ajouter_historique(row["id"], inter.user.id, "Photo supprimée", f"Photo supprimée de la galerie")
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Photo supprimée de {row['nom']} !** ({count_restant}/10)", ephemeral=False)
+    # Afficher la confirmation avec la photo
+    photo_numero = photo['ordre'] + 1
+    
+    e = discord.Embed(
+        title=f"⚠️ Confirmer la suppression — {row['nom']}",
+        description=f"**Es-tu sûr de vouloir supprimer la Photo {photo_numero} ?**\n\nCette action est irréversible.",
+        color=0xFF6B6B
+    )
+    e.set_image(url=photo['url'])
+    e.set_footer(text="💡 Clique sur ✅ pour confirmer ou ❌ pour annuler")
+    
+    # Créer la vue de confirmation
+    view = ConfirmationSupprimerPhoto(row["id"], row['nom'], photo_id_int, photo['url'], photo_numero)
+    
+    await inter.response.send_message(embed=e, view=view, ephemeral=True)
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
