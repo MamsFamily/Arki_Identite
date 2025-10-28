@@ -195,6 +195,24 @@ def db_init():
         VALUES (0, 'banniere_panneau', 'https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg')
         """)
         
+        # Initialiser la couleur du panneau par défaut (bleu Discord)
+        c.execute("""
+        INSERT OR IGNORE INTO config (guild_id, cle, valeur)
+        VALUES (0, 'couleur_panneau', '5865F2')
+        """)
+        
+        # Initialiser le texte du panneau par défaut
+        c.execute("""
+        INSERT OR IGNORE INTO config (guild_id, cle, valeur)
+        VALUES (0, 'texte_panneau', 'Bienvenue sur le panneau de gestion des tribus ! Utilise les boutons ci-dessous pour gérer ta tribu.')
+        """)
+        
+        # Salon par défaut pour les fiches tribu (0 = salon actuel)
+        c.execute("""
+        INSERT OR IGNORE INTO config (guild_id, cle, valeur)
+        VALUES (0, 'salon_fiche_tribu', '0')
+        """)
+        
         # Boss par défaut
         default_boss = ["Broodmother", "Megapithecus", "Dragon", "Cave Tek", "Manticore", "Rockwell", "King Titan", "Boss Astraeos"]
         for boss_name in default_boss:
@@ -240,6 +258,24 @@ def db_init():
                 VALUES (?, ?, 0, ?)
                 """, (tribu["id"], tribu["photo_base"], dt.datetime.utcnow().isoformat()))
         
+        conn.commit()
+
+def get_config(guild_id: int, cle: str, defaut: str = "") -> str:
+    """Récupère une valeur de configuration pour un serveur"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        # Chercher d'abord pour ce serveur, sinon utiliser la valeur globale (guild_id=0)
+        c.execute("SELECT valeur FROM config WHERE guild_id IN (?, 0) AND cle=? ORDER BY guild_id DESC LIMIT 1", 
+                 (guild_id, cle))
+        row = c.fetchone()
+        return row["valeur"] if row else defaut
+
+def set_config(guild_id: int, cle: str, valeur: str):
+    """Définit une valeur de configuration pour un serveur"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("INSERT OR REPLACE INTO config (guild_id, cle, valeur) VALUES (?, ?, ?)",
+                 (guild_id, cle, valeur))
         conn.commit()
 
 def get_maps_choices(guild_id: int):
@@ -1099,9 +1135,6 @@ class PanneauMembre(discord.ui.View):
             value=(
                 "• **/créer_tribu** — créer une nouvelle tribu\n"
                 "• **/fiche_tribu** — afficher une fiche tribu complète\n"
-                "• **/modifier_tribu** — éditer les infos de base\n"
-                "• **/personnaliser_tribu** — personnaliser ta tribu\n"
-                "• **/guide** — afficher le guide\n"
                 "• **/quitter_tribu** — quitter ta tribu\n"
                 "• **/tribu_transférer** — transférer la propriété\n"
                 "• **/tribu_supprimer** — supprimer une tribu"
@@ -1109,38 +1142,13 @@ class PanneauMembre(discord.ui.View):
             inline=False
         )
         
-        # Membres et avant-postes
-        e.add_field(
-            name="👥 Membres & avant-postes",
-            value=(
-                "• **/ajouter_membre_tribu** — ajouter un membre\n"
-                "• **/supprimer_membre_tribu** — retirer un membre\n"
-                "• **/mon_nom_ingame** — modifier ton nom in-game\n"
-                "• **/ajouter_avant_poste** — ajouter un avant-poste\n"
-                "• **/supprimer_avant_poste** — retirer un avant-poste"
-            ),
-            inline=False
-        )
-        
         # Galerie & personnalisation
         e.add_field(
-            name="🎨 Galerie & personnalisation",
+            name="🎨 Galerie & Membres",
             value=(
+                "• **/mon_nom_ingame** — modifier ton nom in-game\n"
                 "• **/ajouter_logo** — changer le logo (fichier ou URL)\n"
-                "• **/ajouter_photo** — ajouter une photo (fichier ou URL)\n"
-                "• **/supprimer_photo** — retirer une photo"
-            ),
-            inline=False
-        )
-        
-        # Progression
-        e.add_field(
-            name="📊 Progression boss & notes",
-            value=(
-                "• **/boss_validé_tribu** — marquer un boss comme validé\n"
-                "• **/boss_non_validé_tribu** — marquer un boss comme non-validé\n"
-                "• **/note_validé_tribu** — marquer une note comme validée\n"
-                "• **/notes_non_validé_tribu** — marquer une note comme non-validée"
+                "• **/ajouter_photo** — ajouter une photo (fichier ou URL)"
             ),
             inline=False
         )
@@ -1167,7 +1175,7 @@ class PanneauMembre(discord.ui.View):
             inline=False
         )
         
-        e.set_footer(text="Total : 27 commandes disponibles • Utilise /guide pour les conseils de personnalisation")
+        e.set_footer(text="💡 Utilise /panneau pour un accès rapide aux fonctions principales")
         await inter.response.send_message(embed=e, ephemeral=True)
     
     @discord.ui.button(label="Boss validé", style=discord.ButtonStyle.success, emoji="✅", row=4)
@@ -1487,30 +1495,27 @@ class PanneauStaff(discord.ui.View):
     
     @discord.ui.button(label="Modifier", style=discord.ButtonStyle.primary, emoji="🛠️", row=0)
     async def btn_modifier(self, inter: discord.Interaction, button: discord.ui.Button):
-        # Pré-remplir le modal avec le nom de la tribu
-        modal = ModalModifierTribu()
-        # On ne peut pas pré-remplir directement, mais on peut créer un modal spécifique
-        await inter.response.send_message(f"ℹ️ Utilise `/modifier_tribu` et sélectionne **{self.tribu_nom}** pour modifier cette tribu.", ephemeral=True)
+        await inter.response.send_message(f"ℹ️ Utilise le bouton **Modifier** dans la fiche de **{self.tribu_nom}** pour modifier cette tribu.", ephemeral=True)
     
     @discord.ui.button(label="Personnaliser", style=discord.ButtonStyle.primary, emoji="🎨", row=0)
     async def btn_personnaliser(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/personnaliser_tribu` et sélectionne **{self.tribu_nom}** pour personnaliser cette tribu.", ephemeral=True)
+        await inter.response.send_message(f"ℹ️ Utilise le bouton **Personnaliser** dans la fiche de **{self.tribu_nom}** pour personnaliser cette tribu.", ephemeral=True)
     
     @discord.ui.button(label="Ajouter membre", style=discord.ButtonStyle.success, emoji="👤", row=1)
     async def btn_ajouter_membre(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_membre_tribu` et sélectionne **{self.tribu_nom}** pour ajouter un membre.", ephemeral=True)
+        await inter.response.send_message(f"ℹ️ Utilise le bouton **Ajouter membre** dans la fiche de **{self.tribu_nom}** pour ajouter un membre.", ephemeral=True)
     
     @discord.ui.button(label="Supprimer membre", style=discord.ButtonStyle.secondary, emoji="👥", row=1)
     async def btn_supprimer_membre(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_membre_tribu` et sélectionne **{self.tribu_nom}** pour supprimer un membre.", ephemeral=True)
+        await inter.response.send_message(f"ℹ️ Utilise le bouton **Supprimer membre** dans la fiche de **{self.tribu_nom}** pour supprimer un membre.", ephemeral=True)
     
     @discord.ui.button(label="Ajouter avant-poste", style=discord.ButtonStyle.success, emoji="🏘️", row=2)
     async def btn_ajouter_ap(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_avant_poste` et sélectionne **{self.tribu_nom}** pour ajouter un avant-poste.", ephemeral=True)
+        await inter.response.send_message(f"ℹ️ Utilise le bouton **Ajouter avant-poste** dans la fiche de **{self.tribu_nom}** pour ajouter un avant-poste.", ephemeral=True)
     
     @discord.ui.button(label="Supprimer avant-poste", style=discord.ButtonStyle.secondary, emoji="🏚️", row=2)
     async def btn_supprimer_ap(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_avant_poste` et sélectionne **{self.tribu_nom}** pour supprimer un avant-poste.", ephemeral=True)
+        await inter.response.send_message(f"ℹ️ Utilise le bouton **Supprimer avant-poste** dans la fiche de **{self.tribu_nom}** pour supprimer un avant-poste.", ephemeral=True)
     
     @discord.ui.button(label="Réafficher fiche", style=discord.ButtonStyle.primary, emoji="🔄", row=3)
     async def btn_afficher(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -2034,7 +2039,7 @@ async def tribu_creer(
         row = c.fetchone()
     
     embed = embed_tribu(row)
-    embed.set_footer(text="ℹ️ Ajoutez des membres avec /ajouter_membre_tribu et des avant-postes avec /ajouter_avant_poste")
+    embed.set_footer(text="ℹ️ Utilisez le panneau de la fiche tribu pour ajouter des membres et des avant-postes")
     await inter.response.send_message("✅ **Tribu créée !**", embed=embed)
 
 @tribu_creer.autocomplete('map_base')
@@ -2075,218 +2080,10 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
     
     await afficher_fiche(inter, row["id"])
 
-@tree.command(name="modifier_tribu", description="Modifier les infos d'une tribu")
-@app_commands.describe(
-    nom="Nom de la tribu à modifier",
-    nouveau_nom="Nouveau nom (optionnel)",
-    description="Nouvelle description (optionnel)",
-    couleur_hex="Couleur hex. ex: #00AAFF (optionnel)",
-    logo_url="URL du logo (optionnel)",
-    base="Nom de la base principale (optionnel)",
-    map_base="Map de la base principale (optionnel)",
-    coords_base="Coordonnées de la base ex: 45.5, 32.6 (optionnel)"
-)
-async def tribu_modifier(
-    inter: discord.Interaction,
-    nom: str,
-    nouveau_nom: Optional[str] = None,
-    description: Optional[str] = None,
-    couleur_hex: Optional[str] = None,
-    logo_url: Optional[str] = None,
-    base: Optional[str] = None,
-    map_base: Optional[str] = None,
-    coords_base: Optional[str] = None
-):
-    db_init()
-    row = tribu_par_nom(inter.guild_id, nom)
-    if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
-        return
-    if not await verifier_droits(inter, row):
-        return
 
-    updates = {}
-    if nouveau_nom:
-        updates["nom"] = nouveau_nom.strip()
-    if description is not None:
-        updates["description"] = description.strip()
-    if couleur_hex:
-        try:
-            updates["couleur"] = int(couleur_hex.replace("#", ""), 16)
-        except ValueError:
-            await inter.response.send_message("❌ Couleur invalide. Utilise un hex, ex: #00AAFF", ephemeral=True)
-            return
-    if logo_url is not None:
-        updates["logo_url"] = logo_url.strip()
-    if base is not None:
-        updates["base"] = base.strip()
-    if map_base is not None:
-        updates["map_base"] = map_base.strip()
-    if coords_base is not None:
-        updates["coords_base"] = coords_base.strip()
 
-    if not updates:
-        await inter.response.send_message("Aucun changement fourni.", ephemeral=True)
-        return
 
-    with db_connect() as conn:
-        c = conn.cursor()
-        if "nom" in updates:
-            c.execute("SELECT 1 FROM tribus WHERE guild_id=? AND LOWER(nom)=LOWER(?) AND id<>?",
-                      (inter.guild_id, updates["nom"], row["id"]))
-            if c.fetchone():
-                await inter.response.send_message("❌ Ce nouveau nom est déjà utilisé.", ephemeral=True)
-                return
-        set_clause = ", ".join(f"{k}=?" for k in updates.keys())
-        c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
-        conn.commit()
 
-    await inter.response.send_message("✅ **Fiche mise à jour !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
-
-@tree.command(name="ajouter_membre_tribu", description="Ajouter un membre à ta tribu")
-@app_commands.describe(
-    utilisateur="Membre à ajouter", 
-    nom_ingame="Nom in-game du joueur", 
-    autorisé_à_modifier_fiche="Autoriser à modifier la fiche ? (oui/non)"
-)
-@app_commands.choices(autorisé_à_modifier_fiche=[
-    app_commands.Choice(name="Oui", value="oui"),
-    app_commands.Choice(name="Non", value="non")
-])
-async def ajouter_membre_tribu(inter: discord.Interaction, utilisateur: discord.Member, nom_ingame: str, autorisé_à_modifier_fiche: str):
-    db_init()
-    
-    # Trouver la tribu du propriétaire/manager
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT t.* FROM tribus t
-            LEFT JOIN membres m ON t.id = m.tribu_id AND m.user_id = ?
-            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR m.manager = 1)
-        """, (inter.user.id, inter.guild_id, inter.user.id))
-        tribus = c.fetchall()
-    
-    if not tribus:
-        await inter.response.send_message("❌ Tu n'es propriétaire ou manager d'aucune tribu.", ephemeral=True)
-        return
-    
-    if len(tribus) > 1:
-        noms = ", ".join([t["nom"] for t in tribus])
-        await inter.response.send_message(f"❌ Tu gères plusieurs tribus ({noms}). Utilise `/modifier_tribu` puis ajoute les membres manuellement.", ephemeral=True)
-        return
-    
-    row = tribus[0]
-    
-    # Convertir oui/non en 1/0 pour la base de données
-    manager_flag = 1 if autorisé_à_modifier_fiche.lower() == "oui" else 0
-    
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("INSERT OR REPLACE INTO membres (tribu_id, user_id, nom_in_game, manager) VALUES (?, ?, ?, ?)",
-                  (row["id"], utilisateur.id, nom_ingame.strip(), manager_flag))
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Membre ajouté", f"<@{utilisateur.id}> ajouté à la tribu")
-    await inter.response.send_message(f"✅ **<@{utilisateur.id}> ajouté à {row['nom']} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
-
-@tree.command(name="supprimer_membre_tribu", description="Retirer un membre d'une tribu")
-@app_commands.describe(nom="Nom de la tribu", utilisateur="Membre à retirer")
-async def supprimer_membre_tribu(inter: discord.Interaction, nom: str, utilisateur: discord.Member):
-    db_init()
-    row = tribu_par_nom(inter.guild_id, nom)
-    if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
-        return
-    if not await verifier_droits(inter, row):
-        return
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (row["id"], utilisateur.id))
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Membre retiré", f"<@{utilisateur.id}> retiré de la tribu")
-    await inter.response.send_message(f"✅ **<@{utilisateur.id}> retiré de {row['nom']} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
-
-@tree.command(name="ajouter_avant_poste", description="Ajouter un avant-poste à ta tribu")
-@app_commands.describe(
-    map="Map de l'avant-poste",
-    coords="Coordonnées ex: 45.5, 32.6"
-)
-async def ajouter_avant_poste(
-    inter: discord.Interaction,
-    map: str,
-    coords: str
-):
-    db_init()
-    
-    # Trouver la tribu du joueur
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT t.* FROM tribus t
-            JOIN membres m ON t.id = m.tribu_id
-            WHERE t.guild_id = ? AND m.user_id = ?
-        """, (inter.guild_id, inter.user.id))
-        tribus = c.fetchall()
-    
-    if not tribus:
-        await inter.response.send_message("❌ Tu n'es membre d'aucune tribu. Rejoins ou crée une tribu d'abord.", ephemeral=True)
-        return
-    
-    if len(tribus) > 1:
-        noms = ", ".join([t["nom"] for t in tribus])
-        await inter.response.send_message(f"❌ Tu es membre de plusieurs tribus ({noms}). Contacte un admin pour ajouter ton avant-poste.", ephemeral=True)
-        return
-    
-    row = tribus[0]
-    
-    # Générer un nom automatique pour l'avant-poste
-    with db_connect() as conn:
-        c = conn.cursor()
-        # Compter les avant-postes existants
-        c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (row["id"],))
-        count = c.fetchone()["count"]
-        nom_avant_poste = f"Avant-poste {count + 1}"
-        
-        c.execute("""
-            INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (row["id"], inter.user.id, nom_avant_poste, map.strip(), coords.strip(), dt.datetime.utcnow().isoformat()))
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Ajout avant-poste", f"{nom_avant_poste} - {map.strip()} | {coords.strip()}")
-    await inter.response.send_message(f"✅ **{nom_avant_poste} ajouté : {map.strip()} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
-
-@ajouter_avant_poste.autocomplete('map')
-async def map_avant_poste_autocomplete(inter: discord.Interaction, current: str):
-    db_init()
-    return get_maps_choices(inter.guild_id)
-
-@tree.command(name="supprimer_avant_poste", description="Retirer un avant-poste d'une tribu")
-@app_commands.describe(nom_tribu="Nom de la tribu", map="Map de l'avant-poste à retirer")
-async def supprimer_avant_poste(inter: discord.Interaction, nom_tribu: str, map: str):
-    db_init()
-    row = tribu_par_nom(inter.guild_id, nom_tribu)
-    if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
-        return
-    if not await verifier_droits(inter, row):
-        return
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM avant_postes WHERE tribu_id=? AND LOWER(map)=LOWER(?)", (row["id"], map))
-        if c.rowcount == 0:
-            await inter.response.send_message(f"❌ Aucun avant-poste trouvé avec la map **{map}**.", ephemeral=True)
-            return
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Retrait avant-poste", f"{map}")
-    await inter.response.send_message(f"✅ **Avant-poste {map} retiré de {row['nom']} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="tribu_transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
@@ -2393,35 +2190,7 @@ async def retirer_map(inter: discord.Interaction, nom: str):
 async def tribu_test(inter: discord.Interaction):
     await inter.response.send_message("🐔 Tout roule ma poule")
 
-@tree.command(name="personnaliser_tribu", description="Personnaliser ta tribu (description, devise, logo, couleur)")
-async def personnaliser_tribu(inter: discord.Interaction):
-    # Afficher un message avec le lien pour la couleur + bouton pour ouvrir le modal
-    e = discord.Embed(
-        title="🎨 Personnaliser ta tribu",
-        description="**Avant de personnaliser, voici un outil utile :**\n\n"
-                    "🎨 **Pour choisir ta couleur :**\n"
-                    "👉 [Cliquer ici pour le sélecteur de couleur](https://htmlcolorcodes.com/fr/selecteur-de-couleur/)\n\n"
-                    "💡 **Clique ensuite sur le bouton ci-dessous pour ouvrir le formulaire de personnalisation.**",
-        color=0x5865F2
-    )
-    e.set_footer(text="💡 Le sélecteur de couleur t'aidera à trouver le code hexadécimal parfait")
-    
-    # Créer un bouton pour ouvrir le modal
-    view = discord.ui.View(timeout=180)
-    btn = discord.ui.Button(label="Ouvrir le formulaire", style=discord.ButtonStyle.primary, emoji="📝")
-    
-    async def btn_callback(btn_inter: discord.Interaction):
-        modal = ModalPersonnaliserTribu()
-        await btn_inter.response.send_modal(modal)
-    
-    btn.callback = btn_callback
-    view.add_item(btn)
-    
-    await inter.response.send_message(embed=e, view=view, ephemeral=True)
 
-@tree.command(name="guide", description="Afficher le guide pour personnaliser ta tribu")
-async def guide(inter: discord.Interaction):
-    await afficher_guide(inter)
 
 @tree.command(name="mon_nom_ingame", description="Ajouter ou modifier ton nom In Game")
 @app_commands.describe(nom_ingame="Ton nom dans le jeu (ex: Raptor_Killer42)")
@@ -2592,205 +2361,9 @@ async def changer_banniere_panneau(inter: discord.Interaction, url: str):
     
     await inter.response.send_message(f"✅ **Bannière du panneau modifiée !**\n\nNouvelle URL : {url}\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
 
-@tree.command(name="boss_validé_tribu", description="Valider un boss complété pour ta tribu")
-@app_commands.describe(boss="Boss complété")
-async def boss_valide_tribu(inter: discord.Interaction, boss: str):
-    db_init()
-    
-    # Trouver la tribu de l'utilisateur
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT t.* FROM tribus t
-            LEFT JOIN membres m ON t.id = m.tribu_id
-            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
-        """, (inter.guild_id, inter.user.id, inter.user.id))
-        row = c.fetchone()
-    
-    if not row:
-        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
-        return
-    
-    # Récupérer les deux listes
-    boss_valides = [b.strip() for b in (row["progression_boss"] or "").split(",") if b.strip()]
-    boss_non_valides = [b.strip() for b in (row["progression_boss_non_valides"] or "").split(",") if b.strip()]
-    
-    # Vérifier si le boss est déjà validé
-    if boss in boss_valides:
-        await inter.response.send_message(f"ℹ️ Le boss **{boss}** est déjà validé pour {row['nom']}.", ephemeral=True)
-        return
-    
-    # Retirer de la liste non-validés si présent
-    if boss in boss_non_valides:
-        boss_non_valides.remove(boss)
-    
-    # Ajouter à la liste des validés
-    boss_valides.append(boss)
-    
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_boss=?, progression_boss_non_valides=? WHERE id=?", 
-                 (", ".join(boss_valides), ", ".join(boss_non_valides), row["id"]))
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Boss validé", boss)
-    await inter.response.send_message(f"✅ **Boss {boss} validé pour {row['nom']} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
 
-@boss_valide_tribu.autocomplete('boss')
-async def boss_autocomplete(inter: discord.Interaction, current: str):
-    db_init()
-    return get_boss_choices(inter.guild_id)
 
-@tree.command(name="note_validé_tribu", description="Valider une note complétée pour ta tribu")
-@app_commands.describe(note="Note complétée")
-async def note_valide_tribu(inter: discord.Interaction, note: str):
-    db_init()
-    
-    # Trouver la tribu de l'utilisateur
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT t.* FROM tribus t
-            LEFT JOIN membres m ON t.id = m.tribu_id
-            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
-        """, (inter.guild_id, inter.user.id, inter.user.id))
-        row = c.fetchone()
-    
-    if not row:
-        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
-        return
-    
-    # Récupérer les deux listes
-    notes_valides = [n.strip() for n in (row["progression_notes"] or "").split(",") if n.strip()]
-    notes_non_valides = [n.strip() for n in (row["progression_notes_non_valides"] or "").split(",") if n.strip()]
-    
-    # Vérifier si la note est déjà validée
-    if note in notes_valides:
-        await inter.response.send_message(f"ℹ️ La note **{note}** est déjà validée pour {row['nom']}.", ephemeral=True)
-        return
-    
-    # Retirer de la liste non-validés si présent
-    if note in notes_non_valides:
-        notes_non_valides.remove(note)
-    
-    # Ajouter à la liste des validés
-    notes_valides.append(note)
-    
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_notes=?, progression_notes_non_valides=? WHERE id=?", 
-                 (", ".join(notes_valides), ", ".join(notes_non_valides), row["id"]))
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Note validée", note)
-    await inter.response.send_message(f"✅ **Note {note} validée pour {row['nom']} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
 
-@note_valide_tribu.autocomplete('note')
-async def note_autocomplete(inter: discord.Interaction, current: str):
-    db_init()
-    return get_notes_choices(inter.guild_id)
-
-@tree.command(name="boss_non_validé_tribu", description="Marquer un boss comme non-validé pour ta tribu")
-@app_commands.describe(boss="Boss à marquer comme non-validé")
-async def boss_non_valide_tribu(inter: discord.Interaction, boss: str):
-    db_init()
-    
-    # Trouver la tribu de l'utilisateur
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT t.* FROM tribus t
-            LEFT JOIN membres m ON t.id = m.tribu_id
-            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
-        """, (inter.guild_id, inter.user.id, inter.user.id))
-        row = c.fetchone()
-    
-    if not row:
-        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
-        return
-    
-    # Récupérer les deux listes
-    boss_valides = [b.strip() for b in (row["progression_boss"] or "").split(",") if b.strip()]
-    boss_non_valides = [b.strip() for b in (row["progression_boss_non_valides"] or "").split(",") if b.strip()]
-    
-    # Vérifier si le boss est déjà non-validé
-    if boss in boss_non_valides:
-        await inter.response.send_message(f"ℹ️ Le boss **{boss}** est déjà marqué comme non-validé pour {row['nom']}.", ephemeral=True)
-        return
-    
-    # Retirer de la liste validés si présent
-    if boss in boss_valides:
-        boss_valides.remove(boss)
-    
-    # Ajouter à la liste des non-validés
-    boss_non_valides.append(boss)
-    
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_boss=?, progression_boss_non_valides=? WHERE id=?", 
-                 (", ".join(boss_valides), ", ".join(boss_non_valides), row["id"]))
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Boss non-validé", boss)
-    await inter.response.send_message(f"❌ **Boss {boss} marqué comme non-validé pour {row['nom']} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
-
-@boss_non_valide_tribu.autocomplete('boss')
-async def boss_non_valide_autocomplete(inter: discord.Interaction, current: str):
-    db_init()
-    return get_boss_choices(inter.guild_id)
-
-@tree.command(name="notes_non_validé_tribu", description="Marquer une note comme non-validée pour ta tribu")
-@app_commands.describe(note="Note à marquer comme non-validée")
-async def notes_non_valide_tribu(inter: discord.Interaction, note: str):
-    db_init()
-    
-    # Trouver la tribu de l'utilisateur
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT t.* FROM tribus t
-            LEFT JOIN membres m ON t.id = m.tribu_id
-            WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
-        """, (inter.guild_id, inter.user.id, inter.user.id))
-        row = c.fetchone()
-    
-    if not row:
-        await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
-        return
-    
-    # Récupérer les deux listes
-    notes_valides = [n.strip() for n in (row["progression_notes"] or "").split(",") if n.strip()]
-    notes_non_valides = [n.strip() for n in (row["progression_notes_non_valides"] or "").split(",") if n.strip()]
-    
-    # Vérifier si la note est déjà non-validée
-    if note in notes_non_valides:
-        await inter.response.send_message(f"ℹ️ La note **{note}** est déjà marquée comme non-validée pour {row['nom']}.", ephemeral=True)
-        return
-    
-    # Retirer de la liste validés si présent
-    if note in notes_valides:
-        notes_valides.remove(note)
-    
-    # Ajouter à la liste des non-validés
-    notes_non_valides.append(note)
-    
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("UPDATE tribus SET progression_notes=?, progression_notes_non_valides=? WHERE id=?", 
-                 (", ".join(notes_valides), ", ".join(notes_non_valides), row["id"]))
-        conn.commit()
-    
-    ajouter_historique(row["id"], inter.user.id, "Note non-validée", note)
-    await inter.response.send_message(f"❌ **Note {note} marquée comme non-validée pour {row['nom']} !**", ephemeral=True)
-    await rafraichir_fiche_tribu(inter.client, row["id"])
-
-@notes_non_valide_tribu.autocomplete('note')
-async def notes_non_valide_autocomplete(inter: discord.Interaction, current: str):
-    db_init()
-    return get_notes_choices(inter.guild_id)
 
 @tree.command(name="ma_tribu", description="Afficher la fiche de ma tribu")
 async def ma_tribu(inter: discord.Interaction):
@@ -2827,9 +2400,6 @@ async def aide(inter: discord.Interaction):
         value=(
             "• **/créer_tribu** — créer une nouvelle tribu\n"
             "• **/fiche_tribu** — afficher une fiche tribu complète\n"
-            "• **/modifier_tribu** — éditer les infos de base\n"
-            "• **/personnaliser_tribu** — personnaliser ta tribu\n"
-            "• **/guide** — afficher le guide\n"
             "• **/quitter_tribu** — quitter ta tribu\n"
             "• **/tribu_transférer** — transférer la propriété\n"
             "• **/tribu_supprimer** — supprimer une tribu"
@@ -2839,19 +2409,11 @@ async def aide(inter: discord.Interaction):
     
     # Membres et avant-postes
     e.add_field(
-        name="👥 Membres & avant-postes",
+        name="👥 Membres & Galerie",
         value=(
-            "• **/ajouter_membre_tribu** — ajouter un membre\n"
-            "• **/supprimer_membre_tribu** — retirer un membre\n"
             "• **/mon_nom_ingame** — modifier ton nom in-game\n"
-            "• **/ajouter_avant_poste** — ajouter un avant-poste\n"
-            "• **/supprimer_avant_poste** — retirer un avant-poste\n"
-            "• **/boss_validé_tribu** — valider un boss\n"
-            "• **/boss_non_validé_tribu** — retirer un boss\n"
-            "• **/note_validé_tribu** — valider une note\n"
-            "• **/notes_non_validé_tribu** — retirer une note\n"
             "• **/ajouter_photo** — ajouter une photo à ta galerie\n"
-            "• **/supprimer_photo** — retirer une photo"
+            "• **/ajouter_logo** — ajouter/modifier le logo de ta tribu"
         ),
         inline=False
     )
@@ -3049,24 +2611,21 @@ async def afficher_guide(inter: discord.Interaction):
     e.add_field(
         name="📊 Gérer la progression (Boss & Notes)",
         value=(
-            "Utilise ces commandes pour compléter la progression de ta fiche :\n"
-            "• `/boss_validé_tribu` — ajouter un boss complété\n"
-            "• `/boss_non_validé_tribu` — retirer un boss\n"
-            "• `/note_validé_tribu` — ajouter une note complétée\n"
-            "• `/notes_non_validé_tribu` — retirer une note"
+            "Utilise les boutons **Boss validé** et **Boss non-validé** dans la fiche de ta tribu.\n"
+            "Même chose pour les notes avec **Note validée** et **Note non-validée**."
         ),
         inline=False
     )
     
     e.add_field(
         name="👥 Gérer les membres et avant-postes",
-        value="Pour ajouter ou retirer des membres et avant-postes, utilise :\n• `/ajouter_membre_tribu`\n• `/supprimer_membre_tribu`\n• `/ajouter_avant_poste`\n• `/supprimer_avant_poste`",
+        value="Utilise les boutons dans la fiche de ta tribu pour :\n• Ajouter/supprimer des membres\n• Ajouter/supprimer des avant-postes",
         inline=False
     )
     
     e.add_field(
         name="📸 Galerie photo (jusqu'à 10 photos)",
-        value="Gérer les photos de ta base :\n• `/ajouter_photo` — ajouter une photo à ta galerie\n• `/supprimer_photo` — retirer une photo\n\nNavigue dans la galerie avec les boutons ◀️ ▶️ sous ta fiche tribu !",
+        value="Gérer les photos de ta base :\n• `/ajouter_photo` — ajouter une photo à ta galerie\n• Bouton **Supprimer photo** dans la fiche — retirer une photo\n\nNavigue dans la galerie avec les boutons ◀️ ▶️ sous ta fiche tribu !",
         inline=False
     )
     
@@ -3110,7 +2669,7 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
             ajouter_historique(row["id"], inter.user.id, "Détails ajoutés", f"Champs: {', '.join(updates.keys())}")
             
             # Message avec info sur la progression
-            msg_success = "✅ **Détails ajoutés !**\n\nℹ️ *Pour la progression Boss/Notes, utilise :*\n• `/boss_validé_tribu`\n• `/note_validé_tribu`"
+            msg_success = "✅ **Détails ajoutés !**\n\nℹ️ *Pour la progression Boss/Notes, utilise les boutons dans la fiche de ta tribu.*"
             await inter.response.send_message(msg_success, ephemeral=True)
             await rafraichir_fiche_tribu(inter.client, row["id"])
         else:
@@ -3242,7 +2801,7 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
         count = c.fetchone()["count"]
         
         if count >= 10:
-            await inter.response.send_message("❌ Cette tribu a déjà 10 photos. Supprime-en une avant d'en ajouter une nouvelle avec `/supprimer_photo`.", ephemeral=True)
+            await inter.response.send_message("❌ Cette tribu a déjà 10 photos. Supprime-en une avant d'en ajouter une nouvelle.", ephemeral=True)
             return
         
         # Calculer le prochain ordre
@@ -3289,55 +2848,6 @@ async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     
     return choices[:25]
 
-@tree.command(name="supprimer_photo", description="Supprimer une photo de la galerie de ta tribu")
-@app_commands.describe(
-    nom="Nom de la tribu",
-    photo_id="Sélectionne la photo à supprimer"
-)
-@app_commands.autocomplete(nom=autocomplete_tribus, photo_id=autocomplete_photos_tribu)
-async def supprimer_photo(inter: discord.Interaction, nom: str, photo_id: str):
-    db_init()
-    row = tribu_par_nom(inter.guild_id, nom)
-    if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
-        return
-    
-    # Vérifier les droits
-    if not await verifier_droits(inter, row):
-        return
-    
-    # Récupérer la photo
-    try:
-        photo_id_int = int(photo_id)
-    except ValueError:
-        await inter.response.send_message("❌ ID de photo invalide.", ephemeral=True)
-        return
-    
-    with db_connect() as conn:
-        c = conn.cursor()
-        # Vérifier que la photo appartient bien à cette tribu
-        c.execute("SELECT * FROM photos_tribu WHERE id=? AND tribu_id=?", (photo_id_int, row["id"]))
-        photo = c.fetchone()
-        
-        if not photo:
-            await inter.response.send_message("❌ Photo introuvable ou n'appartient pas à cette tribu.", ephemeral=True)
-            return
-    
-    # Afficher la confirmation avec la photo
-    photo_numero = photo['ordre'] + 1
-    
-    e = discord.Embed(
-        title=f"⚠️ Confirmer la suppression — {row['nom']}",
-        description=f"**Es-tu sûr de vouloir supprimer la Photo {photo_numero} ?**\n\nCette action est irréversible.",
-        color=0xFF6B6B
-    )
-    e.set_image(url=photo['url'])
-    e.set_footer(text="💡 Clique sur ✅ pour confirmer ou ❌ pour annuler")
-    
-    # Créer la vue de confirmation
-    view = ConfirmationSupprimerPhoto(row["id"], row['nom'], photo_id_int, photo['url'], photo_numero)
-    
-    await inter.response.send_message(embed=e, view=view, ephemeral=True)
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
