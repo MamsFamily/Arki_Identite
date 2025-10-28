@@ -13,15 +13,21 @@ The "Arki Family" Discord bot is designed for the Ark: Survival Ascended communi
 The bot utilizes `discord.py` and is built on an architecture leveraging modern Discord interactions (slash commands, buttons, modals) for a rich user experience.
 
 **Command Optimization (October 2025):**
-- **Streamlined Commands:** Reduced from 31 to 23 slash commands by consolidating redundant features into interactive panels
-- **Commands Removed:** `/modifier_tribu`, `/personnaliser_tribu`, `/ajouter_membre_tribu`, `/retirer_membre_tribu`, `/ajouter_avant_poste`, `/supprimer_avant_poste`, `/supprimer_photo`, `/voir_historique`, `/modifier_base`, `/modifier_description`, `/modifier_couleur`, `/modifier_logo`, `/modifier_recrutement` (13 total)
-- **Functionality Preserved:** All removed command features remain accessible through interactive buttons and modals in the tribe profile panel
+- **Streamlined Commands:** Reduced from 31 to 14 slash commands (-55%) by consolidating redundant features into interactive panels
+- **Phase 1 (13 commands removed):** `/modifier_tribu`, `/personnaliser_tribu`, `/ajouter_membre_tribu`, `/retirer_membre_tribu`, `/ajouter_avant_poste`, `/supprimer_avant_poste`, `/supprimer_photo`, `/voir_historique`, `/modifier_base`, `/modifier_description`, `/modifier_couleur`, `/modifier_logo`, `/modifier_recrutement`
+- **Phase 2 (9 additional commands removed):** `/ajout_map`, `/retirer_map`, `/ajout_boss`, `/retirer_boss`, `/ajout_note`, `/retirer_note`, `/couleur_panneau`, `/texte_panneau`, `/salon_fiche_tribu`
+- **Functionality Preserved:** All removed command features remain accessible through interactive buttons, modals, and menus in panels
+- **Final Command Count:** 14 active slash commands (3 admin-only: `/test_bot`, `/fiche_tribu`, `/changer_bannière_panneau`)
 
 **UI/UX Decisions:**
 - **Interactive Panel (`/panneau`):** A centralized entry point with buttons for main actions (Create, Modify, Customize, Guide). Admin panels self-delete to prevent clutter. Includes customizable banner, color, and text.
-- **Admin Configuration Panel (`/parametres`):** New admin-only panel for bot configuration with buttons for: Banner, Color, Text, and Tribe Card Channel selection
-- **Customizable Main Panel:** Admins can personalize the main panel appearance using `/couleur_panneau`, `/texte_panneau`, and `/changer_bannière_panneau` commands, or through the new `/parametres` panel
-- **Configurable Tribe Card Channel:** New `/salon_fiche_tribu` command allows admins to define a dedicated channel for displaying all tribe cards (default: current channel)
+- **Admin Configuration Panel (`/parametres`):** Comprehensive admin-only panel with 7 buttons organized in 2 rows:
+  - **Row 1 (Appearance):** Banner (with file upload support via link), Color (with color picker link), Text, Tribe Card Channel
+  - **Row 2 (Data Management):** Maps (add/remove), Boss (add/remove), Notes (add/remove)
+  - Each button opens a sub-panel with intuitive controls (modals for input, dropdowns for selection)
+- **Customizable Main Panel:** Admins personalize the panel appearance entirely through `/parametres` (banner, color, text) with visual color picker integration
+- **Configurable Tribe Card Channel:** Admins define a dedicated channel for all tribe cards via dropdown in `/parametres`
+- **File Upload Support:** `/changer_bannière_panneau` command allows direct image upload from phone/PC for banner customization
 - **Auto-Refresh System:** Tribe cards automatically update after any modification using `rafraichir_fiche_tribu()` function
 - **Smart Deletion:** `/ma_tribu` command automatically deletes old tribe card in the same channel before displaying new one to prevent duplicates
 - **Detailed Tribe Profiles:** Information displayed in a structured order (Header, Description, Motto, Members, Main Base, Outposts, Objective, Recruitment, Boss/Notes Progression, Base Photo) with **BOLD CAPITALIZED** titles for readability.

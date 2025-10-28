@@ -1134,12 +1134,7 @@ class PanneauMembre(discord.ui.View):
         e.add_field(
             name="🔧 Gestion admin (modos/admins)",
             value=(
-                "• **/ajout_boss** — ajouter un boss à la liste\n"
-                "• **/retirer_boss** — retirer un boss de la liste\n"
-                "• **/ajout_note** — ajouter une note à la liste\n"
-                "• **/retirer_note** — retirer une note de la liste\n"
-                "• **/ajout_map** — ajouter une map\n"
-                "• **/retirer_map** — retirer une map\n"
+                "• **/parametres** — gérer les paramètres du bot\n"
                 "• **/changer_bannière_panneau** — personnaliser la bannière"
             ),
             inline=False
@@ -2162,40 +2157,7 @@ async def tribu_supprimer_autocomplete(inter: discord.Interaction, current: str)
     filtered = [t["nom"] for t in tribus if current.lower() in t["nom"].lower()][:25]
     return [app_commands.Choice(name=nom, value=nom) for nom in filtered]
 
-# ---- Commandes Admin (maps) ----
 
-@tree.command(name="ajout_map", description="[ADMIN] Ajouter une map à la liste")
-@app_commands.describe(nom="Nom de la map à ajouter")
-async def ajout_map(inter: discord.Interaction, nom: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    db_init()
-    with db_connect() as conn:
-        c = conn.cursor()
-        try:
-            c.execute("INSERT INTO maps (guild_id, nom, created_at) VALUES (?, ?, ?)",
-                     (inter.guild_id, nom.strip(), dt.datetime.utcnow().isoformat()))
-            conn.commit()
-            await inter.response.send_message(f"✅ Map **{nom}** ajoutée à la liste !", ephemeral=True)
-        except sqlite3.IntegrityError:
-            await inter.response.send_message(f"❌ La map **{nom}** existe déjà.", ephemeral=True)
-
-@tree.command(name="retirer_map", description="[ADMIN] Supprimer une map de la liste")
-@app_commands.describe(nom="Nom de la map à supprimer")
-async def retirer_map(inter: discord.Interaction, nom: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    db_init()
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM maps WHERE guild_id=? AND nom=?", (inter.guild_id, nom))
-        if c.rowcount == 0:
-            await inter.response.send_message(f"❌ Map **{nom}** non trouvée.", ephemeral=True)
-        else:
-            conn.commit()
-            await inter.response.send_message(f"✅ Map **{nom}** supprimée de la liste !", ephemeral=True)
 
 @tree.command(name="test_bot", description="Vérifier si le bot répond")
 async def tribu_test(inter: discord.Interaction):
@@ -2277,159 +2239,42 @@ async def quitter_tribu(inter: discord.Interaction):
     ajouter_historique(tribu["id"], inter.user.id, "Quitter tribu", f"<@{inter.user.id}> a quitté la tribu")
     await inter.response.send_message(f"✅ Tu as quitté la tribu **{tribu['nom']}**.", ephemeral=True)
 
-@tree.command(name="ajout_boss", description="[ADMIN] Ajouter un boss à la liste")
-@app_commands.describe(nom="Nom du boss à ajouter")
-async def ajout_boss(inter: discord.Interaction, nom: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    db_init()
-    with db_connect() as conn:
-        c = conn.cursor()
-        try:
-            c.execute("INSERT INTO boss (guild_id, nom, created_at) VALUES (?, ?, ?)",
-                     (inter.guild_id, nom.strip(), dt.datetime.utcnow().isoformat()))
-            conn.commit()
-            await inter.response.send_message(f"✅ Boss **{nom}** ajouté à la liste !", ephemeral=True)
-        except sqlite3.IntegrityError:
-            await inter.response.send_message(f"❌ Le boss **{nom}** existe déjà.", ephemeral=True)
-
-@tree.command(name="retirer_boss", description="[ADMIN] Supprimer un boss de la liste")
-@app_commands.describe(nom="Nom du boss à supprimer")
-async def retirer_boss(inter: discord.Interaction, nom: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    db_init()
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM boss WHERE guild_id=? AND nom=?", (inter.guild_id, nom))
-        if c.rowcount == 0:
-            await inter.response.send_message(f"❌ Boss **{nom}** non trouvé.", ephemeral=True)
-        else:
-            conn.commit()
-            await inter.response.send_message(f"✅ Boss **{nom}** supprimé de la liste !", ephemeral=True)
-
-@retirer_boss.autocomplete('nom')
-async def retirer_boss_autocomplete(inter: discord.Interaction, current: str):
-    db_init()
-    return get_boss_choices(inter.guild_id)
-
-@tree.command(name="ajout_note", description="[ADMIN] Ajouter une note à la liste")
-@app_commands.describe(nom="Nom de la note à ajouter")
-async def ajout_note(inter: discord.Interaction, nom: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    db_init()
-    with db_connect() as conn:
-        c = conn.cursor()
-        try:
-            c.execute("INSERT INTO notes (guild_id, nom, created_at) VALUES (?, ?, ?)",
-                     (inter.guild_id, nom.strip(), dt.datetime.utcnow().isoformat()))
-            conn.commit()
-            await inter.response.send_message(f"✅ Note **{nom}** ajoutée à la liste !", ephemeral=True)
-        except sqlite3.IntegrityError:
-            await inter.response.send_message(f"❌ La note **{nom}** existe déjà.", ephemeral=True)
-
-@tree.command(name="retirer_note", description="[ADMIN] Supprimer une note de la liste")
-@app_commands.describe(nom="Nom de la note à supprimer")
-async def retirer_note(inter: discord.Interaction, nom: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    db_init()
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM notes WHERE guild_id=? AND nom=?", (inter.guild_id, nom))
-        if c.rowcount == 0:
-            await inter.response.send_message(f"❌ Note **{nom}** non trouvée.", ephemeral=True)
-        else:
-            conn.commit()
-            await inter.response.send_message(f"✅ Note **{nom}** supprimée de la liste !", ephemeral=True)
-
-@retirer_note.autocomplete('nom')
-async def retirer_note_autocomplete(inter: discord.Interaction, current: str):
-    db_init()
-    return get_notes_choices(inter.guild_id)
 
 @tree.command(name="changer_bannière_panneau", description="[ADMIN] Modifier la bannière du panneau")
-@app_commands.describe(url="URL de la nouvelle bannière (image)")
-async def changer_banniere_panneau(inter: discord.Interaction, url: str):
+@app_commands.describe(
+    url="URL de la bannière (optionnel si tu fournis un fichier)",
+    fichier="Image à uploader depuis ton téléphone/PC (optionnel si tu fournis une URL)"
+)
+async def changer_banniere_panneau(inter: discord.Interaction, url: Optional[str] = None, fichier: Optional[discord.Attachment] = None):
     if not est_admin(inter):
         await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
         return
     
-    db_init()
-    
-    # Vérifier que c'est une URL valide
-    if not url.startswith("http://") and not url.startswith("https://"):
-        await inter.response.send_message("❌ L'URL doit commencer par http:// ou https://", ephemeral=True)
+    # Vérifier qu'au moins un des deux est fourni
+    if not url and not fichier:
+        await inter.response.send_message("❌ Tu dois fournir soit une URL, soit un fichier image.", ephemeral=True)
         return
+    
+    # Si un fichier est fourni, vérifier que c'est une image
+    if fichier:
+        if not fichier.content_type or not fichier.content_type.startswith("image/"):
+            await inter.response.send_message("❌ Le fichier doit être une image (JPG, PNG, GIF, etc.).", ephemeral=True)
+            return
+        # Utiliser l'URL du fichier uploadé
+        banniere_url = fichier.url
+        source = "📱 depuis un fichier"
+    else:
+        banniere_url = url.strip()
+        # Vérifier que c'est une URL valide
+        if not banniere_url.startswith("http://") and not banniere_url.startswith("https://"):
+            await inter.response.send_message("❌ L'URL doit commencer par http:// ou https://", ephemeral=True)
+            return
+        source = "🔗 depuis une URL"
     
     # Sauvegarder la nouvelle bannière
-    set_config(inter.guild_id, "banniere_panneau", url)
+    set_config(inter.guild_id, "banniere_panneau", banniere_url)
     
-    await inter.response.send_message(f"✅ **Bannière du panneau modifiée !**\n\nNouvelle URL : {url}\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
-
-@tree.command(name="couleur_panneau", description="[ADMIN] Modifier la couleur du panneau")
-@app_commands.describe(couleur_hex="Couleur hexadécimale (ex: #5865F2 ou 5865F2)")
-async def couleur_panneau(inter: discord.Interaction, couleur_hex: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    
-    # Nettoyer la couleur (enlever le # si présent)
-    couleur = couleur_hex.strip().replace("#", "")
-    
-    # Vérifier que c'est un code hex valide
-    if len(couleur) != 6 or not all(c in '0123456789ABCDEFabcdef' for c in couleur):
-        await inter.response.send_message("❌ Couleur invalide. Utilise un code hexadécimal à 6 caractères (ex: 5865F2)", ephemeral=True)
-        return
-    
-    # Sauvegarder la nouvelle couleur
-    set_config(inter.guild_id, "couleur_panneau", couleur)
-    
-    # Créer un embed avec la nouvelle couleur pour preview
-    try:
-        couleur_int = int(couleur, 16)
-        e = discord.Embed(
-            title="✅ Couleur du panneau modifiée !",
-            description=f"**Nouvelle couleur :** #{couleur.upper()}\n\n💡 *Utilise `/panneau` pour voir le résultat.*",
-            color=couleur_int
-        )
-        await inter.response.send_message(embed=e, ephemeral=True)
-    except:
-        await inter.response.send_message(f"✅ **Couleur du panneau modifiée !**\n\nNouvelle couleur : #{couleur.upper()}", ephemeral=True)
-
-@tree.command(name="texte_panneau", description="[ADMIN] Modifier le texte de description du panneau")
-@app_commands.describe(texte="Nouveau texte de description")
-async def texte_panneau(inter: discord.Interaction, texte: str):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    
-    # Sauvegarder le nouveau texte
-    set_config(inter.guild_id, "texte_panneau", texte.strip())
-    
-    await inter.response.send_message(f"✅ **Texte du panneau modifié !**\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
-
-@tree.command(name="salon_fiche_tribu", description="[ADMIN] Définir le salon où afficher les fiches tribu")
-@app_commands.describe(salon="Salon où afficher les fiches (laisse vide pour salon actuel)")
-async def salon_fiche_tribu(inter: discord.Interaction, salon: Optional[discord.TextChannel] = None):
-    if not est_admin(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
-        return
-    
-    if salon:
-        # Sauvegarder l'ID du salon
-        set_config(inter.guild_id, "salon_fiche_tribu", str(salon.id))
-        await inter.response.send_message(f"✅ **Salon des fiches tribu défini !**\n\nToutes les nouvelles fiches seront affichées dans {salon.mention}\n\n💡 *Les fiches existantes ne sont pas déplacées.*", ephemeral=True)
-    else:
-        # Réinitialiser au salon actuel (0)
-        set_config(inter.guild_id, "salon_fiche_tribu", "0")
-        await inter.response.send_message("✅ **Configuration réinitialisée !**\n\nLes fiches seront désormais affichées dans le salon actuel (où la commande est exécutée).", ephemeral=True)
-
+    await inter.response.send_message(f"✅ **Bannière du panneau modifiée !** {source}\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
 
 @tree.command(name="ma_tribu", description="Afficher la fiche de ma tribu")
 async def ma_tribu(inter: discord.Interaction):
@@ -2502,12 +2347,7 @@ async def aide(inter: discord.Interaction):
         name="🎛️ Interface & Admin",
         value=(
             "• **/panneau** — ouvrir le panneau interactif\n"
-            "• **/ajout_map** — ajouter une map (Admin)\n"
-            "• **/retirer_map** — supprimer une map (Admin)\n"
-            "• **/ajout_boss** — ajouter un boss (Admin)\n"
-            "• **/retirer_boss** — supprimer un boss (Admin)\n"
-            "• **/ajout_note** — ajouter une note (Admin)\n"
-            "• **/retirer_note** — supprimer une note (Admin)\n"
+            "• **/parametres** — gérer les paramètres (Admin)\n"
             "• **/changer_bannière_panneau** — changer la bannière (Admin)"
         ),
         inline=False
@@ -2765,26 +2605,49 @@ class PanneauParametres(discord.ui.View):
             await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
             return
         
-        # Modal pour la bannière
-        class ModalBanniere(discord.ui.Modal, title="🖼️ Modifier la bannière"):
-            url = discord.ui.TextInput(
-                label="URL de la bannière",
-                placeholder="https://example.com/banniere.png",
-                style=discord.TextStyle.short,
-                required=True,
-                max_length=500
-            )
-            
-            async def on_submit(self, submit_inter: discord.Interaction):
-                url_value = str(self.url).strip()
-                if not url_value.startswith("http://") and not url_value.startswith("https://"):
-                    await submit_inter.response.send_message("❌ L'URL doit commencer par http:// ou https://", ephemeral=True)
-                    return
-                
-                set_config(submit_inter.guild_id, "banniere_panneau", url_value)
-                await submit_inter.response.send_message(f"✅ **Bannière modifiée !**\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
+        # Afficher un message avec options : URL ou upload via commande
+        e = discord.Embed(
+            title="🖼️ Modifier la bannière du panneau",
+            description=(
+                "**Deux options pour ajouter ta bannière :**\n\n"
+                "📱 **Option 1 : Uploader depuis ton appareil**\n"
+                "Utilise la commande `/changer_bannière_panneau` avec le paramètre `fichier` pour uploader directement une image depuis ton téléphone ou PC.\n\n"
+                "🔗 **Option 2 : Utiliser une URL**\n"
+                "Clique sur le bouton ci-dessous pour entrer une URL d'image."
+            ),
+            color=0x5865F2
+        )
+        e.set_footer(text="💡 L'upload direct est plus simple si tu as l'image sur ton appareil !")
         
-        await inter.response.send_modal(ModalBanniere())
+        # Créer un bouton pour ouvrir le modal URL
+        view = discord.ui.View(timeout=180)
+        btn = discord.ui.Button(label="Entrer une URL", style=discord.ButtonStyle.primary, emoji="🔗")
+        
+        async def btn_callback(btn_inter: discord.Interaction):
+            class ModalBanniere(discord.ui.Modal, title="🖼️ URL de la bannière"):
+                url = discord.ui.TextInput(
+                    label="URL de la bannière",
+                    placeholder="https://example.com/banniere.png",
+                    style=discord.TextStyle.short,
+                    required=True,
+                    max_length=500
+                )
+                
+                async def on_submit(self, submit_inter: discord.Interaction):
+                    url_value = str(self.url).strip()
+                    if not url_value.startswith("http://") and not url_value.startswith("https://"):
+                        await submit_inter.response.send_message("❌ L'URL doit commencer par http:// ou https://", ephemeral=True)
+                        return
+                    
+                    set_config(submit_inter.guild_id, "banniere_panneau", url_value)
+                    await submit_inter.response.send_message(f"✅ **Bannière modifiée !**\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
+            
+            await btn_inter.response.send_modal(ModalBanniere())
+        
+        btn.callback = btn_callback
+        view.add_item(btn)
+        
+        await inter.response.send_message(embed=e, view=view, ephemeral=True)
     
     @discord.ui.button(label="Couleur", style=discord.ButtonStyle.primary, emoji="🎨", row=0)
     async def btn_couleur(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -2792,37 +2655,57 @@ class PanneauParametres(discord.ui.View):
             await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
             return
         
-        # Modal pour la couleur
-        class ModalCouleur(discord.ui.Modal, title="🎨 Modifier la couleur"):
-            couleur = discord.ui.TextInput(
-                label="Couleur hexadécimale",
-                placeholder="Ex: 5865F2 ou #5865F2",
-                style=discord.TextStyle.short,
-                required=True,
-                max_length=7
-            )
-            
-            async def on_submit(self, submit_inter: discord.Interaction):
-                couleur_value = str(self.couleur).strip().replace("#", "")
-                
-                if len(couleur_value) != 6 or not all(c in '0123456789ABCDEFabcdef' for c in couleur_value):
-                    await submit_inter.response.send_message("❌ Couleur invalide. Utilise un code hexadécimal à 6 caractères (ex: 5865F2)", ephemeral=True)
-                    return
-                
-                set_config(submit_inter.guild_id, "couleur_panneau", couleur_value)
-                
-                try:
-                    couleur_int = int(couleur_value, 16)
-                    e = discord.Embed(
-                        title="✅ Couleur modifiée !",
-                        description=f"**Nouvelle couleur :** #{couleur_value.upper()}\n\n💡 *Utilise `/panneau` pour voir le résultat.*",
-                        color=couleur_int
-                    )
-                    await submit_inter.response.send_message(embed=e, ephemeral=True)
-                except:
-                    await submit_inter.response.send_message(f"✅ **Couleur modifiée !**\n\nNouvelle couleur : #{couleur_value.upper()}", ephemeral=True)
+        # Afficher un message avec le lien pour la couleur + bouton pour ouvrir le modal
+        e = discord.Embed(
+            title="🎨 Modifier la couleur du panneau",
+            description="**Avant de personnaliser, voici un outil utile :**\n\n"
+                        "🎨 **Pour choisir ta couleur :**\n"
+                        "👉 [Cliquer ici pour le sélecteur de couleur](https://htmlcolorcodes.com/fr/selecteur-de-couleur/)\n\n"
+                        "💡 **Clique ensuite sur le bouton ci-dessous pour entrer le code hexadécimal.**",
+            color=0x5865F2
+        )
+        e.set_footer(text="💡 Le sélecteur de couleur t'aidera à trouver le code hexadécimal parfait")
         
-        await inter.response.send_modal(ModalCouleur())
+        # Créer un bouton pour ouvrir le modal
+        view = discord.ui.View(timeout=180)
+        btn = discord.ui.Button(label="Entrer le code couleur", style=discord.ButtonStyle.primary, emoji="🎨")
+        
+        async def btn_callback(btn_inter: discord.Interaction):
+            class ModalCouleur(discord.ui.Modal, title="🎨 Modifier la couleur"):
+                couleur = discord.ui.TextInput(
+                    label="Couleur hexadécimale",
+                    placeholder="Ex: 5865F2 ou #5865F2",
+                    style=discord.TextStyle.short,
+                    required=True,
+                    max_length=7
+                )
+                
+                async def on_submit(self, submit_inter: discord.Interaction):
+                    couleur_value = str(self.couleur).strip().replace("#", "")
+                    
+                    if len(couleur_value) != 6 or not all(c in '0123456789ABCDEFabcdef' for c in couleur_value):
+                        await submit_inter.response.send_message("❌ Couleur invalide. Utilise un code hexadécimal à 6 caractères (ex: 5865F2)", ephemeral=True)
+                        return
+                    
+                    set_config(submit_inter.guild_id, "couleur_panneau", couleur_value)
+                    
+                    try:
+                        couleur_int = int(couleur_value, 16)
+                        e = discord.Embed(
+                            title="✅ Couleur modifiée !",
+                            description=f"**Nouvelle couleur :** #{couleur_value.upper()}\n\n💡 *Utilise `/panneau` pour voir le résultat.*",
+                            color=couleur_int
+                        )
+                        await submit_inter.response.send_message(embed=e, ephemeral=True)
+                    except:
+                        await submit_inter.response.send_message(f"✅ **Couleur modifiée !**\n\nNouvelle couleur : #{couleur_value.upper()}", ephemeral=True)
+            
+            await btn_inter.response.send_modal(ModalCouleur())
+        
+        btn.callback = btn_callback
+        view.add_item(btn)
+        
+        await inter.response.send_message(embed=e, view=view, ephemeral=True)
     
     @discord.ui.button(label="Texte", style=discord.ButtonStyle.primary, emoji="📝", row=0)
     async def btn_texte(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -2886,6 +2769,240 @@ class PanneauParametres(discord.ui.View):
                 )
         
         await inter.response.send_message("📍 **Choisir le salon pour les fiches tribu :**", view=view, ephemeral=True)
+    
+    @discord.ui.button(label="Maps", style=discord.ButtonStyle.secondary, emoji="🗺️", row=1)
+    async def btn_maps(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Afficher un sous-menu pour ajouter ou retirer des maps
+        class ViewMapsGestion(discord.ui.View):
+            def __init__(self):
+                super().__init__(timeout=180)
+            
+            @discord.ui.button(label="Ajouter une map", style=discord.ButtonStyle.success, emoji="➕")
+            async def btn_ajouter(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                class ModalAjoutMap(discord.ui.Modal, title="🗺️ Ajouter une map"):
+                    nom = discord.ui.TextInput(
+                        label="Nom de la map",
+                        placeholder="Ex: The Island, Scorched Earth...",
+                        style=discord.TextStyle.short,
+                        required=True,
+                        max_length=100
+                    )
+                    
+                    async def on_submit(self, submit_inter: discord.Interaction):
+                        nom_map = str(self.nom).strip()
+                        db_init()
+                        try:
+                            with db_connect() as conn:
+                                c = conn.cursor()
+                                c.execute("INSERT INTO maps (guild_id, nom) VALUES (?, ?)", (submit_inter.guild_id, nom_map))
+                                conn.commit()
+                            await submit_inter.response.send_message(f"✅ Map **{nom_map}** ajoutée à la liste !", ephemeral=True)
+                        except sqlite3.IntegrityError:
+                            await submit_inter.response.send_message(f"❌ La map **{nom_map}** existe déjà.", ephemeral=True)
+                
+                await btn_inter.response.send_modal(ModalAjoutMap())
+            
+            @discord.ui.button(label="Retirer une map", style=discord.ButtonStyle.danger, emoji="➖")
+            async def btn_retirer(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                # Créer un menu déroulant avec les maps existantes
+                db_init()
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT DISTINCT nom FROM maps WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+                    maps = [row["nom"] for row in c.fetchall()]
+                
+                if not maps:
+                    await btn_inter.response.send_message("❌ Aucune map à retirer.", ephemeral=True)
+                    return
+                
+                class ViewMapSelect(discord.ui.View):
+                    def __init__(self):
+                        super().__init__(timeout=180)
+                    
+                    @discord.ui.select(
+                        placeholder="Sélectionne la map à retirer",
+                        options=[discord.SelectOption(label=m, value=m) for m in maps[:25]]
+                    )
+                    async def select_map(self, select_inter: discord.Interaction, select: discord.ui.Select):
+                        nom_map = select.values[0]
+                        with db_connect() as conn:
+                            c = conn.cursor()
+                            c.execute("DELETE FROM maps WHERE guild_id=? AND nom=?", (select_inter.guild_id, nom_map))
+                            if c.rowcount == 0:
+                                await select_inter.response.send_message(f"❌ Map **{nom_map}** non trouvée.", ephemeral=True)
+                            else:
+                                conn.commit()
+                                await select_inter.response.send_message(f"✅ Map **{nom_map}** supprimée de la liste !", ephemeral=True)
+                
+                view = ViewMapSelect()
+                await btn_inter.response.send_message("🗺️ **Choisir la map à retirer :**", view=view, ephemeral=True)
+        
+        e = discord.Embed(
+            title="🗺️ Gestion des Maps",
+            description="Utilise les boutons ci-dessous pour ajouter ou retirer des maps de la liste.",
+            color=0x5865F2
+        )
+        await inter.response.send_message(embed=e, view=ViewMapsGestion(), ephemeral=True)
+    
+    @discord.ui.button(label="Boss", style=discord.ButtonStyle.secondary, emoji="🐉", row=1)
+    async def btn_boss(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Afficher un sous-menu pour ajouter ou retirer des boss
+        class ViewBossGestion(discord.ui.View):
+            def __init__(self):
+                super().__init__(timeout=180)
+            
+            @discord.ui.button(label="Ajouter un boss", style=discord.ButtonStyle.success, emoji="➕")
+            async def btn_ajouter(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                class ModalAjoutBoss(discord.ui.Modal, title="🐉 Ajouter un boss"):
+                    nom = discord.ui.TextInput(
+                        label="Nom du boss",
+                        placeholder="Ex: Broodmother, Dragon...",
+                        style=discord.TextStyle.short,
+                        required=True,
+                        max_length=100
+                    )
+                    
+                    async def on_submit(self, submit_inter: discord.Interaction):
+                        nom_boss = str(self.nom).strip()
+                        db_init()
+                        try:
+                            with db_connect() as conn:
+                                c = conn.cursor()
+                                c.execute("INSERT INTO boss (guild_id, nom) VALUES (?, ?)", (submit_inter.guild_id, nom_boss))
+                                conn.commit()
+                            await submit_inter.response.send_message(f"✅ Boss **{nom_boss}** ajouté à la liste !", ephemeral=True)
+                        except sqlite3.IntegrityError:
+                            await submit_inter.response.send_message(f"❌ Le boss **{nom_boss}** existe déjà.", ephemeral=True)
+                
+                await btn_inter.response.send_modal(ModalAjoutBoss())
+            
+            @discord.ui.button(label="Retirer un boss", style=discord.ButtonStyle.danger, emoji="➖")
+            async def btn_retirer(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                # Créer un menu déroulant avec les boss existants
+                db_init()
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT DISTINCT nom FROM boss WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+                    boss = [row["nom"] for row in c.fetchall()]
+                
+                if not boss:
+                    await btn_inter.response.send_message("❌ Aucun boss à retirer.", ephemeral=True)
+                    return
+                
+                class ViewBossSelect(discord.ui.View):
+                    def __init__(self):
+                        super().__init__(timeout=180)
+                    
+                    @discord.ui.select(
+                        placeholder="Sélectionne le boss à retirer",
+                        options=[discord.SelectOption(label=b, value=b) for b in boss[:25]]
+                    )
+                    async def select_boss(self, select_inter: discord.Interaction, select: discord.ui.Select):
+                        nom_boss = select.values[0]
+                        with db_connect() as conn:
+                            c = conn.cursor()
+                            c.execute("DELETE FROM boss WHERE guild_id=? AND nom=?", (select_inter.guild_id, nom_boss))
+                            if c.rowcount == 0:
+                                await select_inter.response.send_message(f"❌ Boss **{nom_boss}** non trouvé.", ephemeral=True)
+                            else:
+                                conn.commit()
+                                await select_inter.response.send_message(f"✅ Boss **{nom_boss}** supprimé de la liste !", ephemeral=True)
+                
+                view = ViewBossSelect()
+                await btn_inter.response.send_message("🐉 **Choisir le boss à retirer :**", view=view, ephemeral=True)
+        
+        e = discord.Embed(
+            title="🐉 Gestion des Boss",
+            description="Utilise les boutons ci-dessous pour ajouter ou retirer des boss de la liste.",
+            color=0x5865F2
+        )
+        await inter.response.send_message(embed=e, view=ViewBossGestion(), ephemeral=True)
+    
+    @discord.ui.button(label="Notes", style=discord.ButtonStyle.secondary, emoji="📝", row=1)
+    async def btn_notes(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Afficher un sous-menu pour ajouter ou retirer des notes
+        class ViewNotesGestion(discord.ui.View):
+            def __init__(self):
+                super().__init__(timeout=180)
+            
+            @discord.ui.button(label="Ajouter une note", style=discord.ButtonStyle.success, emoji="➕")
+            async def btn_ajouter(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                class ModalAjoutNote(discord.ui.Modal, title="📝 Ajouter une note"):
+                    nom = discord.ui.TextInput(
+                        label="Nom de la note",
+                        placeholder="Ex: Note de l'explorateur...",
+                        style=discord.TextStyle.short,
+                        required=True,
+                        max_length=100
+                    )
+                    
+                    async def on_submit(self, submit_inter: discord.Interaction):
+                        nom_note = str(self.nom).strip()
+                        db_init()
+                        try:
+                            with db_connect() as conn:
+                                c = conn.cursor()
+                                c.execute("INSERT INTO notes (guild_id, nom) VALUES (?, ?)", (submit_inter.guild_id, nom_note))
+                                conn.commit()
+                            await submit_inter.response.send_message(f"✅ Note **{nom_note}** ajoutée à la liste !", ephemeral=True)
+                        except sqlite3.IntegrityError:
+                            await submit_inter.response.send_message(f"❌ La note **{nom_note}** existe déjà.", ephemeral=True)
+                
+                await btn_inter.response.send_modal(ModalAjoutNote())
+            
+            @discord.ui.button(label="Retirer une note", style=discord.ButtonStyle.danger, emoji="➖")
+            async def btn_retirer(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                # Créer un menu déroulant avec les notes existantes
+                db_init()
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT DISTINCT nom FROM notes WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+                    notes = [row["nom"] for row in c.fetchall()]
+                
+                if not notes:
+                    await btn_inter.response.send_message("❌ Aucune note à retirer.", ephemeral=True)
+                    return
+                
+                class ViewNoteSelect(discord.ui.View):
+                    def __init__(self):
+                        super().__init__(timeout=180)
+                    
+                    @discord.ui.select(
+                        placeholder="Sélectionne la note à retirer",
+                        options=[discord.SelectOption(label=n, value=n) for n in notes[:25]]
+                    )
+                    async def select_note(self, select_inter: discord.Interaction, select: discord.ui.Select):
+                        nom_note = select.values[0]
+                        with db_connect() as conn:
+                            c = conn.cursor()
+                            c.execute("DELETE FROM notes WHERE guild_id=? AND nom=?", (select_inter.guild_id, nom_note))
+                            if c.rowcount == 0:
+                                await select_inter.response.send_message(f"❌ Note **{nom_note}** non trouvée.", ephemeral=True)
+                            else:
+                                conn.commit()
+                                await select_inter.response.send_message(f"✅ Note **{nom_note}** supprimée de la liste !", ephemeral=True)
+                
+                view = ViewNoteSelect()
+                await btn_inter.response.send_message("📝 **Choisir la note à retirer :**", view=view, ephemeral=True)
+        
+        e = discord.Embed(
+            title="📝 Gestion des Notes",
+            description="Utilise les boutons ci-dessous pour ajouter ou retirer des notes de la liste.",
+            color=0x5865F2
+        )
+        await inter.response.send_message(embed=e, view=ViewNotesGestion(), ephemeral=True)
 
 class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = None):
@@ -3076,8 +3193,10 @@ async def parametres(inter: discord.Interaction):
             "🖼️ **Bannière** — Personnaliser l'image du panneau\n"
             "🎨 **Couleur** — Changer la couleur du panneau\n"
             "📝 **Texte** — Modifier le texte de description\n"
-            "📍 **Salon fiches** — Définir où afficher les fiches\n\n"
-            "💡 *Pour gérer les maps/boss/notes, utilise les commandes `/ajout_map`, `/ajout_boss`, `/ajout_note` et leurs équivalents de suppression.*"
+            "📍 **Salon fiches** — Définir où afficher les fiches\n"
+            "🗺️ **Maps** — Gérer les maps disponibles\n"
+            "🐉 **Boss** — Gérer les boss disponibles\n"
+            "📝 **Notes** — Gérer les notes disponibles"
         ),
         color=0xFF9900
     )
