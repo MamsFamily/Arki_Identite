@@ -1230,9 +1230,8 @@ class MenuFicheTribu(discord.ui.View):
         select.callback = self.menu_callback
         self.add_item(select)
         
-        # Ajouter les boutons de navigation de galerie
+        # Ajouter les boutons de navigation de galerie (discrets, sans texte)
         btn_prev = discord.ui.Button(
-            label="Photo précédente",
             emoji="◀️",
             style=discord.ButtonStyle.secondary,
             custom_id=f"galerie_prev:{tribu_id}",
@@ -1242,7 +1241,6 @@ class MenuFicheTribu(discord.ui.View):
         self.add_item(btn_prev)
         
         btn_next = discord.ui.Button(
-            label="Photo suivante",
             emoji="▶️",
             style=discord.ButtonStyle.secondary,
             custom_id=f"galerie_next:{tribu_id}",
