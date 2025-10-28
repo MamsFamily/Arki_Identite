@@ -1876,11 +1876,45 @@ async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: b
         embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
         view = MenuFicheTribu(tribu_id, 0, timeout=None)
         
+        # Déterminer le salon cible
+        target_channel = inter.channel
+        if not ephemeral:
+            # Récupérer le salon configuré
+            salon_id_str = get_config(inter.guild_id, "salon_fiche_tribu", "0")
+            if salon_id_str != "0":
+                configured_channel = inter.guild.get_channel(int(salon_id_str))
+                if configured_channel:
+                    target_channel = configured_channel
+        
         # Envoyer la fiche
-        if inter.response.is_done():
-            await inter.followup.send(embed=embed, view=view, ephemeral=ephemeral)
+        if not ephemeral and target_channel != inter.channel:
+            # Afficher dans un salon différent
+            # Répondre d'abord à l'interaction
+            if inter.response.is_done():
+                await inter.followup.send(f"✅ **Fiche affichée dans {target_channel.mention} !**", ephemeral=True)
+            else:
+                await inter.response.send_message(f"✅ **Fiche affichée dans {target_channel.mention} !**", ephemeral=True)
+            
+            # Envoyer la fiche dans le salon configuré
+            msg = await target_channel.send(embed=embed, view=view)
+            
+            # Sauvegarder le message_id et channel_id
+            c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                     (msg.id, msg.channel.id, tribu_id))
+            conn.commit()
         else:
-            await inter.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
+            # Affichage normal dans le salon actuel
+            if inter.response.is_done():
+                msg = await inter.followup.send(embed=embed, view=view, ephemeral=ephemeral, wait=True)
+            else:
+                await inter.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
+                msg = await inter.original_response()
+            
+            # Sauvegarder le message_id et channel_id (seulement si pas ephemeral)
+            if not ephemeral:
+                c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                         (msg.id, msg.channel.id, tribu_id))
+                conn.commit()
 
 async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, message_prefix: str = "✅ **Fiche mise à jour !**", ephemeral: bool = False):
     """Affiche la fiche tribu mise à jour et supprime TOUTES les anciennes fiches existantes"""
@@ -2743,6 +2777,139 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
         else:
             await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
+class PanneauParametres(discord.ui.View):
+    """Panneau de configuration du bot (Admin seulement)"""
+    def __init__(self, timeout: Optional[float] = None):
+        super().__init__(timeout=timeout)
+    
+    @discord.ui.button(label="Bannière", style=discord.ButtonStyle.primary, emoji="🖼️", row=0)
+    async def btn_banniere(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Modal pour la bannière
+        class ModalBanniere(discord.ui.Modal, title="🖼️ Modifier la bannière"):
+            url = discord.ui.TextInput(
+                label="URL de la bannière",
+                placeholder="https://example.com/banniere.png",
+                style=discord.TextStyle.short,
+                required=True,
+                max_length=500
+            )
+            
+            async def on_submit(self, submit_inter: discord.Interaction):
+                url_value = str(self.url).strip()
+                if not url_value.startswith("http://") and not url_value.startswith("https://"):
+                    await submit_inter.response.send_message("❌ L'URL doit commencer par http:// ou https://", ephemeral=True)
+                    return
+                
+                set_config(submit_inter.guild_id, "banniere_panneau", url_value)
+                await submit_inter.response.send_message(f"✅ **Bannière modifiée !**\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
+        
+        await inter.response.send_modal(ModalBanniere())
+    
+    @discord.ui.button(label="Couleur", style=discord.ButtonStyle.primary, emoji="🎨", row=0)
+    async def btn_couleur(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Modal pour la couleur
+        class ModalCouleur(discord.ui.Modal, title="🎨 Modifier la couleur"):
+            couleur = discord.ui.TextInput(
+                label="Couleur hexadécimale",
+                placeholder="Ex: 5865F2 ou #5865F2",
+                style=discord.TextStyle.short,
+                required=True,
+                max_length=7
+            )
+            
+            async def on_submit(self, submit_inter: discord.Interaction):
+                couleur_value = str(self.couleur).strip().replace("#", "")
+                
+                if len(couleur_value) != 6 or not all(c in '0123456789ABCDEFabcdef' for c in couleur_value):
+                    await submit_inter.response.send_message("❌ Couleur invalide. Utilise un code hexadécimal à 6 caractères (ex: 5865F2)", ephemeral=True)
+                    return
+                
+                set_config(submit_inter.guild_id, "couleur_panneau", couleur_value)
+                
+                try:
+                    couleur_int = int(couleur_value, 16)
+                    e = discord.Embed(
+                        title="✅ Couleur modifiée !",
+                        description=f"**Nouvelle couleur :** #{couleur_value.upper()}\n\n💡 *Utilise `/panneau` pour voir le résultat.*",
+                        color=couleur_int
+                    )
+                    await submit_inter.response.send_message(embed=e, ephemeral=True)
+                except:
+                    await submit_inter.response.send_message(f"✅ **Couleur modifiée !**\n\nNouvelle couleur : #{couleur_value.upper()}", ephemeral=True)
+        
+        await inter.response.send_modal(ModalCouleur())
+    
+    @discord.ui.button(label="Texte", style=discord.ButtonStyle.primary, emoji="📝", row=0)
+    async def btn_texte(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Modal pour le texte
+        class ModalTexte(discord.ui.Modal, title="📝 Modifier le texte du panneau"):
+            texte = discord.ui.TextInput(
+                label="Texte de description",
+                placeholder="Ex: Utilise les boutons ci-dessous...",
+                style=discord.TextStyle.paragraph,
+                required=True,
+                max_length=1000
+            )
+            
+            async def on_submit(self, submit_inter: discord.Interaction):
+                texte_value = str(self.texte).strip()
+                set_config(submit_inter.guild_id, "texte_panneau", texte_value)
+                await submit_inter.response.send_message(f"✅ **Texte modifié !**\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
+        
+        await inter.response.send_modal(ModalTexte())
+    
+    @discord.ui.button(label="Salon fiches", style=discord.ButtonStyle.secondary, emoji="📍", row=0)
+    async def btn_salon(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Menu dropdown pour choisir le salon
+        class ViewSalonSelect(discord.ui.View):
+            def __init__(self):
+                super().__init__(timeout=180)
+            
+            @discord.ui.select(
+                placeholder="Sélectionne le salon pour les fiches",
+                options=[
+                    discord.SelectOption(label="Salon actuel (par défaut)", value="0", emoji="📍", description="Les fiches s'affichent où la commande est tapée")
+                ]
+            )
+            async def select_salon(self, select_inter: discord.Interaction, select: discord.ui.Select):
+                salon_id = select.values[0]
+                set_config(select_inter.guild_id, "salon_fiche_tribu", salon_id)
+                
+                if salon_id == "0":
+                    await select_inter.response.send_message("✅ **Configuration réinitialisée !**\n\nLes fiches seront affichées dans le salon actuel (où la commande est exécutée).", ephemeral=True)
+                else:
+                    salon = inter.guild.get_channel(int(salon_id))
+                    if salon:
+                        await select_inter.response.send_message(f"✅ **Salon défini !**\n\nToutes les nouvelles fiches seront affichées dans {salon.mention}", ephemeral=True)
+        
+        # Créer le menu avec les salons texte du serveur
+        view = ViewSalonSelect()
+        
+        # Ajouter les salons texte au menu
+        for channel in inter.guild.text_channels:
+            if len(view.children[0].options) < 25:  # Max 25 options
+                view.children[0].options.append(
+                    discord.SelectOption(label=f"#{channel.name}", value=str(channel.id), emoji="💬")
+                )
+        
+        await inter.response.send_message("📍 **Choisir le salon pour les fiches tribu :**", view=view, ephemeral=True)
+
 class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout=timeout)
@@ -2916,6 +3083,30 @@ async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     
     return choices[:25]
 
+
+@tree.command(name="parametres", description="[ADMIN] Ouvrir le panneau de configuration du bot")
+async def parametres(inter: discord.Interaction):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    
+    view = PanneauParametres(timeout=None)
+    
+    e = discord.Embed(
+        title="⚙️ Paramètres du bot",
+        description=(
+            "Utilise les boutons ci-dessous pour configurer le bot :\n\n"
+            "🖼️ **Bannière** — Personnaliser l'image du panneau\n"
+            "🎨 **Couleur** — Changer la couleur du panneau\n"
+            "📝 **Texte** — Modifier le texte de description\n"
+            "📍 **Salon fiches** — Définir où afficher les fiches\n\n"
+            "💡 *Pour gérer les maps/boss/notes, utilise les commandes `/ajout_map`, `/ajout_boss`, `/ajout_note` et leurs équivalents de suppression.*"
+        ),
+        color=0xFF9900
+    )
+    e.set_footer(text="👑 Panneau réservé aux administrateurs")
+    
+    await inter.response.send_message(embed=e, view=view, ephemeral=True)
 
 @tree.command(name="panneau", description="Ouvrir le panneau Tribu (boutons)")
 async def panneau(inter: discord.Interaction):
