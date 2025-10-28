@@ -430,8 +430,14 @@ def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None
         e.add_field(name="**🎯 OBJECTIF**", value=tribu["objectif"], inline=False)
     
     # Ouvert au recrutement
-    if "recrutement" in tribu.keys() and tribu["recrutement"]:
-        e.add_field(name="**📢 RECRUTEMENT OUVERT**", value=tribu["recrutement"], inline=False)
+    if "ouvert_recrutement" in tribu.keys() and tribu["ouvert_recrutement"]:
+        recrutement_value = tribu["ouvert_recrutement"]
+        # Si c'est 1 ou 0, convertir en texte
+        if recrutement_value == 1:
+            recrutement_value = "Oui"
+        elif recrutement_value == 0:
+            recrutement_value = "Non"
+        e.add_field(name="**📢 RECRUTEMENT OUVERT**", value=str(recrutement_value), inline=False)
     
     # Progression Boss
     boss_valides = []
