@@ -1238,7 +1238,8 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss validé", boss_selectionne)
-            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"✅ **Boss {boss_selectionne} validé pour {row['nom']} !**")
+            await select_inter.response.send_message(f"✅ **Boss {boss_selectionne} validé pour {row['nom']} !**", ephemeral=True)
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
         view = discord.ui.View(timeout=180)
@@ -1314,7 +1315,8 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss non-validé", boss_selectionne)
-            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"❌ **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**")
+            await select_inter.response.send_message(f"❌ **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**", ephemeral=True)
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
         view = discord.ui.View(timeout=180)
@@ -1390,7 +1392,8 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note validée", note_selectionnee)
-            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"📝 **Note {note_selectionnee} validée pour {row['nom']} !**")
+            await select_inter.response.send_message(f"📝 **Note {note_selectionnee} validée pour {row['nom']} !**", ephemeral=True)
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
         view = discord.ui.View(timeout=180)
@@ -1466,7 +1469,8 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note non-validée", note_selectionnee)
-            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"📄 **Note {note_selectionnee} marquée comme non-validée pour {row['nom']} !**")
+            await select_inter.response.send_message(f"📄 **Note {note_selectionnee} marquée comme non-validée pour {row['nom']} !**", ephemeral=True)
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
         view = discord.ui.View(timeout=180)
@@ -1511,8 +1515,7 @@ class PanneauStaff(discord.ui.View):
     @discord.ui.button(label="Réafficher fiche", style=discord.ButtonStyle.primary, emoji="🔄", row=3)
     async def btn_afficher(self, inter: discord.Interaction, button: discord.ui.Button):
         # Réafficher la fiche de cette tribu
-        await inter.response.defer(ephemeral=False)
-        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"📋 **Fiche tribu : {self.tribu_nom}**", ephemeral=False)
+        await afficher_fiche(inter, self.tribu_id)
     
     @discord.ui.button(label="Supprimer tribu", style=discord.ButtonStyle.danger, emoji="🗑️", row=3)
     async def btn_supprimer(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -2064,16 +2067,13 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
         await inter.response.send_message("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
         return
     
-    # Defer pour éviter le timeout lors de la suppression des anciennes fiches
-    await inter.response.defer(ephemeral=False)
-    
     db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
-        await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
     
-    await afficher_fiche_mise_a_jour(inter, row["id"], "📋 **Fiche tribu**", ephemeral=False)
+    await afficher_fiche(inter, row["id"])
 
 @tree.command(name="modifier_tribu", description="Modifier les infos d'une tribu")
 @app_commands.describe(
@@ -2306,7 +2306,9 @@ async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio
                   (row["id"], nouveau_proprio.id, "Chef",))
         conn.commit()
     
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Propriété de {row['nom']} transférée à <@{nouveau_proprio.id}> !**")
+    ajouter_historique(row["id"], inter.user.id, "Transfert propriété", f"Nouveau propriétaire: <@{nouveau_proprio.id}>")
+    await inter.response.send_message(f"✅ **Propriété de {row['nom']} transférée à <@{nouveau_proprio.id}> !**", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="tribu_supprimer", description="Supprimer une tribu (confirmation requise)")
 @app_commands.describe(nom="Nom de la tribu", confirmation="Retape exactement le nom pour confirmer")
@@ -2911,9 +2913,17 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
         
         ajouter_historique(tid, inter.user.id, "Création tribu", f"Tribu {self.nom.value} créée")
         
-        # Note d'information
+        # Afficher la fiche de la nouvelle tribu
+        # Note: on utilise followup car le defer a déjà été appelé
         note = "ℹ️ **Autres options disponibles** : Utilise les boutons « Modifier », « Personnaliser » et « Guide » pour compléter ta fiche !"
-        await afficher_fiche_mise_a_jour(inter, tid, f"✅ **Tribu {self.nom.value} créée !**\n{note}", ephemeral=False)
+        await inter.followup.send(f"✅ **Tribu {self.nom.value} créée !**\n{note}", ephemeral=True)
+        
+        # Afficher la fiche (sans defer car déjà fait)
+        from discord import Client
+        if isinstance(inter.client, Client):
+            channel = inter.channel
+            if channel:
+                await construire_et_envoyer_fiche(inter.client, tid, channel)
 
 class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", required=False)
@@ -3090,21 +3100,21 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
         if str(self.objectif).strip():
             updates["objectif"] = str(self.objectif).strip()
         
-        with db_connect() as conn:
-            c = conn.cursor()
-            if updates:
+        if updates:
+            with db_connect() as conn:
+                c = conn.cursor()
                 set_clause = ", ".join(f"{k}=?" for k in updates.keys())
                 c.execute(f"UPDATE tribus SET {set_clause} WHERE id=?", (*updates.values(), row["id"]))
                 conn.commit()
-                ajouter_historique(row["id"], inter.user.id, "Détails ajoutés", f"Champs: {', '.join(updates.keys())}")
-                
-                # Message avec info sur la progression
-                msg_success = "✅ **Détails ajoutés !**\n\nℹ️ *Pour la progression Boss/Notes, utilise :*\n• `/boss_validé_tribu`\n• `/note_validé_tribu`"
-                await afficher_fiche_mise_a_jour(inter, row["id"], msg_success, ephemeral=False)
-            else:
-                # Si aucune mise à jour, juste afficher la fiche
-                await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
-                return
+            
+            ajouter_historique(row["id"], inter.user.id, "Détails ajoutés", f"Champs: {', '.join(updates.keys())}")
+            
+            # Message avec info sur la progression
+            msg_success = "✅ **Détails ajoutés !**\n\nℹ️ *Pour la progression Boss/Notes, utilise :*\n• `/boss_validé_tribu`\n• `/note_validé_tribu`"
+            await inter.response.send_message(msg_success, ephemeral=True)
+            await rafraichir_fiche_tribu(inter.client, row["id"])
+        else:
+            await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = None):
