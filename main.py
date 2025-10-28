@@ -1248,7 +1248,7 @@ class MenuFicheTribu(discord.ui.View):
         # Ajouter les boutons de navigation de galerie EN PREMIER (row=0, au-dessus)
         btn_prev = discord.ui.Button(
             emoji="🔙",
-            style=discord.ButtonStyle.secondary,
+            style=discord.ButtonStyle.primary,
             custom_id=f"galerie_prev:{tribu_id}",
             row=0
         )
@@ -1257,7 +1257,7 @@ class MenuFicheTribu(discord.ui.View):
         
         btn_next = discord.ui.Button(
             emoji="🔜",
-            style=discord.ButtonStyle.secondary,
+            style=discord.ButtonStyle.primary,
             custom_id=f"galerie_next:{tribu_id}",
             row=0
         )
