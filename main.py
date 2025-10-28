@@ -954,9 +954,18 @@ class PanneauMembre(discord.ui.View):
             await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
             return
         
-        # Ouvrir le modal pour ajouter une photo
-        modal = ModalAjouterPhoto(self.tribu_id, self.tribu_nom)
-        await inter.response.send_modal(modal)
+        # Afficher les instructions pour utiliser la commande avec fichier
+        e = discord.Embed(
+            title="📸 Ajouter une photo",
+            description=f"Pour ajouter une photo à **{self.tribu_nom}**, utilise la commande `/ajouter_photo`.\n\n"
+                        "**Deux options disponibles :**\n"
+                        "📱 **Depuis ton téléphone/PC** : Clique sur l'icône 📎 à gauche de la commande et choisis une image\n"
+                        "🔗 **Depuis une URL** : Colle l'URL de ton image hébergée en ligne\n\n"
+                        "Tu peux ajouter jusqu'à 10 photos par tribu !",
+            color=0x5865F2
+        )
+        e.set_footer(text="💡 La commande /ajouter_photo accepte les fichiers ET les URLs")
+        await inter.response.send_message(embed=e, ephemeral=True)
     
     @discord.ui.button(label="Supprimer photo", style=discord.ButtonStyle.secondary, emoji="🗑️", row=3)
     async def btn_supprimer_photo(self, inter: discord.Interaction, button: discord.ui.Button):
