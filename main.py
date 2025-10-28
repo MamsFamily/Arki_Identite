@@ -1333,7 +1333,7 @@ class PanneauMembre(discord.ui.View):
         
         await inter.response.send_message("❌ **Marquer un boss comme non-validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
     
-    @discord.ui.button(label="Note validée", style=discord.ButtonStyle.success, emoji="📝", row=5)
+    @discord.ui.button(label="Note validée", style=discord.ButtonStyle.success, emoji="📝", row=3)
     async def btn_note_valide(self, inter: discord.Interaction, button: discord.ui.Button):
         if not self.tribu_id:
             await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
@@ -1409,7 +1409,7 @@ class PanneauMembre(discord.ui.View):
         
         await inter.response.send_message("📝 **Marquer une note comme validée**\n\nSélectionne la note :", view=view, ephemeral=True)
     
-    @discord.ui.button(label="Note non validée", style=discord.ButtonStyle.danger, emoji="📄", row=5)
+    @discord.ui.button(label="Note non validée", style=discord.ButtonStyle.danger, emoji="📄", row=3)
     async def btn_note_non_valide(self, inter: discord.Interaction, button: discord.ui.Button):
         if not self.tribu_id:
             await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
