@@ -2340,9 +2340,12 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     description = discord.ui.TextInput(label="Description (optionnel)", placeholder="Une brève description de la tribu", required=False, style=discord.TextStyle.paragraph)
 
     async def on_submit(self, inter: discord.Interaction):
+        # Différer immédiatement pour éviter le timeout (la création prend du temps)
+        await inter.response.defer(ephemeral=False)
+        
         db_init()
         if tribu_par_nom(inter.guild_id, self.nom.value):
-            await inter.response.send_message("❌ Ce nom de tribu est déjà pris.", ephemeral=True)
+            await inter.followup.send("❌ Ce nom de tribu est déjà pris.", ephemeral=True)
             return
         
         with db_connect() as conn:
