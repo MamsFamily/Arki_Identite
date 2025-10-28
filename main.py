@@ -700,6 +700,28 @@ class PanneauMembre(discord.ui.View):
         # Afficher directement la fiche de la tribu
         await afficher_fiche(inter, self.tribu_id, ephemeral=False)
     
+    @discord.ui.button(label="Changer logo", style=discord.ButtonStyle.primary, emoji="🖼️", row=0)
+    async def btn_logo(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Message explicatif avec instructions claires
+        e = discord.Embed(
+            title=f"🖼️ Changer le logo de {self.tribu_nom}",
+            description="**Pour uploader depuis ton téléphone/PC :**\n"
+                        "1️⃣ Tape `/ajouter_logo`\n"
+                        "2️⃣ Sélectionne ta tribu\n"
+                        "3️⃣ Clique sur l'icône **📎** (à gauche)\n"
+                        "4️⃣ Choisis ton image\n"
+                        "5️⃣ Envoie !\n\n"
+                        "**Ou via URL :**\n"
+                        "Remplis simplement le champ `url_logo`",
+            color=0x5865F2
+        )
+        e.set_footer(text="💡 Les boutons Discord ne peuvent pas uploader de fichiers - utilise la commande /ajouter_logo")
+        await inter.response.send_message(embed=e, ephemeral=True)
+    
     @discord.ui.button(label="Ajouter membre", style=discord.ButtonStyle.success, emoji="👤", row=1)
     async def btn_ajouter_membre(self, inter: discord.Interaction, button: discord.ui.Button):
         if not self.tribu_id:
@@ -1024,6 +1046,17 @@ class PanneauMembre(discord.ui.View):
                 "• **/mon_nom_ingame** — modifier ton nom in-game\n"
                 "• **/ajouter_avant_poste** — ajouter un avant-poste\n"
                 "• **/supprimer_avant_poste** — retirer un avant-poste"
+            ),
+            inline=False
+        )
+        
+        # Galerie & personnalisation
+        e.add_field(
+            name="🎨 Galerie & personnalisation",
+            value=(
+                "• **/ajouter_logo** — changer le logo (fichier ou URL)\n"
+                "• **/ajouter_photo** — ajouter une photo (fichier ou URL)\n"
+                "• **/supprimer_photo** — retirer une photo"
             ),
             inline=False
         )
@@ -2589,6 +2622,49 @@ class PanneauTribu(discord.ui.View):
     @discord.ui.button(label="Guide", style=discord.ButtonStyle.secondary, emoji="📖", custom_id="panneau:guide")
     async def btn_guide(self, inter: discord.Interaction, button: discord.ui.Button):
         await afficher_guide(inter)
+
+@tree.command(name="ajouter_logo", description="Changer le logo de ta tribu")
+@app_commands.describe(
+    nom="Nom de la tribu",
+    url_logo="URL du logo (optionnel si tu fournis un fichier)",
+    fichier="Image à uploader depuis ton téléphone/PC (optionnel si tu fournis une URL)"
+)
+@app_commands.autocomplete(nom=autocomplete_tribus)
+async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[str] = None, fichier: Optional[discord.Attachment] = None):
+    db_init()
+    row = tribu_par_nom(inter.guild_id, nom)
+    if not row:
+        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        return
+    
+    # Vérifier qu'au moins un des deux est fourni
+    if not url_logo and not fichier:
+        await inter.response.send_message("❌ Tu dois fournir soit une URL, soit un fichier image.", ephemeral=True)
+        return
+    
+    # Si un fichier est fourni, vérifier que c'est une image
+    if fichier:
+        if not fichier.content_type or not fichier.content_type.startswith("image/"):
+            await inter.response.send_message("❌ Le fichier doit être une image (JPG, PNG, GIF, etc.).", ephemeral=True)
+            return
+        # Utiliser l'URL du fichier uploadé
+        logo_url = fichier.url
+    else:
+        logo_url = url_logo.strip()
+    
+    # Vérifier les droits
+    if not await verifier_droits(inter, row):
+        return
+    
+    # Mettre à jour le logo
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE tribus SET logo_url=? WHERE id=?", (logo_url, row["id"]))
+        conn.commit()
+    
+    source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
+    ajouter_historique(row["id"], inter.user.id, "Logo modifié", f"Logo changé {source}")
+    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Logo de {row['nom']} mis à jour !**\n{source}", ephemeral=False)
 
 @tree.command(name="ajouter_photo", description="Ajouter une photo à la galerie de ta tribu (max 10 photos)")
 @app_commands.describe(
