@@ -595,10 +595,44 @@ class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
         ajouter_historique(self.tribu_id, inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
         await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {self.tribu_nom} !** ({count + 1}/10)\n🔗 depuis une URL", ephemeral=False)
 
+class ConfirmationSupprimerPhoto(discord.ui.View):
+    """Vue de confirmation pour la suppression de photo"""
+    def __init__(self, tribu_id: int, tribu_nom: str, photo_id: int, photo_url: str, photo_numero: int):
+        super().__init__(timeout=60)
+        self.tribu_id = tribu_id
+        self.tribu_nom = tribu_nom
+        self.photo_id = photo_id
+        self.photo_url = photo_url
+        self.photo_numero = photo_numero
+    
+    @discord.ui.button(label="Confirmer la suppression", style=discord.ButtonStyle.danger, emoji="✅")
+    async def confirmer(self, inter: discord.Interaction, button: discord.ui.Button):
+        with db_connect() as conn:
+            c = conn.cursor()
+            # Supprimer la photo
+            c.execute("DELETE FROM photos_tribu WHERE id=?", (self.photo_id,))
+            
+            # Réorganiser les ordres
+            c.execute("SELECT id FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (self.tribu_id,))
+            photos_restantes = c.fetchall()
+            for i, p in enumerate(photos_restantes):
+                c.execute("UPDATE photos_tribu SET ordre=? WHERE id=?", (i, p["id"]))
+            
+            conn.commit()
+            count_restant = len(photos_restantes)
+        
+        ajouter_historique(self.tribu_id, inter.user.id, "Photo supprimée", f"Photo {self.photo_numero} supprimée de la galerie")
+        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"✅ **Photo {self.photo_numero} supprimée de {self.tribu_nom} !** ({count_restant}/10)", ephemeral=False)
+    
+    @discord.ui.button(label="Annuler", style=discord.ButtonStyle.secondary, emoji="❌")
+    async def annuler(self, inter: discord.Interaction, button: discord.ui.Button):
+        await inter.response.edit_message(content="❌ Suppression annulée.", embed=None, view=None)
+
 class SelectSupprimerPhoto(discord.ui.Select):
     def __init__(self, tribu_id: int, tribu_nom: str, photos: list):
         self.tribu_id = tribu_id
         self.tribu_nom = tribu_nom
+        self.photos_dict = {photo['id']: photo for photo in photos}  # Stocker les photos
         
         # Créer les options à partir des photos (juste les numéros, SANS #)
         options = []
@@ -621,30 +655,28 @@ class SelectSupprimerPhoto(discord.ui.Select):
     async def callback(self, inter: discord.Interaction):
         photo_id = int(self.values[0])
         
-        with db_connect() as conn:
-            c = conn.cursor()
-            # Vérifier que la photo appartient bien à cette tribu
-            c.execute("SELECT * FROM photos_tribu WHERE id=? AND tribu_id=?", (photo_id, self.tribu_id))
-            photo = c.fetchone()
-            
-            if not photo:
-                await inter.response.send_message("❌ Photo introuvable.", ephemeral=True)
-                return
-            
-            # Supprimer la photo
-            c.execute("DELETE FROM photos_tribu WHERE id=?", (photo_id,))
-            
-            # Réorganiser les ordres
-            c.execute("SELECT id FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (self.tribu_id,))
-            photos_restantes = c.fetchall()
-            for i, p in enumerate(photos_restantes):
-                c.execute("UPDATE photos_tribu SET ordre=? WHERE id=?", (i, p["id"]))
-            
-            conn.commit()
-            count_restant = len(photos_restantes)
+        # Récupérer les infos de la photo
+        photo = self.photos_dict.get(photo_id)
+        if not photo:
+            await inter.response.send_message("❌ Photo introuvable.", ephemeral=True)
+            return
         
-        ajouter_historique(self.tribu_id, inter.user.id, "Photo supprimée", f"Photo supprimée de la galerie")
-        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"✅ **Photo supprimée de {self.tribu_nom} !** ({count_restant}/10)", ephemeral=False)
+        photo_numero = photo['ordre'] + 1
+        
+        # Afficher un embed de confirmation avec la photo
+        e = discord.Embed(
+            title=f"⚠️ Confirmer la suppression — {self.tribu_nom}",
+            description=f"**Es-tu sûr de vouloir supprimer la Photo {photo_numero} ?**\n\nCette action est irréversible.",
+            color=0xFF6B6B
+        )
+        e.set_image(url=photo['url'])
+        e.set_footer(text="💡 Clique sur ✅ pour confirmer ou ❌ pour annuler")
+        
+        # Créer la vue de confirmation
+        view = ConfirmationSupprimerPhoto(self.tribu_id, self.tribu_nom, photo_id, photo['url'], photo_numero)
+        
+        # Modifier le message avec l'embed de confirmation
+        await inter.response.edit_message(embed=e, view=view)
 
 class ViewSupprimerPhoto(discord.ui.View):
     def __init__(self, tribu_id: int, tribu_nom: str, photos: list):
@@ -1008,27 +1040,26 @@ class PanneauMembre(discord.ui.View):
             await inter.response.send_message("📷 Aucune photo dans la galerie. Utilise le bouton **Ajouter photo** pour en ajouter une.", ephemeral=True)
             return
         
-        # Créer un embed avec toutes les photos affichées
+        # Créer la liste des photos pour la description
+        photos_liste = []
+        for i, photo in enumerate(photos):
+            numero = i + 1
+            # Tronquer l'URL pour l'affichage
+            url_courte = photo['url'][:60] + "..." if len(photo['url']) > 60 else photo['url']
+            photos_liste.append(f"**📸 Photo {numero}** — [Voir]({photo['url']})")
+        
+        photos_texte = "\n".join(photos_liste)
+        
+        # Créer un embed simple avec la liste des photos
         e = discord.Embed(
             title=f"🗑️ Supprimer une photo — {self.tribu_nom}",
-            description=f"**{len(photos)} photo(s) dans la galerie**\n\nRegarde les photos ci-dessous, puis sélectionne le numéro dans le menu :",
+            description=f"**{len(photos)} photo(s) dans la galerie**\n\n{photos_texte}\n\n💡 **Sélectionne le numéro dans le menu ci-dessous**",
             color=0xFF6B6B
         )
         
-        # Afficher chaque photo avec son numéro
-        for i, photo in enumerate(photos):
-            numero = i + 1
-            e.add_field(
-                name=f"\u200b",  # Champ invisible
-                value=f"**📸 Photo {numero}**\n[Cliquer pour voir]({photo['url']})",
-                inline=True
-            )
-        
-        # Afficher la première photo comme image principale de l'embed
+        # Afficher la première photo comme aperçu
         if photos:
-            e.set_image(url=photos[0]['url'])
-        
-        e.set_footer(text="💡 La première photo est affichée ci-dessus. Sélectionne le numéro dans le menu.")
+            e.set_thumbnail(url=photos[0]['url'])
         
         # Afficher le menu de sélection
         view = ViewSupprimerPhoto(self.tribu_id, self.tribu_nom, photos)
