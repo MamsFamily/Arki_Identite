@@ -1203,11 +1203,11 @@ class PanneauMembre(discord.ui.View):
             options.append(discord.SelectOption(
                 label=boss_nom,
                 value=boss_nom,
-                emoji="<a:yes:1328152490163601448>"
+                emoji="✅"
             ))
         
         select = discord.ui.Select(
-            placeholder="<a:yes:1328152490163601448> Sélectionne le boss validé...",
+            placeholder="✅ Sélectionne le boss validé...",
             options=options
         )
         
@@ -1257,7 +1257,7 @@ class PanneauMembre(discord.ui.View):
         
         await inter.response.send_message("✅ **Marquer un boss comme validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
     
-    @discord.ui.button(label="Boss non validé", style=discord.ButtonStyle.danger, emoji="<a:no:1328152539660554363>", row=4)
+    @discord.ui.button(label="Boss non validé", style=discord.ButtonStyle.danger, emoji="❌", row=4)
     async def btn_boss_non_valide(self, inter: discord.Interaction, button: discord.ui.Button):
         if not self.tribu_id:
             await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
@@ -1279,11 +1279,11 @@ class PanneauMembre(discord.ui.View):
             options.append(discord.SelectOption(
                 label=boss_nom,
                 value=boss_nom,
-                emoji="<a:no:1328152539660554363>"
+                emoji="❌"
             ))
         
         select = discord.ui.Select(
-            placeholder="<a:no:1328152539660554363> Sélectionne le boss non-validé...",
+            placeholder="❌ Sélectionne le boss non-validé...",
             options=options
         )
         
@@ -1325,13 +1325,165 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss non-validé", boss_selectionne)
-            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"<a:no:1328152539660554363> **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**")
+            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"❌ **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**")
         
         select.callback = select_callback
         view = discord.ui.View(timeout=180)
         view.add_item(select)
         
-        await inter.response.send_message("<a:no:1328152539660554363> **Marquer un boss comme non-validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
+        await inter.response.send_message("❌ **Marquer un boss comme non-validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
+    
+    @discord.ui.button(label="Note validée", style=discord.ButtonStyle.success, emoji="📝", row=5)
+    async def btn_note_valide(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer toutes les notes disponibles
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT nom FROM notes WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+            notes_list = [row["nom"] for row in c.fetchall()]
+        
+        if not notes_list:
+            await inter.response.send_message("❌ Aucune note disponible. Contacte un admin pour en ajouter.", ephemeral=True)
+            return
+        
+        # Créer le menu déroulant des notes
+        options = []
+        for note_nom in notes_list[:25]:  # Discord limite à 25 options
+            options.append(discord.SelectOption(
+                label=note_nom,
+                value=note_nom,
+                emoji="📝"
+            ))
+        
+        select = discord.ui.Select(
+            placeholder="📝 Sélectionne la note validée...",
+            options=options
+        )
+        
+        async def select_callback(select_inter: discord.Interaction):
+            note_selectionnee = select.values[0]
+            
+            # Vérifier les droits et ajouter la note validée
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not row:
+                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    return
+                
+                if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
+                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    return
+                
+                # Récupérer les deux listes
+                notes_valides = [n.strip() for n in (row["progression_notes"] or "").split(",") if n.strip()]
+                notes_non_valides = [n.strip() for n in (row["progression_notes_non_valides"] or "").split(",") if n.strip()]
+                
+                # Vérifier si la note est déjà validée
+                if note_selectionnee in notes_valides:
+                    await select_inter.response.send_message(f"ℹ️ La note **{note_selectionnee}** est déjà validée pour {row['nom']}.", ephemeral=True)
+                    return
+                
+                # Retirer de la liste non-validées si présent
+                if note_selectionnee in notes_non_valides:
+                    notes_non_valides.remove(note_selectionnee)
+                
+                # Ajouter à la liste des validées
+                notes_valides.append(note_selectionnee)
+                
+                c.execute("UPDATE tribus SET progression_notes=?, progression_notes_non_valides=? WHERE id=?", 
+                         (", ".join(notes_valides), ", ".join(notes_non_valides), row["id"]))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Note validée", note_selectionnee)
+            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"📝 **Note {note_selectionnee} validée pour {row['nom']} !**")
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=180)
+        view.add_item(select)
+        
+        await inter.response.send_message("📝 **Marquer une note comme validée**\n\nSélectionne la note :", view=view, ephemeral=True)
+    
+    @discord.ui.button(label="Note non validée", style=discord.ButtonStyle.danger, emoji="📄", row=5)
+    async def btn_note_non_valide(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer toutes les notes disponibles
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT nom FROM notes WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+            notes_list = [row["nom"] for row in c.fetchall()]
+        
+        if not notes_list:
+            await inter.response.send_message("❌ Aucune note disponible. Contacte un admin pour en ajouter.", ephemeral=True)
+            return
+        
+        # Créer le menu déroulant des notes
+        options = []
+        for note_nom in notes_list[:25]:  # Discord limite à 25 options
+            options.append(discord.SelectOption(
+                label=note_nom,
+                value=note_nom,
+                emoji="📄"
+            ))
+        
+        select = discord.ui.Select(
+            placeholder="📄 Sélectionne la note non-validée...",
+            options=options
+        )
+        
+        async def select_callback(select_inter: discord.Interaction):
+            note_selectionnee = select.values[0]
+            
+            # Vérifier les droits et ajouter la note non-validée
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not row:
+                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    return
+                
+                if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
+                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    return
+                
+                # Récupérer les deux listes
+                notes_valides = [n.strip() for n in (row["progression_notes"] or "").split(",") if n.strip()]
+                notes_non_valides = [n.strip() for n in (row["progression_notes_non_valides"] or "").split(",") if n.strip()]
+                
+                # Vérifier si la note est déjà non-validée
+                if note_selectionnee in notes_non_valides:
+                    await select_inter.response.send_message(f"ℹ️ La note **{note_selectionnee}** est déjà marquée comme non-validée pour {row['nom']}.", ephemeral=True)
+                    return
+                
+                # Retirer de la liste validées si présent
+                if note_selectionnee in notes_valides:
+                    notes_valides.remove(note_selectionnee)
+                
+                # Ajouter à la liste des non-validées
+                notes_non_valides.append(note_selectionnee)
+                
+                c.execute("UPDATE tribus SET progression_notes=?, progression_notes_non_valides=? WHERE id=?", 
+                         (", ".join(notes_valides), ", ".join(notes_non_valides), row["id"]))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Note non-validée", note_selectionnee)
+            await afficher_fiche_mise_a_jour(select_inter, self.tribu_id, f"📄 **Note {note_selectionnee} marquée comme non-validée pour {row['nom']} !**")
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=180)
+        view.add_item(select)
+        
+        await inter.response.send_message("📄 **Marquer une note comme non-validée**\n\nSélectionne la note :", view=view, ephemeral=True)
 
 # ---------- Panneau Staff pour gérer une tribu spécifique ----------
 class PanneauStaff(discord.ui.View):
