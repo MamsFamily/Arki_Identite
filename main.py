@@ -1153,6 +1153,7 @@ class MenuFicheTribu(discord.ui.View):
             custom_id=f"menu_fiche:{tribu_id}",
             options=[
                 discord.SelectOption(label="Mes commandes", value="commandes", emoji="💡", description="Aide et commandes utiles"),
+                discord.SelectOption(label="Personnaliser", value="personnaliser", emoji="🎨", description="Personnaliser la tribu"),
                 discord.SelectOption(label="Quitter tribu", value="quitter", emoji="🚪", description="Quitter cette tribu"),
                 discord.SelectOption(label="Historique", value="historique", emoji="📜", description="Voir l'historique des actions"),
                 discord.SelectOption(label="Staff", value="staff", emoji="⚙️", description="Mode staff (admins/modos)")
@@ -1238,6 +1239,8 @@ class MenuFicheTribu(discord.ui.View):
         
         if choice == "commandes":
             await self.action_commandes(inter)
+        elif choice == "personnaliser":
+            await self.action_personnaliser(inter)
         elif choice == "quitter":
             await self.action_quitter(inter)
         elif choice == "historique":
@@ -1266,6 +1269,29 @@ class MenuFicheTribu(discord.ui.View):
         e.set_footer(text="💡 Panneau visible uniquement par toi • Utilise les boutons pour plus d'infos")
         
         await inter.response.send_message(embed=e, view=view, ephemeral=True)
+    
+    async def action_personnaliser(self, inter: discord.Interaction):
+        # Vérifier les droits (référent, manager, admin ou modo)
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            tribu = c.fetchone()
+            if not tribu:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+            
+            # Vérifier les permissions
+            has_perm = (est_admin_ou_modo(inter) or 
+                       inter.user.id == tribu["proprietaire_id"] or 
+                       est_manager(self.tribu_id, inter.user.id))
+            
+            if not has_perm:
+                await inter.response.send_message("❌ Seuls le référent, les managers, admins et modos peuvent personnaliser la tribu.", ephemeral=True)
+                return
+        
+        # Ouvrir le modal de personnalisation
+        modal = ModalPersonnaliserTribu()
+        await inter.response.send_modal(modal)
     
     async def action_quitter(self, inter: discord.Interaction):
         # Vérifier que l'utilisateur est membre
@@ -2414,18 +2440,18 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             return
         
         updates = {}
-        if str(self.couleur_hex).strip():
+        if self.couleur_hex.value.strip():
             try:
-                updates["couleur"] = int(str(self.couleur_hex).replace("#", ""), 16)
+                updates["couleur"] = int(self.couleur_hex.value.replace("#", ""), 16)
             except ValueError:
                 await inter.response.send_message("❌ Couleur invalide.", ephemeral=True)
                 return
-        if str(self.logo_url).strip():
-            updates["logo_url"] = str(self.logo_url).strip()
-        if str(self.objectif).strip():
-            updates["objectif"] = str(self.objectif).strip()
-        if str(self.devise).strip():
-            updates["devise"] = str(self.devise).strip()
+        if self.logo_url.value.strip():
+            updates["logo_url"] = self.logo_url.value.strip()
+        if self.objectif.value.strip():
+            updates["objectif"] = self.objectif.value.strip()
+        if self.devise.value.strip():
+            updates["devise"] = self.devise.value.strip()
         
         if updates:
             with db_connect() as conn:
