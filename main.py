@@ -600,19 +600,19 @@ class SelectSupprimerPhoto(discord.ui.Select):
         self.tribu_id = tribu_id
         self.tribu_nom = tribu_nom
         
-        # Créer les options à partir des photos
+        # Créer les options à partir des photos (juste les numéros)
         options = []
         for photo in photos:
-            label = f"Photo #{photo['ordre'] + 1}"
-            url_display = photo['url'][:50] + "..." if len(photo['url']) > 50 else photo['url']
+            numero = photo['ordre'] + 1
             options.append(discord.SelectOption(
-                label=label,
-                description=url_display,
-                value=str(photo['id'])
+                label=f"📸 Photo #{numero}",
+                description=f"Supprimer la photo #{numero}",
+                value=str(photo['id']),
+                emoji="🗑️"
             ))
         
         super().__init__(
-            placeholder="Sélectionne la photo à supprimer...",
+            placeholder="Choisis le numéro de la photo...",
             options=options,
             min_values=1,
             max_values=1
@@ -1008,9 +1008,31 @@ class PanneauMembre(discord.ui.View):
             await inter.response.send_message("📷 Aucune photo dans la galerie. Utilise le bouton **Ajouter photo** pour en ajouter une.", ephemeral=True)
             return
         
+        # Créer un embed avec une galerie de miniatures
+        e = discord.Embed(
+            title=f"🗑️ Supprimer une photo — {self.tribu_nom}",
+            description=f"**{len(photos)} photo(s) dans la galerie**\n\nRegarde les miniatures ci-dessous et sélectionne le numéro de la photo à supprimer dans le menu.",
+            color=0xFF6B6B
+        )
+        
+        # Ajouter les photos comme champs (max 10 photos de toute façon)
+        for photo in photos:
+            numero = photo['ordre'] + 1
+            e.add_field(
+                name=f"📸 Photo #{numero}",
+                value=f"[Voir en grand]({photo['url']})",
+                inline=True
+            )
+        
+        # Afficher la première photo comme miniature principale
+        if photos:
+            e.set_thumbnail(url=photos[0]['url'])
+        
+        e.set_footer(text="💡 Sélectionne le numéro dans le menu ci-dessous")
+        
         # Afficher le menu de sélection
         view = ViewSupprimerPhoto(self.tribu_id, self.tribu_nom, photos)
-        await inter.response.send_message("🗑️ Sélectionne la photo à supprimer :", view=view, ephemeral=True)
+        await inter.response.send_message(embed=e, view=view, ephemeral=True)
     
     @discord.ui.button(label="Voir toutes les commandes", style=discord.ButtonStyle.secondary, emoji="📖", row=4)
     async def btn_aide(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -2746,11 +2768,9 @@ async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     
     choices = []
     for photo in photos:
-        # Afficher "Photo #1", "Photo #2", etc.
-        label = f"Photo #{photo['ordre'] + 1}"
-        # Tronquer l'URL si trop longue
-        url_display = photo['url'][:50] + "..." if len(photo['url']) > 50 else photo['url']
-        choices.append(app_commands.Choice(name=f"{label} — {url_display}", value=str(photo['id'])))
+        # Afficher juste "📸 Photo #1", "📸 Photo #2", etc.
+        numero = photo['ordre'] + 1
+        choices.append(app_commands.Choice(name=f"📸 Photo #{numero}", value=str(photo['id'])))
     
     return choices[:25]
 
