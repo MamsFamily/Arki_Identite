@@ -948,6 +948,28 @@ class PanneauMembre(discord.ui.View):
         view.add_item(select)
         await inter.response.send_message("🏚️ Sélectionne l'avant-poste à retirer :", view=view, ephemeral=True)
     
+    @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
+    async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Message explicatif avec instructions claires
+        e = discord.Embed(
+            title=f"📸 Ajouter une photo à {self.tribu_nom}",
+            description="**Pour uploader depuis ton téléphone/PC :**\n"
+                        "1️⃣ Tape `/ajouter_photo`\n"
+                        "2️⃣ Sélectionne ta tribu\n"
+                        "3️⃣ Clique sur l'icône **📎** (à gauche)\n"
+                        "4️⃣ Choisis ton image\n"
+                        "5️⃣ Envoie !\n\n"
+                        "**Ou via URL :**\n"
+                        "Remplis simplement le champ `url_photo`",
+            color=0x5865F2
+        )
+        e.set_footer(text="💡 Les boutons Discord ne peuvent pas uploader de fichiers - utilise la commande /ajouter_photo")
+        await inter.response.send_message(embed=e, ephemeral=True)
+    
     @discord.ui.button(label="Supprimer photo", style=discord.ButtonStyle.secondary, emoji="🗑️", row=3)
     async def btn_supprimer_photo(self, inter: discord.Interaction, button: discord.ui.Button):
         if not self.tribu_id:
