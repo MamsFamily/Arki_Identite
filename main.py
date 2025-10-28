@@ -766,68 +766,51 @@ class PanneauMembre(discord.ui.View):
             await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
             return
         
-        # Ouvrir un modal pour ajouter un membre
-        modal = discord.ui.Modal(title="👤 Ajouter un membre")
-        user_input = discord.ui.TextInput(
-            label="Membre Discord",
-            placeholder="@utilisateur ou ID utilisateur",
-            required=True,
-            style=discord.TextStyle.short
-        )
-        nom_ingame_input = discord.ui.TextInput(
-            label="Nom in-game (optionnel)",
-            placeholder="Son nom dans le jeu",
-            required=False,
-            max_length=100,
-            style=discord.TextStyle.short
-        )
-        modal.add_item(user_input)
-        modal.add_item(nom_ingame_input)
+        # Vérifier les droits
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            row = c.fetchone()
         
-        async def modal_callback(modal_inter: discord.Interaction):
-            user_str = user_input.value.strip()
-            nom_ingame = nom_ingame_input.value.strip() if nom_ingame_input.value else ""
+        if not row:
+            await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+            return
+        
+        if not (est_admin(inter) or inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, inter.user.id)):
+            await inter.response.send_message("❌ Tu n'as pas la permission d'ajouter des membres.", ephemeral=True)
+            return
+        
+        # Créer une vue avec un sélecteur d'utilisateur
+        view = discord.ui.View(timeout=180)
+        user_select = discord.ui.UserSelect(
+            placeholder="Sélectionne l'utilisateur à ajouter...",
+            min_values=1,
+            max_values=1
+        )
+        
+        async def user_select_callback(select_inter: discord.Interaction):
+            selected_user = user_select.values[0]
             
-            # Extraire l'ID utilisateur
-            user_id = None
-            if user_str.startswith("<@") and user_str.endswith(">"):
-                user_id = int(user_str.strip("<@!>"))
-            elif user_str.isdigit():
-                user_id = int(user_str)
-            else:
-                await modal_inter.response.send_message("❌ Format invalide. Mentionne un utilisateur avec @ ou fournis son ID.", ephemeral=True)
-                return
-            
-            # Vérifier les droits
+            # Vérifier si le membre est déjà dans la tribu
             with db_connect() as conn:
                 c = conn.cursor()
-                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
-                row = c.fetchone()
-                
-                if not row:
-                    await modal_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
-                    return
-                
-                if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
-                    await modal_inter.response.send_message("❌ Tu n'as pas la permission d'ajouter des membres.", ephemeral=True)
-                    return
-                
-                # Vérifier si le membre est déjà dans la tribu
-                c.execute("SELECT * FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, user_id))
+                c.execute("SELECT * FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, selected_user.id))
                 if c.fetchone():
-                    await modal_inter.response.send_message(f"❌ <@{user_id}> est déjà membre de cette tribu.", ephemeral=True)
+                    await select_inter.response.send_message(f"❌ {selected_user.mention} est déjà membre de cette tribu.", ephemeral=True)
                     return
                 
                 # Ajouter le membre
-                c.execute("INSERT INTO membres (tribu_id, user_id, nom_in_game) VALUES (?, ?, ?)", 
-                         (self.tribu_id, user_id, nom_ingame))
+                c.execute("INSERT INTO membres (tribu_id, user_id) VALUES (?, ?)", 
+                         (self.tribu_id, selected_user.id))
                 conn.commit()
             
-            ajouter_historique(self.tribu_id, modal_inter.user.id, "Membre ajouté", f"<@{user_id}> ajouté à la tribu")
-            await modal_inter.response.send_message(f"✅ <@{user_id}> a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Membre ajouté", f"{selected_user.mention} ajouté à la tribu")
+            await select_inter.response.send_message(f"✅ {selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
         
-        modal.on_submit = modal_callback
-        await inter.response.send_modal(modal)
+        user_select.callback = user_select_callback
+        view.add_item(user_select)
+        
+        await inter.response.send_message("👤 **Ajouter un membre**\n\nSélectionne l'utilisateur à ajouter :", view=view, ephemeral=True)
     
     @discord.ui.button(label="Supprimer membre", style=discord.ButtonStyle.secondary, emoji="👥", row=1)
     async def btn_supprimer_membre(self, inter: discord.Interaction, button: discord.ui.Button):
