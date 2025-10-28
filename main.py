@@ -889,60 +889,84 @@ class PanneauMembre(discord.ui.View):
             await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
             return
         
-        # Ouvrir un modal pour ajouter un avant-poste
-        modal = discord.ui.Modal(title="🏘️ Ajouter un avant-poste")
-        map_input = discord.ui.TextInput(
-            label="Map",
-            placeholder="Nom de la map",
-            required=True,
-            max_length=100,
-            style=discord.TextStyle.short
-        )
-        coords_input = discord.ui.TextInput(
-            label="Coordonnées (optionnel)",
-            placeholder="Ex: 50.0, 50.0",
-            required=False,
-            max_length=100,
-            style=discord.TextStyle.short
-        )
-        modal.add_item(map_input)
-        modal.add_item(coords_input)
+        # Récupérer toutes les maps disponibles
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT nom FROM maps WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+            maps = [row["nom"] for row in c.fetchall()]
         
-        async def modal_callback(modal_inter: discord.Interaction):
-            map_name = map_input.value.strip()
-            coords = coords_input.value.strip() if coords_input.value else ""
-            
-            # Vérifier les droits
-            with db_connect() as conn:
-                c = conn.cursor()
-                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
-                row = c.fetchone()
-                
-                if not row:
-                    await modal_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
-                    return
-                
-                if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
-                    await modal_inter.response.send_message("❌ Tu n'as pas la permission d'ajouter des avant-postes.", ephemeral=True)
-                    return
-                
-                # Générer un nom automatique
-                c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (self.tribu_id,))
-                count = c.fetchone()["count"]
-                nom_ap = f"Avant-Poste #{count + 1}"
-                
-                # Ajouter l'avant-poste
-                c.execute("""
-                INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """, (self.tribu_id, modal_inter.user.id, nom_ap, map_name, coords, dt.datetime.utcnow().isoformat()))
-                conn.commit()
-            
-            ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} sur {map_name}")
-            await modal_inter.response.send_message(f"✅ **{nom_ap}** ajouté à **{self.tribu_nom}** sur {map_name} !", ephemeral=True)
+        if not maps:
+            await inter.response.send_message("❌ Aucune map disponible. Contacte un admin pour en ajouter.", ephemeral=True)
+            return
         
-        modal.on_submit = modal_callback
-        await inter.response.send_modal(modal)
+        # Créer le menu déroulant des maps
+        options = []
+        for map_nom in maps[:25]:  # Discord limite à 25 options
+            options.append(discord.SelectOption(
+                label=map_nom,
+                value=map_nom,
+                emoji="🗺️"
+            ))
+        
+        select = discord.ui.Select(
+            placeholder="🗺️ Sélectionne la map de l'avant-poste...",
+            options=options
+        )
+        
+        async def select_callback(select_inter: discord.Interaction):
+            map_selectionnee = select.values[0]
+            
+            # Ouvrir un modal pour les coordonnées
+            modal = discord.ui.Modal(title=f"🏘️ Avant-poste sur {map_selectionnee}")
+            coords_input = discord.ui.TextInput(
+                label="Coordonnées",
+                placeholder="Ex: 45.5, 32.6",
+                required=True,
+                max_length=100,
+                style=discord.TextStyle.short
+            )
+            modal.add_item(coords_input)
+            
+            async def modal_callback(modal_inter: discord.Interaction):
+                coords = coords_input.value.strip()
+                
+                # Vérifier les droits
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                    row = c.fetchone()
+                    
+                    if not row:
+                        await modal_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                        return
+                    
+                    if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
+                        await modal_inter.response.send_message("❌ Tu n'as pas la permission d'ajouter des avant-postes.", ephemeral=True)
+                        return
+                    
+                    # Générer un nom automatique
+                    c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (self.tribu_id,))
+                    count = c.fetchone()["count"]
+                    nom_ap = f"Avant-poste {count + 1}"
+                    
+                    # Ajouter l'avant-poste
+                    c.execute("""
+                    INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """, (self.tribu_id, modal_inter.user.id, nom_ap, map_selectionnee, coords, dt.datetime.utcnow().isoformat()))
+                    conn.commit()
+                
+                ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} — {map_selectionnee} | {coords}")
+                await afficher_fiche_mise_a_jour(modal_inter, self.tribu_id, f"✅ **{nom_ap} ajouté : {map_selectionnee} !**")
+            
+            modal.on_submit = modal_callback
+            await select_inter.response.send_modal(modal)
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=180)
+        view.add_item(select)
+        
+        await inter.response.send_message("🏘️ **Ajouter un avant-poste**\n\nSélectionne d'abord la map :", view=view, ephemeral=True)
     
     @discord.ui.button(label="Supprimer avant-poste", style=discord.ButtonStyle.secondary, emoji="🏚️", row=2)
     async def btn_supprimer_ap(self, inter: discord.Interaction, button: discord.ui.Button):

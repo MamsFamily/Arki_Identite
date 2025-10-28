@@ -15,9 +15,10 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 **UI/UX Decisions:**
 - **Interactive Panel (`/panneau`):** A centralized entry point with buttons for main actions (Create, Modify, Customize, Guide). Admin panels self-delete to prevent clutter. Includes a visual banner.
 - **Detailed Tribe Profiles:** Information displayed in a structured order (Header, Description, Motto, Members, Main Base, Outposts, Objective, Recruitment, Boss/Notes Progression, Base Photo) with **BOLD CAPITALIZED** titles for readability.
-- **Dropdown Menu under Tribe Profile:** Menu with options for "Leave Tribe," "History" (with pagination), and "Staff" (for admins/moderators).
+- **Dropdown Menu under Tribe Profile:** Menu with options for "Mes commandes" (member panel), "Personnaliser", "Leave Tribe", "History" (with pagination), and "Staff" (for admins/moderators).
+- **"Mes commandes" Panel:** All buttons in this panel replicate their corresponding slash command behavior (e.g., "Ajouter avant-poste" uses map dropdown selection like `/ajouter_avant_poste`).
 - **Modals:** Used for complex data input, simplifying creation and modification processes.
-- **Dropdown Menus:** For map and tribe selection with autocompletion.
+- **Dropdown Menus:** For map and tribe selection with autocompletion, ensuring consistency between slash commands and button interactions.
 
 **Technical Implementations & Feature Specifications:**
 - **Tribe Management:** Creation, modification (name, color, logo, base map/coords, description, motto, recruitment, objective), ownership transfer, and deletion.
