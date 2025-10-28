@@ -599,7 +599,8 @@ class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
             conn.commit()
         
         ajouter_historique(self.tribu_id, inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
-        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {self.tribu_nom} !** ({count + 1}/10)\n🔗 depuis une URL", ephemeral=False)
+        await inter.response.send_message(f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {self.tribu_nom} !** ({count + 1}/10)\n🔗 depuis une URL", ephemeral=True)
+        await rafraichir_fiche_tribu(inter.client, self.tribu_id)
 
 class ConfirmationSupprimerPhoto(discord.ui.View):
     """Vue de confirmation pour la suppression de photo"""
@@ -628,7 +629,8 @@ class ConfirmationSupprimerPhoto(discord.ui.View):
             count_restant = len(photos_restantes)
         
         ajouter_historique(self.tribu_id, inter.user.id, "Photo supprimée", f"Photo {self.photo_numero} supprimée de la galerie")
-        await afficher_fiche_mise_a_jour(inter, self.tribu_id, f"✅ **Photo {self.photo_numero} supprimée de {self.tribu_nom} !** ({count_restant}/10)", ephemeral=False)
+        await inter.response.send_message(f"✅ **Photo {self.photo_numero} supprimée de {self.tribu_nom} !** ({count_restant}/10)", ephemeral=True)
+        await rafraichir_fiche_tribu(inter.client, self.tribu_id)
     
     @discord.ui.button(label="Annuler", style=discord.ButtonStyle.secondary, emoji="❌")
     async def annuler(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -3174,7 +3176,8 @@ async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[
     
     source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
     ajouter_historique(row["id"], inter.user.id, "Logo modifié", f"Logo changé {source}")
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Logo de {row['nom']} mis à jour !**\n{source}", ephemeral=False)
+    await inter.response.send_message(f"✅ **Logo de {row['nom']} mis à jour !**\n{source}", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="ajouter_photo", description="Ajouter une photo à la galerie de ta tribu (max 10 photos)")
 @app_commands.describe(
@@ -3233,7 +3236,8 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
     
     source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
     ajouter_historique(row["id"], inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée {source}")
-    await afficher_fiche_mise_a_jour(inter, row["id"], f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {row['nom']} !** ({count + 1}/10)\n{source}", ephemeral=False)
+    await inter.response.send_message(f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {row['nom']} !** ({count + 1}/10)\n{source}", ephemeral=True)
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     """Autocomplétion pour les photos d'une tribu"""
