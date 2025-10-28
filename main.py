@@ -589,7 +589,7 @@ class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
             c.execute("""
             INSERT INTO photos_tribu (tribu_id, url, ordre, created_at)
             VALUES (?, ?, ?, ?)
-            """, (self.tribu_id, str(self.url_photo).strip(), nouvel_ordre, dt.datetime.utcnow().isoformat()))
+            """, (self.tribu_id, self.url_photo.value.strip(), nouvel_ordre, dt.datetime.utcnow().isoformat()))
             conn.commit()
         
         ajouter_historique(self.tribu_id, inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
@@ -659,27 +659,294 @@ class PanneauMembre(discord.ui.View):
     
     @discord.ui.button(label="Changer mon nom in-game", style=discord.ButtonStyle.primary, emoji="✏️", row=0)
     async def btn_nom_ingame(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/mon_nom_ingame` pour modifier ton nom in-game affiché dans tes tribus.", ephemeral=True)
+        # Ouvrir un modal pour changer le nom in-game
+        modal = discord.ui.Modal(title="✏️ Modifier mon nom in-game")
+        nom_input = discord.ui.TextInput(
+            label="Nouveau nom in-game",
+            placeholder="Ton nom dans Ark: Survival Ascended",
+            required=True,
+            max_length=100,
+            style=discord.TextStyle.short
+        )
+        modal.add_item(nom_input)
+        
+        async def modal_callback(modal_inter: discord.Interaction):
+            nouveau_nom = nom_input.value.strip()
+            if not nouveau_nom:
+                await modal_inter.response.send_message("❌ Le nom ne peut pas être vide.", ephemeral=True)
+                return
+            
+            # Mettre à jour le nom in-game pour toutes les tribus de l'utilisateur
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("UPDATE membres SET nom_in_game=? WHERE user_id=?", (nouveau_nom, modal_inter.user.id))
+                affected = c.rowcount
+                conn.commit()
+            
+            if affected > 0:
+                await modal_inter.response.send_message(f"✅ Ton nom in-game a été changé en **{nouveau_nom}** pour toutes tes tribus !", ephemeral=True)
+            else:
+                await modal_inter.response.send_message(f"✅ Ton nom in-game a été défini sur **{nouveau_nom}** !", ephemeral=True)
+        
+        modal.on_submit = modal_callback
+        await inter.response.send_modal(modal)
     
     @discord.ui.button(label="Voir ma fiche tribu", style=discord.ButtonStyle.primary, emoji="📋", row=0)
     async def btn_fiche(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/fiche_tribu` et sélectionne **{self.tribu_nom}** pour afficher la fiche complète de ta tribu.", ephemeral=True)
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Afficher directement la fiche de la tribu
+        await afficher_fiche(inter, self.tribu_id, ephemeral=False)
     
     @discord.ui.button(label="Ajouter membre", style=discord.ButtonStyle.success, emoji="👤", row=1)
     async def btn_ajouter_membre(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_membre_tribu` et sélectionne **{self.tribu_nom}** pour ajouter un membre à ta tribu.", ephemeral=True)
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Ouvrir un modal pour ajouter un membre
+        modal = discord.ui.Modal(title="👤 Ajouter un membre")
+        user_input = discord.ui.TextInput(
+            label="Membre Discord",
+            placeholder="@utilisateur ou ID utilisateur",
+            required=True,
+            style=discord.TextStyle.short
+        )
+        nom_ingame_input = discord.ui.TextInput(
+            label="Nom in-game (optionnel)",
+            placeholder="Son nom dans le jeu",
+            required=False,
+            max_length=100,
+            style=discord.TextStyle.short
+        )
+        modal.add_item(user_input)
+        modal.add_item(nom_ingame_input)
+        
+        async def modal_callback(modal_inter: discord.Interaction):
+            user_str = user_input.value.strip()
+            nom_ingame = nom_ingame_input.value.strip() if nom_ingame_input.value else ""
+            
+            # Extraire l'ID utilisateur
+            user_id = None
+            if user_str.startswith("<@") and user_str.endswith(">"):
+                user_id = int(user_str.strip("<@!>"))
+            elif user_str.isdigit():
+                user_id = int(user_str)
+            else:
+                await modal_inter.response.send_message("❌ Format invalide. Mentionne un utilisateur avec @ ou fournis son ID.", ephemeral=True)
+                return
+            
+            # Vérifier les droits
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not row:
+                    await modal_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    return
+                
+                if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
+                    await modal_inter.response.send_message("❌ Tu n'as pas la permission d'ajouter des membres.", ephemeral=True)
+                    return
+                
+                # Vérifier si le membre est déjà dans la tribu
+                c.execute("SELECT * FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, user_id))
+                if c.fetchone():
+                    await modal_inter.response.send_message(f"❌ <@{user_id}> est déjà membre de cette tribu.", ephemeral=True)
+                    return
+                
+                # Ajouter le membre
+                c.execute("INSERT INTO membres (tribu_id, user_id, nom_in_game) VALUES (?, ?, ?)", 
+                         (self.tribu_id, user_id, nom_ingame))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, modal_inter.user.id, "Membre ajouté", f"<@{user_id}> ajouté à la tribu")
+            await modal_inter.response.send_message(f"✅ <@{user_id}> a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
+        
+        modal.on_submit = modal_callback
+        await inter.response.send_modal(modal)
     
     @discord.ui.button(label="Supprimer membre", style=discord.ButtonStyle.secondary, emoji="👥", row=1)
     async def btn_supprimer_membre(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_membre_tribu` et sélectionne **{self.tribu_nom}** pour retirer un membre de ta tribu.", ephemeral=True)
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer les membres de la tribu
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            row = c.fetchone()
+            
+            if not row:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+            
+            c.execute("SELECT user_id, role FROM membres WHERE tribu_id=? AND user_id != ?", 
+                     (self.tribu_id, row["proprietaire_id"]))
+            membres = c.fetchall()
+        
+        if not membres:
+            await inter.response.send_message("❌ Aucun membre à supprimer (hors référent).", ephemeral=True)
+            return
+        
+        # Créer un menu de sélection
+        options = []
+        for membre in membres:
+            role_display = f" — {membre['role']}" if membre['role'] else ""
+            options.append(discord.SelectOption(
+                label=f"@{membre['user_id']}",
+                description=f"User ID: {membre['user_id']}{role_display}",
+                value=str(membre['user_id'])
+            ))
+        
+        select = discord.ui.Select(placeholder="Sélectionne le membre à retirer...", options=options[:25])
+        
+        async def select_callback(select_inter: discord.Interaction):
+            user_id = int(select.values[0])
+            
+            # Vérifier les droits
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
+                    await select_inter.response.send_message("❌ Tu n'as pas la permission de retirer des membres.", ephemeral=True)
+                    return
+                
+                c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, user_id))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Membre retiré", f"<@{user_id}> retiré de la tribu")
+            await select_inter.response.send_message(f"✅ <@{user_id}> a été retiré de **{self.tribu_nom}** !", ephemeral=True)
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=180)
+        view.add_item(select)
+        await inter.response.send_message("👥 Sélectionne le membre à retirer :", view=view, ephemeral=True)
     
     @discord.ui.button(label="Ajouter avant-poste", style=discord.ButtonStyle.success, emoji="🏘️", row=2)
     async def btn_ajouter_ap(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/ajouter_avant_poste` et sélectionne **{self.tribu_nom}** pour ajouter un avant-poste.", ephemeral=True)
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Ouvrir un modal pour ajouter un avant-poste
+        modal = discord.ui.Modal(title="🏘️ Ajouter un avant-poste")
+        map_input = discord.ui.TextInput(
+            label="Map",
+            placeholder="Nom de la map",
+            required=True,
+            max_length=100,
+            style=discord.TextStyle.short
+        )
+        coords_input = discord.ui.TextInput(
+            label="Coordonnées (optionnel)",
+            placeholder="Ex: 50.0, 50.0",
+            required=False,
+            max_length=100,
+            style=discord.TextStyle.short
+        )
+        modal.add_item(map_input)
+        modal.add_item(coords_input)
+        
+        async def modal_callback(modal_inter: discord.Interaction):
+            map_name = map_input.value.strip()
+            coords = coords_input.value.strip() if coords_input.value else ""
+            
+            # Vérifier les droits
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not row:
+                    await modal_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    return
+                
+                if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
+                    await modal_inter.response.send_message("❌ Tu n'as pas la permission d'ajouter des avant-postes.", ephemeral=True)
+                    return
+                
+                # Générer un nom automatique
+                c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (self.tribu_id,))
+                count = c.fetchone()["count"]
+                nom_ap = f"Avant-Poste #{count + 1}"
+                
+                # Ajouter l'avant-poste
+                c.execute("""
+                INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, (self.tribu_id, modal_inter.user.id, nom_ap, map_name, coords, dt.datetime.utcnow().isoformat()))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} sur {map_name}")
+            await modal_inter.response.send_message(f"✅ **{nom_ap}** ajouté à **{self.tribu_nom}** sur {map_name} !", ephemeral=True)
+        
+        modal.on_submit = modal_callback
+        await inter.response.send_modal(modal)
     
     @discord.ui.button(label="Supprimer avant-poste", style=discord.ButtonStyle.secondary, emoji="🏚️", row=2)
     async def btn_supprimer_ap(self, inter: discord.Interaction, button: discord.ui.Button):
-        await inter.response.send_message(f"ℹ️ Utilise `/supprimer_avant_poste` et sélectionne **{self.tribu_nom}** pour retirer un avant-poste.", ephemeral=True)
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer les avant-postes de la tribu
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, nom, map, coords FROM avant_postes WHERE tribu_id=?", (self.tribu_id,))
+            avant_postes = c.fetchall()
+        
+        if not avant_postes:
+            await inter.response.send_message("❌ Aucun avant-poste à supprimer.", ephemeral=True)
+            return
+        
+        # Créer un menu de sélection
+        options = []
+        for ap in avant_postes:
+            desc = f"{ap['map']}"
+            if ap['coords']:
+                desc += f" ({ap['coords']})"
+            options.append(discord.SelectOption(
+                label=ap['nom'],
+                description=desc,
+                value=str(ap['id'])
+            ))
+        
+        select = discord.ui.Select(placeholder="Sélectionne l'avant-poste à retirer...", options=options[:25])
+        
+        async def select_callback(select_inter: discord.Interaction):
+            ap_id = int(select.values[0])
+            
+            # Vérifier les droits
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
+                    await select_inter.response.send_message("❌ Tu n'as pas la permission de retirer des avant-postes.", ephemeral=True)
+                    return
+                
+                c.execute("SELECT nom FROM avant_postes WHERE id=?", (ap_id,))
+                ap = c.fetchone()
+                nom_ap = ap["nom"] if ap else "Avant-poste"
+                
+                c.execute("DELETE FROM avant_postes WHERE id=?", (ap_id,))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Avant-poste supprimé", nom_ap)
+            await select_inter.response.send_message(f"✅ **{nom_ap}** supprimé de **{self.tribu_nom}** !", ephemeral=True)
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=180)
+        view.add_item(select)
+        await inter.response.send_message("🏚️ Sélectionne l'avant-poste à retirer :", view=view, ephemeral=True)
     
     @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
     async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -2285,15 +2552,31 @@ class PanneauTribu(discord.ui.View):
 @tree.command(name="ajouter_photo", description="Ajouter une photo à la galerie de ta tribu (max 10 photos)")
 @app_commands.describe(
     nom="Nom de la tribu",
-    url_photo="URL de la photo (postimages.org recommandé)"
+    url_photo="URL de la photo (optionnel si tu fournis un fichier)",
+    fichier="Image à uploader depuis ton téléphone/PC (optionnel si tu fournis une URL)"
 )
 @app_commands.autocomplete(nom=autocomplete_tribus)
-async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: str):
+async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optional[str] = None, fichier: Optional[discord.Attachment] = None):
     db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
         await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
+    
+    # Vérifier qu'au moins un des deux est fourni
+    if not url_photo and not fichier:
+        await inter.response.send_message("❌ Tu dois fournir soit une URL, soit un fichier image.", ephemeral=True)
+        return
+    
+    # Si un fichier est fourni, vérifier que c'est une image
+    if fichier:
+        if not fichier.content_type or not fichier.content_type.startswith("image/"):
+            await inter.response.send_message("❌ Le fichier doit être une image (JPG, PNG, GIF, etc.).", ephemeral=True)
+            return
+        # Utiliser l'URL du fichier uploadé
+        photo_url = fichier.url
+    else:
+        photo_url = url_photo.strip()
     
     # Vérifier les droits
     if not await verifier_droits(inter, row):
@@ -2318,11 +2601,12 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: str):
         c.execute("""
         INSERT INTO photos_tribu (tribu_id, url, ordre, created_at)
         VALUES (?, ?, ?, ?)
-        """, (row["id"], url_photo.strip(), nouvel_ordre, dt.datetime.utcnow().isoformat()))
+        """, (row["id"], photo_url, nouvel_ordre, dt.datetime.utcnow().isoformat()))
         conn.commit()
     
-    ajouter_historique(row["id"], inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
-    await inter.response.send_message(f"✅ Photo #{nouvel_ordre + 1} ajoutée à la galerie de **{row['nom']}** ! ({count + 1}/10 photos)", ephemeral=True)
+    source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
+    ajouter_historique(row["id"], inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée {source}")
+    await inter.response.send_message(f"✅ Photo #{nouvel_ordre + 1} ajoutée à la galerie de **{row['nom']}** ! ({count + 1}/10 photos)\n{source}", ephemeral=True)
 
 async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     """Autocomplétion pour les photos d'une tribu"""
