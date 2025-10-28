@@ -2361,8 +2361,63 @@ async def changer_banniere_panneau(inter: discord.Interaction, url: str):
     
     await inter.response.send_message(f"✅ **Bannière du panneau modifiée !**\n\nNouvelle URL : {url}\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
 
+@tree.command(name="couleur_panneau", description="[ADMIN] Modifier la couleur du panneau")
+@app_commands.describe(couleur_hex="Couleur hexadécimale (ex: #5865F2 ou 5865F2)")
+async def couleur_panneau(inter: discord.Interaction, couleur_hex: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    
+    # Nettoyer la couleur (enlever le # si présent)
+    couleur = couleur_hex.strip().replace("#", "")
+    
+    # Vérifier que c'est un code hex valide
+    if len(couleur) != 6 or not all(c in '0123456789ABCDEFabcdef' for c in couleur):
+        await inter.response.send_message("❌ Couleur invalide. Utilise un code hexadécimal à 6 caractères (ex: 5865F2)", ephemeral=True)
+        return
+    
+    # Sauvegarder la nouvelle couleur
+    set_config(inter.guild_id, "couleur_panneau", couleur)
+    
+    # Créer un embed avec la nouvelle couleur pour preview
+    try:
+        couleur_int = int(couleur, 16)
+        e = discord.Embed(
+            title="✅ Couleur du panneau modifiée !",
+            description=f"**Nouvelle couleur :** #{couleur.upper()}\n\n💡 *Utilise `/panneau` pour voir le résultat.*",
+            color=couleur_int
+        )
+        await inter.response.send_message(embed=e, ephemeral=True)
+    except:
+        await inter.response.send_message(f"✅ **Couleur du panneau modifiée !**\n\nNouvelle couleur : #{couleur.upper()}", ephemeral=True)
 
+@tree.command(name="texte_panneau", description="[ADMIN] Modifier le texte de description du panneau")
+@app_commands.describe(texte="Nouveau texte de description")
+async def texte_panneau(inter: discord.Interaction, texte: str):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    
+    # Sauvegarder le nouveau texte
+    set_config(inter.guild_id, "texte_panneau", texte.strip())
+    
+    await inter.response.send_message(f"✅ **Texte du panneau modifié !**\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
 
+@tree.command(name="salon_fiche_tribu", description="[ADMIN] Définir le salon où afficher les fiches tribu")
+@app_commands.describe(salon="Salon où afficher les fiches (laisse vide pour salon actuel)")
+async def salon_fiche_tribu(inter: discord.Interaction, salon: Optional[discord.TextChannel] = None):
+    if not est_admin(inter):
+        await inter.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+    
+    if salon:
+        # Sauvegarder l'ID du salon
+        set_config(inter.guild_id, "salon_fiche_tribu", str(salon.id))
+        await inter.response.send_message(f"✅ **Salon des fiches tribu défini !**\n\nToutes les nouvelles fiches seront affichées dans {salon.mention}\n\n💡 *Les fiches existantes ne sont pas déplacées.*", ephemeral=True)
+    else:
+        # Réinitialiser au salon actuel (0)
+        set_config(inter.guild_id, "salon_fiche_tribu", "0")
+        await inter.response.send_message("✅ **Configuration réinitialisée !**\n\nLes fiches seront désormais affichées dans le salon actuel (où la commande est exécutée).", ephemeral=True)
 
 
 @tree.command(name="ma_tribu", description="Afficher la fiche de ma tribu")
@@ -2383,7 +2438,20 @@ async def ma_tribu(inter: discord.Interaction):
         await inter.response.send_message("❌ Tu ne fais partie d'aucune tribu. Utilise `/panneau` pour créer ou rejoindre une tribu !", ephemeral=True)
         return
     
-    # Afficher la fiche de la tribu
+    # Supprimer l'ancienne fiche si elle existe dans ce même salon
+    if row["message_id"] and row["channel_id"] == inter.channel_id:
+        try:
+            channel = bot.get_channel(row["channel_id"])
+            if channel:
+                message = await channel.fetch_message(row["message_id"])
+                await message.delete()
+                print(f"✅ Ancienne fiche de '{row['nom']}' supprimée du salon {inter.channel_id}")
+        except discord.NotFound:
+            print(f"⚠️ Ancienne fiche introuvable (déjà supprimée)")
+        except Exception as e:
+            print(f"⚠️ Erreur lors de la suppression de l'ancienne fiche : {e}")
+    
+    # Afficher la nouvelle fiche de la tribu
     await afficher_fiche(inter, row["id"], ephemeral=False)
 
 @tree.command(name="aide", description="Afficher la liste des commandes du bot")
@@ -2877,22 +2945,42 @@ async def panneau(inter: discord.Interaction):
         
         print(f"Total panneaux supprimés: {panneaux_supprimes}")
         
+        # Récupérer les configurations personnalisées
+        couleur_hex = get_config(inter.guild_id, "couleur_panneau", "5865F2")
+        texte = get_config(inter.guild_id, "texte_panneau", "Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.")
+        banniere_url = get_config(inter.guild_id, "banniere_panneau", "https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
+        
+        # Convertir la couleur hex en int
+        try:
+            couleur = int(couleur_hex, 16)
+        except:
+            couleur = 0x5865F2  # Bleu Discord par défaut
+        
         e = discord.Embed(
             title="🧭 Panneau — Fiches Tribu",
-            description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
-            color=0x2B2D31
+            description=texte,
+            color=couleur
         )
-        banniere_url = get_config(inter.guild_id, "banniere_panneau", "https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
         e.set_image(url=banniere_url)
         e.set_footer(text="👑 Panneau admin — Visible par tous")
         await inter.followup.send(embed=e, view=v)
     else:
+        # Récupérer les configurations personnalisées
+        couleur_hex = get_config(inter.guild_id, "couleur_panneau", "5865F2")
+        texte = get_config(inter.guild_id, "texte_panneau", "Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.")
+        banniere_url = get_config(inter.guild_id, "banniere_panneau", "https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
+        
+        # Convertir la couleur hex en int
+        try:
+            couleur = int(couleur_hex, 16)
+        except:
+            couleur = 0x5865F2  # Bleu Discord par défaut
+        
         e = discord.Embed(
             title="🧭 Panneau — Fiches Tribu",
-            description="Utilise les boutons ci-dessous pour gérer les fiches sans taper de commandes.",
-            color=0x2B2D31
+            description=texte,
+            color=couleur
         )
-        banniere_url = get_config(inter.guild_id, "banniere_panneau", "https://i.postimg.cc/8c6gy1qK/AB2723-D2-B10-F-40-F7-A124-1-D6-F30510096.jpg")
         e.set_image(url=banniere_url)
         e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
         await inter.response.send_message(embed=e, view=v, ephemeral=True)
