@@ -2683,8 +2683,12 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             updates["coords_base"] = str(self.coords_base).strip()
         if str(self.description).strip():
             updates["description"] = str(self.description).strip()
-        if str(self.recrutement).strip().lower() in ["oui", "non"]:
-            updates["ouvert_recrutement"] = 1 if str(self.recrutement).strip().lower() == "oui" else 0
+        if str(self.recrutement).strip():
+            recrutement_texte = str(self.recrutement).strip()
+            if recrutement_texte.lower() in ["oui", "non"]:
+                updates["ouvert_recrutement"] = 1 if recrutement_texte.lower() == "oui" else 0
+            else:
+                updates["ouvert_recrutement"] = recrutement_texte
         
         if updates:
             with db_connect() as conn:
