@@ -1,3 +1,13 @@
+import os
+import sqlite3
+
+db_path = os.getenv("SQLITE_PATH", "arki_identite.db")
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT, data TEXT)")
+conn.commit()
+
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
