@@ -1,8 +1,10 @@
 [project]
-name = "repl-nix-workspace"
-version = "0.1.0"
-description = "Add your description here"
+name = "arki-family-bot"
+version = "1.0.0"
+description = "Bot Discord pour la gestion des tribus Ark: Survival Ascended"
 requires-python = ">=3.11"
 dependencies = [
     "discord-py>=2.6.4",
+    "flask>=3.0.0",
+    "python-dotenv>=1.0.0",
 ]
