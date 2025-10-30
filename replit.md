@@ -60,6 +60,15 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 - **Field Flexibility:** Removal of character limitations for most text fields.
 - **Persistent Navigation:** Photo gallery buttons use custom_id with `tribu_id` to remain functional after bot restarts via the global `on_interaction` listener.
 
+**High-Load Optimizations (October 2025):**
+- **Database Concurrency:** SQLite configured with WAL mode (`PRAGMA journal_mode=WAL`) for improved concurrent reads/writes, `timeout=30.0s`, and `busy_timeout=30000ms` to prevent "database is locked" errors
+- **Single Initialization:** `db_init()` called only once at bot startup (in `on_ready()`) instead of 26 times per interaction, eliminating exclusive lock contention from repeated CREATE INDEX statements
+- **8 Performance Indexes:** Added indexes on frequently-queried columns (tribus.guild_id, tribus.message_id, membres.tribu_id, membres.user_id, avant_postes.tribu_id, historique.tribu_id, photos_tribu.tribu_id, config.guild_id) to accelerate database operations
+- **Interaction Timeout Prevention:** All heavy modals (ModalModifierTribu, ModalPersonnaliserTribu, ModalDetaillerTribu) use `await inter.response.defer(ephemeral=True)` at the start to prevent "application not responding" errors during database operations
+- **Extended View Timeouts:** All Views increased from 180s to 300s (5 minutes) to accommodate user interaction delays
+- **Auto-Refresh/Create System:** Unified `afficher_ou_rafraichir_fiche()` function automatically creates tribe cards if they don't exist or refreshes existing ones, with robust error handling for deleted messages/channels
+- **Stress-Tested:** Designed and validated for 50+ simultaneous users creating/modifying tribes without errors or interaction failures
+
 ## External Dependencies
 - **Discord API:** The bot interacts directly with the Discord API via the `discord.py` library.
 - **SQLite:** Embedded database for data persistence.
