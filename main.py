@@ -43,7 +43,8 @@ def keep_alive():
     t = Thread(target=run, daemon=True)
     t.start()
 
-DB_PATH = os.getenv("TRIBU_BOT_DB", "tribus.db")
+# Chemin de la base de données (utilise SQLITE_PATH pour le déploiement Replit)
+DB_PATH = os.getenv("SQLITE_PATH", os.getenv("TRIBU_BOT_DB", "tribus.db"))
 
 # ---------- Base de données ----------
 def db_connect():
