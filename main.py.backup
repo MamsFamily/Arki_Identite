@@ -37,13 +37,8 @@ DB_PATH = os.getenv("TRIBU_BOT_DB", "tribus.db")
 
 # ---------- Base de données ----------
 def db_connect():
-    """Connexion à la base de données avec timeout et busy handler pour éviter les locks"""
-    conn = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False)
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    # Activer le mode WAL pour améliorer la concurrence
-    conn.execute("PRAGMA journal_mode=WAL")
-    # Augmenter le busy_timeout pour attendre jusqu'à 30 secondes
-    conn.execute("PRAGMA busy_timeout = 30000")
     return conn
 
 def db_init():
@@ -496,7 +491,7 @@ def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None
 # ---------- Vue pour l'historique paginé ----------
 class HistoriqueView(discord.ui.View):
     def __init__(self, tribu_id: int, tribu_nom: str, offset: int = 0):
-        super().__init__(timeout=300)  # 3 minutes
+        super().__init__(timeout=180)  # 3 minutes
         self.tribu_id = tribu_id
         self.tribu_nom = tribu_nom
         self.offset = offset
@@ -589,6 +584,7 @@ class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
     
     async def on_submit(self, inter: discord.Interaction):
         await inter.response.defer(ephemeral=True)
+        db_init()
         
         # Vérifier les droits
         with db_connect() as conn:
@@ -660,10 +656,7 @@ class ConfirmationSupprimerPhoto(discord.ui.View):
         
         ajouter_historique(self.tribu_id, inter.user.id, "Photo supprimée", f"Photo {self.photo_numero} supprimée de la galerie")
         await inter.response.send_message(f"✅ **Photo {self.photo_numero} supprimée de {self.tribu_nom} !** ({count_restant}/10)", ephemeral=True)
-        try:
-            await afficher_ou_rafraichir_fiche(inter.client, self.tribu_id, inter.guild)
-        except Exception as e:
-            print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+        await rafraichir_fiche_tribu(inter.client, self.tribu_id)
     
     @discord.ui.button(label="Annuler", style=discord.ButtonStyle.secondary, emoji="❌")
     async def annuler(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -721,7 +714,7 @@ class SelectSupprimerPhoto(discord.ui.Select):
 
 class ViewSupprimerPhoto(discord.ui.View):
     def __init__(self, tribu_id: int, tribu_nom: str, photos: list):
-        super().__init__(timeout=300)
+        super().__init__(timeout=180)
         self.add_item(SelectSupprimerPhoto(tribu_id, tribu_nom, photos))
 
 class PanneauMembre(discord.ui.View):
@@ -816,7 +809,7 @@ class PanneauMembre(discord.ui.View):
             return
         
         # Créer une vue avec un sélecteur d'utilisateur
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         user_select = discord.ui.UserSelect(
             placeholder="Sélectionne l'utilisateur à ajouter...",
             min_values=1,
@@ -837,7 +830,7 @@ class PanneauMembre(discord.ui.View):
             # Demander si le membre est manager
             class ViewManagerChoice(discord.ui.View):
                 def __init__(self, tribu_id: int, tribu_nom: str, user: discord.User):
-                    super().__init__(timeout=300)
+                    super().__init__(timeout=180)
                     self.tribu_id = tribu_id
                     self.tribu_nom = tribu_nom
                     self.selected_user = user
@@ -852,10 +845,7 @@ class PanneauMembre(discord.ui.View):
                     
                     ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté en tant que Manager")
                     await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** en tant que **Manager** !", ephemeral=True)
-                    try:
-                        await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild)
-                    except Exception as e:
-                        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+                    await rafraichir_fiche_tribu(btn_inter.client, self.tribu_id)
                 
                 @discord.ui.button(label="Non, membre simple", style=discord.ButtonStyle.secondary, emoji="👤")
                 async def btn_membre(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
@@ -867,10 +857,7 @@ class PanneauMembre(discord.ui.View):
                     
                     ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté à la tribu")
                     await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
-                    try:
-                        await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild)
-                    except Exception as e:
-                        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+                    await rafraichir_fiche_tribu(btn_inter.client, self.tribu_id)
             
             e = discord.Embed(
                 title="👤 Autorisation de modification",
@@ -950,13 +937,10 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Membre retiré", f"<@{user_id}> retiré de la tribu")
             await select_inter.response.send_message(f"✅ <@{user_id}> a été retiré de **{self.tribu_nom}** !", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         view.add_item(select)
         await inter.response.send_message("👥 Sélectionne le membre à retirer :", view=view, ephemeral=True)
     
@@ -1035,16 +1019,13 @@ class PanneauMembre(discord.ui.View):
                 
                 ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} — {map_selectionnee} | {coords}")
                 await modal_inter.response.send_message(f"✅ **{nom_ap} ajouté : {map_selectionnee} !**", ephemeral=True)
-                try:
-                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild)
-                except Exception as e:
-                    print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+                await rafraichir_fiche_tribu(modal_inter.client, self.tribu_id)
             
             modal.on_submit = modal_callback
             await select_inter.response.send_modal(modal)
         
         select.callback = select_callback
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         view.add_item(select)
         
         await inter.response.send_message("🏘️ **Ajouter un avant-poste**\n\nSélectionne d'abord la map :", view=view, ephemeral=True)
@@ -1101,13 +1082,10 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Avant-poste supprimé", nom_ap)
             await select_inter.response.send_message(f"✅ **{nom_ap}** supprimé de **{self.tribu_nom}** !", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         view.add_item(select)
         await inter.response.send_message("🏚️ Sélectionne l'avant-poste à retirer :", view=view, ephemeral=True)
     
@@ -1296,13 +1274,10 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss validé", boss_selectionne)
             await select_inter.response.send_message(f"✅ **Boss {boss_selectionne} validé pour {row['nom']} !**", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         view.add_item(select)
         
         await inter.response.send_message("✅ **Marquer un boss comme validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
@@ -1376,13 +1351,10 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss non-validé", boss_selectionne)
             await select_inter.response.send_message(f"❌ **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         view.add_item(select)
         
         await inter.response.send_message("❌ **Marquer un boss comme non-validé**\n\nSélectionne le boss :", view=view, ephemeral=True)
@@ -1456,13 +1428,10 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note validée", note_selectionnee)
             await select_inter.response.send_message(f"📝 **Note {note_selectionnee} validée pour {row['nom']} !**", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         view.add_item(select)
         
         await inter.response.send_message("📝 **Marquer une note comme validée**\n\nSélectionne la note :", view=view, ephemeral=True)
@@ -1536,13 +1505,10 @@ class PanneauMembre(discord.ui.View):
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note non-validée", note_selectionnee)
             await select_inter.response.send_message(f"📄 **Note {note_selectionnee} marquée comme non-validée pour {row['nom']} !**", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+            await rafraichir_fiche_tribu(select_inter.client, self.tribu_id)
         
         select.callback = select_callback
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         view.add_item(select)
         
         await inter.response.send_message("📄 **Marquer une note comme non-validée**\n\nSélectionne la note :", view=view, ephemeral=True)
@@ -1749,7 +1715,7 @@ class MenuFicheTribu(discord.ui.View):
         e.set_footer(text="💡 Le sélecteur de couleur t'aidera à trouver le code hexadécimal parfait")
         
         # Créer un bouton pour ouvrir le modal
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         btn = discord.ui.Button(label="Ouvrir le formulaire", style=discord.ButtonStyle.primary, emoji="📝")
         
         async def btn_callback(btn_inter: discord.Interaction):
@@ -2190,6 +2156,7 @@ async def tribu_creer(
     map_base: str,
     coords_base: str
 ):
+    db_init()
     if tribu_par_nom(inter.guild_id, nom):
         await inter.response.send_message("❌ Ce nom de tribu est déjà pris sur ce serveur.", ephemeral=True)
         return
@@ -2221,10 +2188,12 @@ async def tribu_creer(
 
 @tribu_creer.autocomplete('map_base')
 async def map_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
     return get_maps_choices(inter.guild_id)
 
 async def autocomplete_tribus(inter: discord.Interaction, current: str):
     """Autocomplétion pour les noms de tribus"""
+    db_init()
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("SELECT nom FROM tribus WHERE guild_id=? ORDER BY LOWER(nom) ASC", (inter.guild_id,))
@@ -2247,6 +2216,7 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
         await inter.response.send_message("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
         return
     
+    db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
         await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
@@ -2262,6 +2232,7 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
 @tree.command(name="tribu_transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
 async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio: discord.Member):
+    db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
         await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
@@ -2278,14 +2249,12 @@ async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio
     
     ajouter_historique(row["id"], inter.user.id, "Transfert propriété", f"Nouveau propriétaire: <@{nouveau_proprio.id}>")
     await inter.response.send_message(f"✅ **Propriété de {row['nom']} transférée à <@{nouveau_proprio.id}> !**", ephemeral=True)
-    try:
-        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
-    except Exception as e:
-        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="tribu_supprimer", description="Supprimer une tribu (confirmation requise)")
 @app_commands.describe(nom="Nom de la tribu", confirmation="Retape exactement le nom pour confirmer")
 async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: str):
+    db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
         await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
@@ -2304,6 +2273,7 @@ async def tribu_supprimer(inter: discord.Interaction, nom: str, confirmation: st
 
 @tribu_supprimer.autocomplete('nom')
 async def tribu_supprimer_autocomplete(inter: discord.Interaction, current: str):
+    db_init()
     with db_connect() as conn:
         c = conn.cursor()
         
@@ -2336,6 +2306,8 @@ async def tribu_test(inter: discord.Interaction):
 @tree.command(name="mon_nom_ingame", description="Ajouter ou modifier ton nom In Game")
 @app_commands.describe(nom_ingame="Ton nom dans le jeu (ex: Raptor_Killer42)")
 async def mon_nom_ingame(inter: discord.Interaction, nom_ingame: str):
+    db_init()
+    
     # Trouver les tribus dont l'utilisateur est membre
     with db_connect() as conn:
         c = conn.cursor()
@@ -2371,6 +2343,8 @@ async def mon_nom_ingame(inter: discord.Interaction, nom_ingame: str):
 
 @tree.command(name="quitter_tribu", description="Quitter ta tribu")
 async def quitter_tribu(inter: discord.Interaction):
+    db_init()
+    
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("""
@@ -2442,6 +2416,8 @@ async def changer_banniere_panneau(inter: discord.Interaction, url: Optional[str
 
 @tree.command(name="ma_tribu", description="Afficher la fiche de ma tribu")
 async def ma_tribu(inter: discord.Interaction):
+    db_init()
+    
     # Trouver la tribu de l'utilisateur
     with db_connect() as conn:
         c = conn.cursor()
@@ -2530,6 +2506,7 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
         # Différer immédiatement pour éviter le timeout (la création prend du temps)
         await inter.response.defer(ephemeral=False)
         
+        db_init()
         if tribu_par_nom(inter.guild_id, self.nom.value):
             await inter.followup.send("❌ Ce nom de tribu est déjà pris.", ephemeral=True)
             return
@@ -2575,7 +2552,7 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
     recrutement = discord.ui.TextInput(label="Recrutement ouvert", required=False, placeholder="Ex: Oui, nous recrutons !")
 
     async def on_submit(self, inter: discord.Interaction):
-        await inter.response.defer(ephemeral=True)
+        db_init()
         # Trouver la tribu de l'utilisateur
         with db_connect() as conn:
             c = conn.cursor()
@@ -2587,7 +2564,7 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             row = c.fetchone()
         
         if not row:
-            await inter.followup.send("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+            await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
             return
         
         updates = {}
@@ -2615,13 +2592,10 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             
             # Ajouter l'historique après avoir fermé la connexion
             ajouter_historique(row["id"], inter.user.id, "Modification", f"Champs modifiés: {', '.join(updates.keys())}")
-            await inter.followup.send("✅ **Tribu modifiée !**", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+            await inter.response.send_message("✅ **Tribu modifiée !**", ephemeral=True)
+            await rafraichir_fiche_tribu(inter.client, row["id"])
         else:
-            await inter.followup.send("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
+            await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"):
     couleur_hex = discord.ui.TextInput(label="Couleur", required=False, placeholder="Ex: #00AAFF")
@@ -2630,7 +2604,7 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
     devise = discord.ui.TextInput(label="Devise de tribu", required=False)
 
     async def on_submit(self, inter: discord.Interaction):
-        await inter.response.defer(ephemeral=True)
+        db_init()
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("""
@@ -2641,7 +2615,7 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             row = c.fetchone()
         
         if not row:
-            await inter.followup.send("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+            await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
             return
         
         updates = {}
@@ -2649,7 +2623,7 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             try:
                 updates["couleur"] = int(self.couleur_hex.value.replace("#", ""), 16)
             except ValueError:
-                await inter.followup.send("❌ Couleur invalide.", ephemeral=True)
+                await inter.response.send_message("❌ Couleur invalide.", ephemeral=True)
                 return
         if self.logo_url.value.strip():
             updates["logo_url"] = self.logo_url.value.strip()
@@ -2668,13 +2642,65 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             # Ajouter l'historique après avoir fermé la connexion
             ajouter_historique(row["id"], inter.user.id, "Personnalisation", f"Champs: {', '.join(updates.keys())}")
             
-            await inter.followup.send("✅ **Tribu personnalisée !**", ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+            # Vérifier si une fiche existe déjà
+            message_id = row.get("message_id", 0) or 0
+            channel_id = row.get("channel_id", 0) or 0
+            
+            if message_id and channel_id:
+                # Rafraîchir la fiche existante
+                await rafraichir_fiche_tribu(inter.client, row["id"])
+                await inter.response.send_message(
+                    "✅ **Tribu personnalisée !**\n\n✨ *La fiche tribu a été mise à jour automatiquement.*", 
+                    ephemeral=True
+                )
+            else:
+                # Pas de fiche existante - en créer une nouvelle
+                await inter.response.send_message(
+                    "✅ **Tribu personnalisée !**\n\n✨ *Affichage de ta fiche mise à jour...*", 
+                    ephemeral=True
+                )
+                
+                # Récupérer le salon configuré ou utiliser le salon actuel
+                salon_id = get_config(inter.guild_id, "salon_fiche_tribu")
+                target_channel = inter.channel
+                
+                if salon_id and salon_id != "0":
+                    configured_channel = inter.guild.get_channel(int(salon_id))
+                    if configured_channel:
+                        target_channel = configured_channel
+                
+                # Préparer les données de la tribu
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT * FROM tribus WHERE id=?", (row["id"],))
+                    tribu = c.fetchone()
+                    c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (row["id"],))
+                    membres = c.fetchall()
+                    c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (row["id"],))
+                    avant_postes = c.fetchall()
+                    c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (row["id"],))
+                    photos = c.fetchall()
+                    
+                    # Récupérer l'avatar du créateur
+                    createur_avatar_url = None
+                    try:
+                        createur = await inter.client.fetch_user(tribu['proprietaire_id'])
+                        if createur:
+                            createur_avatar_url = createur.display_avatar.url
+                    except:
+                        pass
+                    
+                    # Créer et envoyer la fiche
+                    embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+                    view = MenuFicheTribu(row["id"], 0, timeout=None)
+                    msg = await target_channel.send(embed=embed, view=view)
+                    
+                    # Sauvegarder le message_id et channel_id
+                    c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                             (msg.id, msg.channel.id, row["id"]))
+                    conn.commit()
         else:
-            await inter.followup.send("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
+            await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 async def afficher_guide(inter: discord.Interaction):
     """Affiche le guide d'information pour personnaliser sa tribu"""
@@ -2727,7 +2753,7 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
     objectif = discord.ui.TextInput(label="Objectif", required=False)
 
     async def on_submit(self, inter: discord.Interaction):
-        await inter.response.defer(ephemeral=True)
+        db_init()
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("""
@@ -2738,7 +2764,7 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
             row = c.fetchone()
         
         if not row:
-            await inter.followup.send("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
+            await inter.response.send_message("❌ Tu n'es référent ou manager d'aucune tribu.", ephemeral=True)
             return
         
         updates = {}
@@ -2758,13 +2784,10 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
             
             # Message avec info sur la progression
             msg_success = "✅ **Détails ajoutés !**\n\nℹ️ *Pour la progression Boss/Notes, utilise les boutons dans la fiche de ta tribu.*"
-            await inter.followup.send(msg_success, ephemeral=True)
-            try:
-                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
-            except Exception as e:
-                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+            await inter.response.send_message(msg_success, ephemeral=True)
+            await rafraichir_fiche_tribu(inter.client, row["id"])
         else:
-            await inter.followup.send("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
+            await inter.response.send_message("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 class PanneauParametres(discord.ui.View):
     """Panneau de configuration du bot (Admin seulement)"""
@@ -2792,7 +2815,7 @@ class PanneauParametres(discord.ui.View):
         e.set_footer(text="💡 L'upload direct est plus simple si tu as l'image sur ton appareil !")
         
         # Créer un bouton pour ouvrir le modal URL
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         btn = discord.ui.Button(label="Entrer une URL", style=discord.ButtonStyle.primary, emoji="🔗")
         
         async def btn_callback(btn_inter: discord.Interaction):
@@ -2839,7 +2862,7 @@ class PanneauParametres(discord.ui.View):
         e.set_footer(text="💡 Le sélecteur de couleur t'aidera à trouver le code hexadécimal parfait")
         
         # Créer un bouton pour ouvrir le modal
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         btn = discord.ui.Button(label="Entrer le code couleur", style=discord.ButtonStyle.primary, emoji="🎨")
         
         async def btn_callback(btn_inter: discord.Interaction):
@@ -2911,7 +2934,7 @@ class PanneauParametres(discord.ui.View):
         # Menu dropdown pour choisir le salon
         class ViewSalonSelect(discord.ui.View):
             def __init__(self):
-                super().__init__(timeout=300)
+                super().__init__(timeout=180)
             
             @discord.ui.select(
                 placeholder="Sélectionne le salon pour les fiches",
@@ -2951,7 +2974,7 @@ class PanneauParametres(discord.ui.View):
         # Afficher un sous-menu pour ajouter ou retirer des maps
         class ViewMapsGestion(discord.ui.View):
             def __init__(self):
-                super().__init__(timeout=300)
+                super().__init__(timeout=180)
             
             @discord.ui.button(label="Ajouter une map", style=discord.ButtonStyle.success, emoji="➕")
             async def btn_ajouter(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
@@ -2966,6 +2989,7 @@ class PanneauParametres(discord.ui.View):
                     
                     async def on_submit(self, submit_inter: discord.Interaction):
                         nom_map = str(self.nom).strip()
+                        db_init()
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
@@ -2980,6 +3004,7 @@ class PanneauParametres(discord.ui.View):
             @discord.ui.button(label="Retirer une map", style=discord.ButtonStyle.danger, emoji="➖")
             async def btn_retirer(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
                 # Créer un menu déroulant avec les maps existantes
+                db_init()
                 with db_connect() as conn:
                     c = conn.cursor()
                     c.execute("SELECT DISTINCT nom FROM maps WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
@@ -2991,7 +3016,7 @@ class PanneauParametres(discord.ui.View):
                 
                 class ViewMapSelect(discord.ui.View):
                     def __init__(self):
-                        super().__init__(timeout=300)
+                        super().__init__(timeout=180)
                     
                     @discord.ui.select(
                         placeholder="Sélectionne la map à retirer",
@@ -3027,7 +3052,7 @@ class PanneauParametres(discord.ui.View):
         # Afficher un sous-menu pour ajouter ou retirer des boss
         class ViewBossGestion(discord.ui.View):
             def __init__(self):
-                super().__init__(timeout=300)
+                super().__init__(timeout=180)
             
             @discord.ui.button(label="Ajouter un boss", style=discord.ButtonStyle.success, emoji="➕")
             async def btn_ajouter(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
@@ -3042,6 +3067,7 @@ class PanneauParametres(discord.ui.View):
                     
                     async def on_submit(self, submit_inter: discord.Interaction):
                         nom_boss = str(self.nom).strip()
+                        db_init()
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
@@ -3056,6 +3082,7 @@ class PanneauParametres(discord.ui.View):
             @discord.ui.button(label="Retirer un boss", style=discord.ButtonStyle.danger, emoji="➖")
             async def btn_retirer(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
                 # Créer un menu déroulant avec les boss existants
+                db_init()
                 with db_connect() as conn:
                     c = conn.cursor()
                     c.execute("SELECT DISTINCT nom FROM boss WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
@@ -3067,7 +3094,7 @@ class PanneauParametres(discord.ui.View):
                 
                 class ViewBossSelect(discord.ui.View):
                     def __init__(self):
-                        super().__init__(timeout=300)
+                        super().__init__(timeout=180)
                     
                     @discord.ui.select(
                         placeholder="Sélectionne le boss à retirer",
@@ -3103,7 +3130,7 @@ class PanneauParametres(discord.ui.View):
         # Afficher un sous-menu pour ajouter ou retirer des notes
         class ViewNotesGestion(discord.ui.View):
             def __init__(self):
-                super().__init__(timeout=300)
+                super().__init__(timeout=180)
             
             @discord.ui.button(label="Ajouter une note", style=discord.ButtonStyle.success, emoji="➕")
             async def btn_ajouter(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
@@ -3118,6 +3145,7 @@ class PanneauParametres(discord.ui.View):
                     
                     async def on_submit(self, submit_inter: discord.Interaction):
                         nom_note = str(self.nom).strip()
+                        db_init()
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
@@ -3132,6 +3160,7 @@ class PanneauParametres(discord.ui.View):
             @discord.ui.button(label="Retirer une note", style=discord.ButtonStyle.danger, emoji="➖")
             async def btn_retirer(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
                 # Créer un menu déroulant avec les notes existantes
+                db_init()
                 with db_connect() as conn:
                     c = conn.cursor()
                     c.execute("SELECT DISTINCT nom FROM notes WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
@@ -3143,7 +3172,7 @@ class PanneauParametres(discord.ui.View):
                 
                 class ViewNoteSelect(discord.ui.View):
                     def __init__(self):
-                        super().__init__(timeout=300)
+                        super().__init__(timeout=180)
                     
                     @discord.ui.select(
                         placeholder="Sélectionne la note à retirer",
@@ -3196,7 +3225,7 @@ class PanneauTribu(discord.ui.View):
         e.set_footer(text="💡 Le sélecteur de couleur t'aidera à trouver le code hexadécimal parfait")
         
         # Créer un bouton pour ouvrir le modal
-        view = discord.ui.View(timeout=300)
+        view = discord.ui.View(timeout=180)
         btn = discord.ui.Button(label="Ouvrir le formulaire", style=discord.ButtonStyle.primary, emoji="📝")
         
         async def btn_callback(btn_inter: discord.Interaction):
@@ -3220,6 +3249,7 @@ class PanneauTribu(discord.ui.View):
 )
 @app_commands.autocomplete(nom=autocomplete_tribus)
 async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[str] = None, fichier: Optional[discord.Attachment] = None):
+    db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
         await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
@@ -3253,10 +3283,7 @@ async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[
     source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
     ajouter_historique(row["id"], inter.user.id, "Logo modifié", f"Logo changé {source}")
     await inter.response.send_message(f"✅ **Logo de {row['nom']} mis à jour !**\n{source}", ephemeral=True)
-    try:
-        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
-    except Exception as e:
-        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 @tree.command(name="ajouter_photo", description="Ajouter une photo à la galerie de ta tribu (max 10 photos)")
 @app_commands.describe(
@@ -3266,6 +3293,7 @@ async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[
 )
 @app_commands.autocomplete(nom=autocomplete_tribus)
 async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optional[str] = None, fichier: Optional[discord.Attachment] = None):
+    db_init()
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
         await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
@@ -3315,13 +3343,12 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
     source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
     ajouter_historique(row["id"], inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée {source}")
     await inter.response.send_message(f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {row['nom']} !** ({count + 1}/10)\n{source}", ephemeral=True)
-    try:
-        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
-    except Exception as e:
-        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+    await rafraichir_fiche_tribu(inter.client, row["id"])
 
 async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     """Autocomplétion pour les photos d'une tribu"""
+    db_init()
+    
     # Récupérer le nom de la tribu depuis le namespace
     nom_tribu = inter.namespace.nom if hasattr(inter.namespace, 'nom') else None
     if not nom_tribu:
@@ -3528,6 +3555,7 @@ async def on_ready():
     print(f"Connecté en tant que {bot.user} (ID: {bot.user.id})")
 
 def main():
+    db_init()
     token = os.getenv("DISCORD_BOT_TOKEN")
     if not token:
         print("ERREUR : définis la variable d'environnement DISCORD_BOT_TOKEN avec le token du bot.")
