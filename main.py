@@ -773,7 +773,7 @@ class PanneauMembre(discord.ui.View):
         async def modal_callback(modal_inter: discord.Interaction):
             nouveau_nom = nom_input.value.strip()
             if not nouveau_nom:
-                await modal_inter.response.send_message("❌ Le nom ne peut pas être vide.", ephemeral=True)
+                await modal_inter.followup.send("❌ Le nom ne peut pas être vide.", ephemeral=True)
                 return
             
             # Mettre à jour le nom in-game pour toutes les tribus de l'utilisateur
@@ -784,9 +784,9 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             if affected > 0:
-                await modal_inter.response.send_message(f"✅ Ton nom in-game a été changé en **{nouveau_nom}** pour toutes tes tribus !", ephemeral=True)
+                await modal_inter.followup.send(f"✅ Ton nom in-game a été changé en **{nouveau_nom}** pour toutes tes tribus !", ephemeral=True)
             else:
-                await modal_inter.response.send_message(f"✅ Ton nom in-game a été défini sur **{nouveau_nom}** !", ephemeral=True)
+                await modal_inter.followup.send(f"✅ Ton nom in-game a été défini sur **{nouveau_nom}** !", ephemeral=True)
         
         modal.on_submit = modal_callback
         await inter.response.send_modal(modal)
@@ -858,7 +858,7 @@ class PanneauMembre(discord.ui.View):
                 c = conn.cursor()
                 c.execute("SELECT * FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, selected_user.id))
                 if c.fetchone():
-                    await select_inter.response.send_message(f"❌ {selected_user.mention} est déjà membre de cette tribu.", ephemeral=True)
+                    await select_inter.followup.send(f"❌ {selected_user.mention} est déjà membre de cette tribu.", ephemeral=True)
                     return
             
             # Demander si le membre est manager
@@ -878,7 +878,7 @@ class PanneauMembre(discord.ui.View):
                         conn.commit()
                     
                     ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté en tant que Manager")
-                    await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** en tant que **Manager** !", ephemeral=True)
+                    await btn_inter.followup.send(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** en tant que **Manager** !", ephemeral=True)
                     try:
                         await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
                     except Exception as e:
@@ -893,7 +893,7 @@ class PanneauMembre(discord.ui.View):
                         conn.commit()
                     
                     ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté à la tribu")
-                    await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
+                    await btn_inter.followup.send(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
                     try:
                         await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
                     except Exception as e:
@@ -904,7 +904,7 @@ class PanneauMembre(discord.ui.View):
                 description=f"**{selected_user.mention}** sera-t-il autorisé à modifier la fiche de la tribu ?",
                 color=0x5865F2
             )
-            await select_inter.response.send_message(embed=e, view=ViewManagerChoice(self.tribu_id, self.tribu_nom, selected_user), ephemeral=True)
+            await select_inter.followup.send(embed=e, view=ViewManagerChoice(self.tribu_id, self.tribu_nom, selected_user), ephemeral=True)
         
         user_select.callback = user_select_callback
         view.add_item(user_select)
@@ -960,6 +960,8 @@ class PanneauMembre(discord.ui.View):
         select = discord.ui.Select(placeholder="Sélectionne le membre à retirer...", options=options[:25])
         
         async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
             user_id = int(select.values[0])
             
             # Vérifier les droits
@@ -969,14 +971,14 @@ class PanneauMembre(discord.ui.View):
                 row = c.fetchone()
                 
                 if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
-                    await select_inter.response.send_message("❌ Tu n'as pas la permission de retirer des membres.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tu n'as pas la permission de retirer des membres.", ephemeral=True)
                     return
                 
                 c.execute("DELETE FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, user_id))
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Membre retiré", f"<@{user_id}> retiré de la tribu")
-            await select_inter.response.send_message(f"✅ <@{user_id}> a été retiré de **{self.tribu_nom}** !", ephemeral=True)
+            await select_inter.followup.send(f"✅ <@{user_id}> a été retiré de **{self.tribu_nom}** !", ephemeral=True)
             try:
                 await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
@@ -1018,6 +1020,8 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
             map_selectionnee = select.values[0]
             
             # Ouvrir un modal pour les coordonnées
@@ -1041,11 +1045,11 @@ class PanneauMembre(discord.ui.View):
                     row = c.fetchone()
                     
                     if not row:
-                        await modal_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                        await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                         return
                     
                     if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
-                        await modal_inter.response.send_message("❌ Tu n'as pas la permission d'ajouter des avant-postes.", ephemeral=True)
+                        await modal_inter.followup.send("❌ Tu n'as pas la permission d'ajouter des avant-postes.", ephemeral=True)
                         return
                     
                     # Générer un nom automatique
@@ -1061,7 +1065,7 @@ class PanneauMembre(discord.ui.View):
                     conn.commit()
                 
                 ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} — {map_selectionnee} | {coords}")
-                await modal_inter.response.send_message(f"✅ **{nom_ap} ajouté : {map_selectionnee} !**", ephemeral=True)
+                await modal_inter.followup.send(f"✅ **{nom_ap} ajouté : {map_selectionnee} !**", ephemeral=True)
                 try:
                     await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
                 except Exception as e:
@@ -1107,6 +1111,8 @@ class PanneauMembre(discord.ui.View):
         select = discord.ui.Select(placeholder="Sélectionne l'avant-poste à retirer...", options=options[:25])
         
         async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
             ap_id = int(select.values[0])
             
             # Vérifier les droits
@@ -1116,7 +1122,7 @@ class PanneauMembre(discord.ui.View):
                 row = c.fetchone()
                 
                 if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
-                    await select_inter.response.send_message("❌ Tu n'as pas la permission de retirer des avant-postes.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tu n'as pas la permission de retirer des avant-postes.", ephemeral=True)
                     return
                 
                 c.execute("SELECT nom FROM avant_postes WHERE id=?", (ap_id,))
@@ -1127,7 +1133,7 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Avant-poste supprimé", nom_ap)
-            await select_inter.response.send_message(f"✅ **{nom_ap}** supprimé de **{self.tribu_nom}** !", ephemeral=True)
+            await select_inter.followup.send(f"✅ **{nom_ap}** supprimé de **{self.tribu_nom}** !", ephemeral=True)
             try:
                 await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
@@ -1285,6 +1291,9 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
+            
             boss_selectionne = select.values[0]
             
             # Vérifier les droits et ajouter le boss validé
@@ -1294,11 +1303,11 @@ class PanneauMembre(discord.ui.View):
                 row = c.fetchone()
                 
                 if not row:
-                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                     return
                 
                 if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
-                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
                     return
                 
                 # Récupérer les deux listes
@@ -1307,7 +1316,7 @@ class PanneauMembre(discord.ui.View):
                 
                 # Vérifier si le boss est déjà validé
                 if boss_selectionne in boss_valides:
-                    await select_inter.response.send_message(f"ℹ️ Le boss **{boss_selectionne}** est déjà validé pour {row['nom']}.", ephemeral=True)
+                    await select_inter.followup.send(f"ℹ️ Le boss **{boss_selectionne}** est déjà validé pour {row['nom']}.", ephemeral=True)
                     return
                 
                 # Retirer de la liste non-validés si présent
@@ -1322,7 +1331,7 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss validé", boss_selectionne)
-            await select_inter.response.send_message(f"✅ **Boss {boss_selectionne} validé pour {row['nom']} !**", ephemeral=True)
+            await select_inter.followup.send(f"✅ **Boss {boss_selectionne} validé pour {row['nom']} !**", ephemeral=True)
             try:
                 await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
@@ -1365,6 +1374,8 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
             boss_selectionne = select.values[0]
             
             # Vérifier les droits et ajouter le boss non-validé
@@ -1374,11 +1385,11 @@ class PanneauMembre(discord.ui.View):
                 row = c.fetchone()
                 
                 if not row:
-                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                     return
                 
                 if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
-                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
                     return
                 
                 # Récupérer les deux listes
@@ -1387,7 +1398,7 @@ class PanneauMembre(discord.ui.View):
                 
                 # Vérifier si le boss est déjà non-validé
                 if boss_selectionne in boss_non_valides:
-                    await select_inter.response.send_message(f"ℹ️ Le boss **{boss_selectionne}** est déjà marqué comme non-validé pour {row['nom']}.", ephemeral=True)
+                    await select_inter.followup.send(f"ℹ️ Le boss **{boss_selectionne}** est déjà marqué comme non-validé pour {row['nom']}.", ephemeral=True)
                     return
                 
                 # Retirer de la liste validés si présent
@@ -1402,7 +1413,7 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss non-validé", boss_selectionne)
-            await select_inter.response.send_message(f"❌ **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**", ephemeral=True)
+            await select_inter.followup.send(f"❌ **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**", ephemeral=True)
             try:
                 await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
@@ -1445,6 +1456,8 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
             note_selectionnee = select.values[0]
             
             # Vérifier les droits et ajouter la note validée
@@ -1454,11 +1467,11 @@ class PanneauMembre(discord.ui.View):
                 row = c.fetchone()
                 
                 if not row:
-                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                     return
                 
                 if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
-                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
                     return
                 
                 # Récupérer les deux listes
@@ -1467,7 +1480,7 @@ class PanneauMembre(discord.ui.View):
                 
                 # Vérifier si la note est déjà validée
                 if note_selectionnee in notes_valides:
-                    await select_inter.response.send_message(f"ℹ️ La note **{note_selectionnee}** est déjà validée pour {row['nom']}.", ephemeral=True)
+                    await select_inter.followup.send(f"ℹ️ La note **{note_selectionnee}** est déjà validée pour {row['nom']}.", ephemeral=True)
                     return
                 
                 # Retirer de la liste non-validées si présent
@@ -1482,7 +1495,7 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note validée", note_selectionnee)
-            await select_inter.response.send_message(f"📝 **Note {note_selectionnee} validée pour {row['nom']} !**", ephemeral=True)
+            await select_inter.followup.send(f"📝 **Note {note_selectionnee} validée pour {row['nom']} !**", ephemeral=True)
             try:
                 await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
@@ -1525,6 +1538,8 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
             note_selectionnee = select.values[0]
             
             # Vérifier les droits et ajouter la note non-validée
@@ -1534,11 +1549,11 @@ class PanneauMembre(discord.ui.View):
                 row = c.fetchone()
                 
                 if not row:
-                    await select_inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                     return
                 
                 if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
-                    await select_inter.response.send_message("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
+                    await select_inter.followup.send("❌ Tu n'as pas la permission de modifier la progression.", ephemeral=True)
                     return
                 
                 # Récupérer les deux listes
@@ -1547,7 +1562,7 @@ class PanneauMembre(discord.ui.View):
                 
                 # Vérifier si la note est déjà non-validée
                 if note_selectionnee in notes_non_valides:
-                    await select_inter.response.send_message(f"ℹ️ La note **{note_selectionnee}** est déjà marquée comme non-validée pour {row['nom']}.", ephemeral=True)
+                    await select_inter.followup.send(f"ℹ️ La note **{note_selectionnee}** est déjà marquée comme non-validée pour {row['nom']}.", ephemeral=True)
                     return
                 
                 # Retirer de la liste validées si présent
@@ -1562,7 +1577,7 @@ class PanneauMembre(discord.ui.View):
                 conn.commit()
             
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note non-validée", note_selectionnee)
-            await select_inter.response.send_message(f"📄 **Note {note_selectionnee} marquée comme non-validée pour {row['nom']} !**", ephemeral=True)
+            await select_inter.followup.send(f"📄 **Note {note_selectionnee} marquée comme non-validée pour {row['nom']} !**", ephemeral=True)
             try:
                 await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
@@ -3022,11 +3037,11 @@ class PanneauParametres(discord.ui.View):
                 set_config(select_inter.guild_id, "salon_fiche_tribu", salon_id)
                 
                 if salon_id == "0":
-                    await select_inter.response.send_message("✅ **Configuration réinitialisée !**\n\nLes fiches seront affichées dans le salon actuel (où la commande est exécutée).", ephemeral=True)
+                    await select_inter.followup.send("✅ **Configuration réinitialisée !**\n\nLes fiches seront affichées dans le salon actuel (où la commande est exécutée).", ephemeral=True)
                 else:
                     salon = inter.guild.get_channel(int(salon_id))
                     if salon:
-                        await select_inter.response.send_message(f"✅ **Salon défini !**\n\nToutes les nouvelles fiches seront affichées dans {salon.mention}", ephemeral=True)
+                        await select_inter.followup.send(f"✅ **Salon défini !**\n\nToutes les nouvelles fiches seront affichées dans {salon.mention}", ephemeral=True)
         
         # Créer le menu avec les salons texte du serveur
         view = ViewSalonSelect()
@@ -3084,7 +3099,7 @@ class PanneauParametres(discord.ui.View):
                     maps = [row["nom"] for row in c.fetchall()]
                 
                 if not maps:
-                    await btn_inter.response.send_message("❌ Aucune map à retirer.", ephemeral=True)
+                    await btn_inter.followup.send("❌ Aucune map à retirer.", ephemeral=True)
                     return
                 
                 class ViewMapSelect(discord.ui.View):
@@ -3101,13 +3116,13 @@ class PanneauParametres(discord.ui.View):
                             c = conn.cursor()
                             c.execute("DELETE FROM maps WHERE guild_id=? AND nom=?", (select_inter.guild_id, nom_map))
                             if c.rowcount == 0:
-                                await select_inter.response.send_message(f"❌ Map **{nom_map}** non trouvée.", ephemeral=True)
+                                await select_inter.followup.send(f"❌ Map **{nom_map}** non trouvée.", ephemeral=True)
                             else:
                                 conn.commit()
-                                await select_inter.response.send_message(f"✅ Map **{nom_map}** supprimée de la liste !", ephemeral=True)
+                                await select_inter.followup.send(f"✅ Map **{nom_map}** supprimée de la liste !", ephemeral=True)
                 
                 view = ViewMapSelect()
-                await btn_inter.response.send_message("🗺️ **Choisir la map à retirer :**", view=view, ephemeral=True)
+                await btn_inter.followup.send("🗺️ **Choisir la map à retirer :**", view=view, ephemeral=True)
         
         e = discord.Embed(
             title="🗺️ Gestion des Maps",
@@ -3160,7 +3175,7 @@ class PanneauParametres(discord.ui.View):
                     boss = [row["nom"] for row in c.fetchall()]
                 
                 if not boss:
-                    await btn_inter.response.send_message("❌ Aucun boss à retirer.", ephemeral=True)
+                    await btn_inter.followup.send("❌ Aucun boss à retirer.", ephemeral=True)
                     return
                 
                 class ViewBossSelect(discord.ui.View):
@@ -3177,13 +3192,13 @@ class PanneauParametres(discord.ui.View):
                             c = conn.cursor()
                             c.execute("DELETE FROM boss WHERE guild_id=? AND nom=?", (select_inter.guild_id, nom_boss))
                             if c.rowcount == 0:
-                                await select_inter.response.send_message(f"❌ Boss **{nom_boss}** non trouvé.", ephemeral=True)
+                                await select_inter.followup.send(f"❌ Boss **{nom_boss}** non trouvé.", ephemeral=True)
                             else:
                                 conn.commit()
-                                await select_inter.response.send_message(f"✅ Boss **{nom_boss}** supprimé de la liste !", ephemeral=True)
+                                await select_inter.followup.send(f"✅ Boss **{nom_boss}** supprimé de la liste !", ephemeral=True)
                 
                 view = ViewBossSelect()
-                await btn_inter.response.send_message("🐉 **Choisir le boss à retirer :**", view=view, ephemeral=True)
+                await btn_inter.followup.send("🐉 **Choisir le boss à retirer :**", view=view, ephemeral=True)
         
         e = discord.Embed(
             title="🐉 Gestion des Boss",
@@ -3236,7 +3251,7 @@ class PanneauParametres(discord.ui.View):
                     notes = [row["nom"] for row in c.fetchall()]
                 
                 if not notes:
-                    await btn_inter.response.send_message("❌ Aucune note à retirer.", ephemeral=True)
+                    await btn_inter.followup.send("❌ Aucune note à retirer.", ephemeral=True)
                     return
                 
                 class ViewNoteSelect(discord.ui.View):
@@ -3253,13 +3268,13 @@ class PanneauParametres(discord.ui.View):
                             c = conn.cursor()
                             c.execute("DELETE FROM notes WHERE guild_id=? AND nom=?", (select_inter.guild_id, nom_note))
                             if c.rowcount == 0:
-                                await select_inter.response.send_message(f"❌ Note **{nom_note}** non trouvée.", ephemeral=True)
+                                await select_inter.followup.send(f"❌ Note **{nom_note}** non trouvée.", ephemeral=True)
                             else:
                                 conn.commit()
-                                await select_inter.response.send_message(f"✅ Note **{nom_note}** supprimée de la liste !", ephemeral=True)
+                                await select_inter.followup.send(f"✅ Note **{nom_note}** supprimée de la liste !", ephemeral=True)
                 
                 view = ViewNoteSelect()
-                await btn_inter.response.send_message("📝 **Choisir la note à retirer :**", view=view, ephemeral=True)
+                await btn_inter.followup.send("📝 **Choisir la note à retirer :**", view=view, ephemeral=True)
         
         e = discord.Embed(
             title="📝 Gestion des Notes",
