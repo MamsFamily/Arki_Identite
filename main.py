@@ -874,6 +874,9 @@ class PanneauMembre(discord.ui.View):
                 
                 @discord.ui.button(label="Oui, manager", style=discord.ButtonStyle.success, emoji="✅")
                 async def btn_manager(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                    # DEFER immédiatement pour éviter timeout
+                    await btn_inter.response.defer(ephemeral=True)
+                    
                     with db_connect() as conn:
                         c = conn.cursor()
                         c.execute("INSERT INTO membres (tribu_id, user_id, role, manager) VALUES (?, ?, ?, 1)", 
@@ -885,10 +888,13 @@ class PanneauMembre(discord.ui.View):
                     try:
                         await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
                     except Exception as e:
-                        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+                        await btn_inter.followup.send(f"⚠️ **Note** : Membre ajouté mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
                 
                 @discord.ui.button(label="Non, membre simple", style=discord.ButtonStyle.secondary, emoji="👤")
                 async def btn_membre(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                    # DEFER immédiatement pour éviter timeout
+                    await btn_inter.response.defer(ephemeral=True)
+                    
                     with db_connect() as conn:
                         c = conn.cursor()
                         c.execute("INSERT INTO membres (tribu_id, user_id) VALUES (?, ?)", 
@@ -900,7 +906,7 @@ class PanneauMembre(discord.ui.View):
                     try:
                         await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
                     except Exception as e:
-                        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+                        await btn_inter.followup.send(f"⚠️ **Note** : Membre ajouté mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
             
             e = discord.Embed(
                 title="👤 Autorisation de modification",
