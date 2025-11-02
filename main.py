@@ -36,7 +36,33 @@ def keep_alive():
 # Chemin de la base de données (utilise SQLITE_PATH pour le déploiement Replit)
 DB_PATH = os.getenv("SQLITE_PATH", os.getenv("TRIBU_BOT_DB", "tribus.db"))
 
-# ---------- Base de données ----------
+# ---------- Base de données Arki Identité ----------
+# Base de données séparée pour les identités utilisateurs
+# Sur Railway : /data/arki_identite.db (dans le coffre)
+# En local : arki_identite.db (racine du projet)
+if os.getenv("SQLITE_PATH"):
+    # Railway : utiliser le répertoire /data/
+    IDENTITE_DB_PATH = "/data/arki_identite.db"
+else:
+    # Local (Replit) : racine du projet
+    IDENTITE_DB_PATH = "arki_identite.db"
+
+def identite_db_connect():
+    """Connexion à la base de données Arki Identité"""
+    conn = sqlite3.connect(IDENTITE_DB_PATH, timeout=30.0, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout = 30000")
+    return conn
+
+def identite_db_init():
+    """Initialisation de la base de données Arki Identité"""
+    with identite_db_connect() as conn:
+        cursor = conn.cursor()
+        cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT, data TEXT)")
+        conn.commit()
+
+# ---------- Base de données Tribus ----------
 def db_connect():
     """Connexion à la base de données avec timeout et busy handler pour éviter les locks"""
     conn = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False)
@@ -3510,7 +3536,8 @@ async def on_interaction(inter: discord.Interaction):
 
 @bot.event
 async def on_ready():
-    db_init()  # Initialiser la DB au démarrage
+    db_init()  # Initialiser la DB tribus au démarrage
+    identite_db_init()  # Initialiser la DB Arki Identité au démarrage
     
     # Ajouter les vues persistantes pour qu'elles fonctionnent après redémarrage
     bot.add_view(PanneauTribu(timeout=None))
