@@ -1029,8 +1029,7 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
-            # DEFER IMMÉDIATEMENT pour éviter timeout
-            await select_inter.response.defer(ephemeral=True)
+            # NE PAS DEFER ici car on doit ouvrir un modal !
             map_selectionnee = select.values[0]
             
             # Ouvrir un modal pour les coordonnées
@@ -1045,6 +1044,9 @@ class PanneauMembre(discord.ui.View):
             modal.add_item(coords_input)
             
             async def modal_callback(modal_inter: discord.Interaction):
+                # DEFER immédiatement dans le modal callback
+                await modal_inter.response.defer(ephemeral=True)
+                
                 coords = coords_input.value.strip()
                 
                 # Vérifier les droits
@@ -1078,7 +1080,7 @@ class PanneauMembre(discord.ui.View):
                 try:
                     await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
                 except Exception as e:
-                    print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+                    await modal_inter.followup.send(f"⚠️ **Note** : Avant-poste ajouté mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
             
             modal.on_submit = modal_callback
             await select_inter.response.send_modal(modal)
@@ -1152,6 +1154,129 @@ class PanneauMembre(discord.ui.View):
         view = discord.ui.View(timeout=300)
         view.add_item(select)
         await inter.response.send_message("🏚️ Sélectionne l'avant-poste à retirer :", view=view, ephemeral=True)
+    
+    @discord.ui.button(label="Modifier base principale", style=discord.ButtonStyle.success, emoji="🏠", row=2)
+    async def btn_ajouter_base(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer toutes les maps disponibles
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT nom FROM maps WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+            maps = [row["nom"] for row in c.fetchall()]
+        
+        if not maps:
+            await inter.response.send_message("❌ Aucune map disponible. Contacte un admin pour en ajouter.", ephemeral=True)
+            return
+        
+        # Créer le menu déroulant des maps
+        options = []
+        for map_nom in maps[:25]:  # Discord limite à 25 options
+            options.append(discord.SelectOption(
+                label=map_nom,
+                value=map_nom,
+                emoji="🗺️"
+            ))
+        
+        select = discord.ui.Select(
+            placeholder="🗺️ Sélectionne la map de la base principale...",
+            options=options
+        )
+        
+        async def select_callback(select_inter: discord.Interaction):
+            # NE PAS DEFER ici car on doit ouvrir un modal !
+            map_selectionnee = select.values[0]
+            
+            # Ouvrir un modal pour les coordonnées
+            modal = discord.ui.Modal(title=f"🏠 Base principale sur {map_selectionnee}")
+            coords_input = discord.ui.TextInput(
+                label="Coordonnées",
+                placeholder="Ex: 45.5, 32.6",
+                required=True,
+                max_length=100,
+                style=discord.TextStyle.short
+            )
+            modal.add_item(coords_input)
+            
+            async def modal_callback(modal_inter: discord.Interaction):
+                # DEFER immédiatement dans le modal callback
+                await modal_inter.response.defer(ephemeral=True)
+                
+                coords = coords_input.value.strip()
+                
+                # Vérifier les droits
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                    row = c.fetchone()
+                    
+                    if not row:
+                        await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
+                        return
+                    
+                    if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
+                        await modal_inter.followup.send("❌ Tu n'as pas la permission de modifier la base principale.", ephemeral=True)
+                        return
+                    
+                    # Mettre à jour la base principale
+                    c.execute("""
+                    UPDATE tribus SET base_map=?, base_coords=? WHERE id=?
+                    """, (map_selectionnee, coords, self.tribu_id))
+                    conn.commit()
+                
+                ajouter_historique(self.tribu_id, modal_inter.user.id, "Base principale modifiée", f"{map_selectionnee} | {coords}")
+                await modal_inter.followup.send(f"✅ **Base principale définie : {map_selectionnee} ({coords}) !**", ephemeral=True)
+                try:
+                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
+                except Exception as e:
+                    await modal_inter.followup.send(f"⚠️ **Note** : Base modifiée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
+            
+            modal.on_submit = modal_callback
+            await select_inter.response.send_modal(modal)
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=300)
+        view.add_item(select)
+        
+        await inter.response.send_message("🏠 **Modifier la base principale**\n\nSélectionne d'abord la map :", view=view, ephemeral=True)
+    
+    @discord.ui.button(label="Retirer base principale", style=discord.ButtonStyle.danger, emoji="🗑️", row=2)
+    async def btn_retirer_base(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Vérifier les droits
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+            row = c.fetchone()
+            
+            if not row:
+                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                return
+            
+            if not (est_admin(inter) or inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, inter.user.id)):
+                await inter.response.send_message("❌ Tu n'as pas la permission de modifier la base principale.", ephemeral=True)
+                return
+            
+            # Vérifier si une base existe
+            if not row["base_map"] and not row["base_coords"]:
+                await inter.response.send_message("❌ Aucune base principale n'est définie.", ephemeral=True)
+                return
+            
+            # Retirer la base principale
+            c.execute("UPDATE tribus SET base_map=NULL, base_coords=NULL WHERE id=?", (self.tribu_id,))
+            conn.commit()
+        
+        ajouter_historique(self.tribu_id, inter.user.id, "Base principale retirée", "La base principale a été supprimée")
+        await inter.response.send_message("✅ **Base principale retirée !**", ephemeral=True)
+        try:
+            await afficher_ou_rafraichir_fiche(inter.client, self.tribu_id, inter.guild, inter.channel)
+        except Exception as e:
+            print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
     
     @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
     async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
