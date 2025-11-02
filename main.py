@@ -1884,6 +1884,13 @@ async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
     await inter.response.send_message("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
     return False
 
+async def verifier_droits_defer(inter: discord.Interaction, tribu) -> bool:
+    """Version de verifier_droits pour les interactions déjà defer()"""
+    if est_admin(inter) or inter.user.id == tribu["proprietaire_id"] or est_manager(tribu["id"], inter.user.id):
+        return True
+    await inter.followup.send("❌ Tu n'as pas la permission de modifier cette tribu.", ephemeral=True)
+    return False
+
 def parser_membre_info(texte: str, guild: discord.Guild):
     """Parse le format: @pseudo NomInGame autorisé:oui/non"""
     if not texte or not texte.strip():
@@ -2294,12 +2301,15 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
 @tree.command(name="tribu_transférer", description="Transférer la propriété d'une tribu")
 @app_commands.describe(nom="Nom de la tribu", nouveau_proprio="Nouveau propriétaire")
 async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio: discord.Member):
+    # DEFER immédiatement pour éviter le timeout
+    await inter.response.defer(ephemeral=True)
+    
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
     if not (est_admin(inter) or inter.user.id == row["proprietaire_id"]):
-        await inter.response.send_message("❌ Seul le propriétaire actuel (ou un admin) peut transférer la tribu.", ephemeral=True)
+        await inter.followup.send("❌ Seul le propriétaire actuel (ou un admin) peut transférer la tribu.", ephemeral=True)
         return
     with db_connect() as conn:
         c = conn.cursor()
@@ -2309,11 +2319,15 @@ async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio
         conn.commit()
     
     ajouter_historique(row["id"], inter.user.id, "Transfert propriété", f"Nouveau propriétaire: <@{nouveau_proprio.id}>")
-    await inter.response.send_message(f"✅ **Propriété de {row['nom']} transférée à <@{nouveau_proprio.id}> !**", ephemeral=True)
+    
+    # Répondre AVANT le rafraîchissement
+    await inter.followup.send(f"✅ **Propriété de {row['nom']} transférée à <@{nouveau_proprio.id}> !**", ephemeral=True)
+    
+    # Rafraîchir la fiche APRÈS avoir répondu
     try:
         await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
     except Exception as e:
-        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+        await inter.followup.send(f"⚠️ **Note** : Tribu transférée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
 @tree.command(name="tribu_supprimer", description="Supprimer une tribu (confirmation requise)")
 @app_commands.describe(nom="Nom de la tribu", confirmation="Retape exactement le nom pour confirmer")
@@ -3289,20 +3303,23 @@ class PanneauTribu(discord.ui.View):
 )
 @app_commands.autocomplete(nom=autocomplete_tribus)
 async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[str] = None, fichier: Optional[discord.Attachment] = None):
+    # DEFER immédiatement pour éviter le timeout (3 secondes)
+    await inter.response.defer(ephemeral=True)
+    
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
     
     # Vérifier qu'au moins un des deux est fourni
     if not url_logo and not fichier:
-        await inter.response.send_message("❌ Tu dois fournir soit une URL, soit un fichier image.", ephemeral=True)
+        await inter.followup.send("❌ Tu dois fournir soit une URL, soit un fichier image.", ephemeral=True)
         return
     
     # Si un fichier est fourni, vérifier que c'est une image
     if fichier:
         if not fichier.content_type or not fichier.content_type.startswith("image/"):
-            await inter.response.send_message("❌ Le fichier doit être une image (JPG, PNG, GIF, etc.).", ephemeral=True)
+            await inter.followup.send("❌ Le fichier doit être une image (JPG, PNG, GIF, etc.).", ephemeral=True)
             return
         # Utiliser l'URL du fichier uploadé
         logo_url = fichier.url
@@ -3310,7 +3327,7 @@ async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[
         logo_url = url_logo.strip()
     
     # Vérifier les droits
-    if not await verifier_droits(inter, row):
+    if not await verifier_droits_defer(inter, row):
         return
     
     # Mettre à jour le logo
@@ -3321,11 +3338,15 @@ async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[
     
     source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
     ajouter_historique(row["id"], inter.user.id, "Logo modifié", f"Logo changé {source}")
-    await inter.response.send_message(f"✅ **Logo de {row['nom']} mis à jour !**\n{source}", ephemeral=True)
+    
+    # Répondre AVANT le rafraîchissement
+    await inter.followup.send(f"✅ **Logo de {row['nom']} mis à jour !**\n{source}", ephemeral=True)
+    
+    # Rafraîchir la fiche APRÈS avoir répondu
     try:
         await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
     except Exception as e:
-        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+        await inter.followup.send(f"⚠️ **Note** : Logo mis à jour mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
 @tree.command(name="ajouter_photo", description="Ajouter une photo à la galerie de ta tribu (max 10 photos)")
 @app_commands.describe(
@@ -3335,20 +3356,23 @@ async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[
 )
 @app_commands.autocomplete(nom=autocomplete_tribus)
 async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optional[str] = None, fichier: Optional[discord.Attachment] = None):
+    # DEFER immédiatement pour éviter le timeout (3 secondes)
+    await inter.response.defer(ephemeral=True)
+    
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
     
     # Vérifier qu'au moins un des deux est fourni
     if not url_photo and not fichier:
-        await inter.response.send_message("❌ Tu dois fournir soit une URL, soit un fichier image.", ephemeral=True)
+        await inter.followup.send("❌ Tu dois fournir soit une URL, soit un fichier image.", ephemeral=True)
         return
     
     # Si un fichier est fourni, vérifier que c'est une image
     if fichier:
         if not fichier.content_type or not fichier.content_type.startswith("image/"):
-            await inter.response.send_message("❌ Le fichier doit être une image (JPG, PNG, GIF, etc.).", ephemeral=True)
+            await inter.followup.send("❌ Le fichier doit être une image (JPG, PNG, GIF, etc.).", ephemeral=True)
             return
         # Utiliser l'URL du fichier uploadé
         photo_url = fichier.url
@@ -3356,7 +3380,7 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
         photo_url = url_photo.strip()
     
     # Vérifier les droits
-    if not await verifier_droits(inter, row):
+    if not await verifier_droits_defer(inter, row):
         return
     
     # Vérifier le nombre de photos (max 10)
@@ -3366,7 +3390,7 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
         count = c.fetchone()["count"]
         
         if count >= 10:
-            await inter.response.send_message("❌ Cette tribu a déjà 10 photos. Supprime-en une avant d'en ajouter une nouvelle.", ephemeral=True)
+            await inter.followup.send("❌ Cette tribu a déjà 10 photos. Supprime-en une avant d'en ajouter une nouvelle.", ephemeral=True)
             return
         
         # Calculer le prochain ordre
@@ -3383,11 +3407,14 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
     
     source = "📱 depuis un fichier" if fichier else "🔗 depuis une URL"
     ajouter_historique(row["id"], inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée {source}")
-    await inter.response.send_message(f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {row['nom']} !** ({count + 1}/10)\n{source}", ephemeral=True)
+    
+    # Répondre AVANT le rafraîchissement
+    await inter.followup.send(f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {row['nom']} !** ({count + 1}/10)\n{source}", ephemeral=True)
+    
+    # Rafraîchir la fiche APRÈS avoir répondu
     try:
         await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
     except Exception as e:
-        print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
         await inter.followup.send(f"⚠️ **Note** : Photo ajoutée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
 async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
