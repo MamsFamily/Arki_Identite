@@ -851,6 +851,9 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def user_select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
+            
             selected_user = user_select.values[0]
             
             # Vérifier si le membre est déjà dans la tribu
@@ -2518,6 +2521,9 @@ async def changer_banniere_panneau(inter: discord.Interaction, url: Optional[str
 
 @tree.command(name="ma_tribu", description="Afficher la fiche de ma tribu")
 async def ma_tribu(inter: discord.Interaction):
+    # DEFER immédiatement pour éviter timeout
+    await inter.response.defer(ephemeral=True)
+    
     # Trouver la tribu de l'utilisateur
     with db_connect() as conn:
         c = conn.cursor()
@@ -2529,7 +2535,7 @@ async def ma_tribu(inter: discord.Interaction):
         row = c.fetchone()
     
     if not row:
-        await inter.response.send_message("❌ Tu ne fais partie d'aucune tribu. Utilise `/panneau` pour créer ou rejoindre une tribu !", ephemeral=True)
+        await inter.followup.send("❌ Tu ne fais partie d'aucune tribu. Utilise `/panneau` pour créer ou rejoindre une tribu !", ephemeral=True)
         return
     
     # Supprimer l'ancienne fiche si elle existe dans ce même salon
