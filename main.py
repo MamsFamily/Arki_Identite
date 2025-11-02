@@ -2545,6 +2545,42 @@ async def aide(inter: discord.Interaction):
     e.set_footer(text="💡 Utilise /panneau pour un accès rapide aux fonctions principales")
     await inter.response.send_message(embed=e, ephemeral=True)
 
+# ---------- Commandes de Test DB Arki Identité (pour Railway) ----------
+@tree.command(name="save_test", description="[TEST] Enregistrer une donnée dans la base Arki Identité")
+@app_commands.describe(texte="Le texte à enregistrer pour tester la base de données")
+async def save_test(inter: discord.Interaction, texte: str):
+    """Commande de test pour enregistrer une donnée dans la base Arki Identité"""
+    try:
+        with identite_db_connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO users (user_id, data) VALUES (?, ?)", (str(inter.user.id), texte))
+            conn.commit()
+        await inter.response.send_message(
+            f"✅ **Donnée sauvegardée pour {inter.user.display_name}**\n📝 Contenu : `{texte}`", 
+            ephemeral=True
+        )
+    except Exception as e:
+        await inter.response.send_message(f"❌ Erreur lors de la sauvegarde : {e}", ephemeral=True)
+
+@tree.command(name="show_test", description="[TEST] Afficher la dernière donnée enregistrée")
+async def show_test(inter: discord.Interaction):
+    """Commande de test pour afficher la dernière donnée enregistrée dans Arki Identité"""
+    try:
+        with identite_db_connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT data FROM users WHERE user_id = ? ORDER BY rowid DESC LIMIT 1", (str(inter.user.id),))
+            result = cursor.fetchone()
+        
+        if result:
+            await inter.response.send_message(
+                f"📦 **Dernière donnée enregistrée**\n`{result[0]}`", 
+                ephemeral=True
+            )
+        else:
+            await inter.response.send_message("ℹ️ Aucune donnée trouvée pour toi 🫤", ephemeral=True)
+    except Exception as e:
+        await inter.response.send_message(f"❌ Erreur lors de la lecture : {e}", ephemeral=True)
+
 # ---------- UI (boutons + modals) ----------
 class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", required=True)
