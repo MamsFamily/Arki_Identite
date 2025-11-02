@@ -290,6 +290,37 @@ def db_init():
                 VALUES (?, ?, 0, ?)
                 """, (tribu["id"], tribu["photo_base"], dt.datetime.utcnow().isoformat()))
         
+        # Table pour les maps premium
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS maps_premium (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id INTEGER NOT NULL,
+            nom TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(guild_id, nom)
+        )
+        """)
+        
+        # Maps premium par défaut
+        default_maps_premium = ["Svartalfheim", "Némésis"]
+        for map_name in default_maps_premium:
+            c.execute("INSERT OR IGNORE INTO maps_premium (guild_id, nom, created_at) VALUES (?, ?, ?)",
+                     (0, map_name, dt.datetime.utcnow().isoformat()))
+        
+        # Table pour les bases premium (similaire aux avant-postes)
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS bases_premium (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tribu_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            nom TEXT NOT NULL,
+            map TEXT DEFAULT '',
+            coords TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (tribu_id) REFERENCES tribus(id) ON DELETE CASCADE
+        )
+        """)
+        
         # Ajouter des index pour optimiser les performances avec beaucoup d'utilisateurs
         c.execute("CREATE INDEX IF NOT EXISTS idx_tribus_guild ON tribus(guild_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tribus_proprietaire ON tribus(proprietaire_id)")
@@ -298,6 +329,8 @@ def db_init():
         c.execute("CREATE INDEX IF NOT EXISTS idx_avant_postes_tribu ON avant_postes(tribu_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_photos_tribu ON photos_tribu(tribu_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_historique_tribu ON historique(tribu_id)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_bases_premium_tribu ON bases_premium(tribu_id)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_config_guild ON config(guild_id)")
         
         conn.commit()
 
@@ -1241,42 +1274,6 @@ class PanneauMembre(discord.ui.View):
         view.add_item(select)
         
         await inter.response.send_message("🏠 **Modifier la base principale**\n\nSélectionne d'abord la map :", view=view, ephemeral=True)
-    
-    @discord.ui.button(label="Retirer base principale", style=discord.ButtonStyle.danger, emoji="🗑️", row=2)
-    async def btn_retirer_base(self, inter: discord.Interaction, button: discord.ui.Button):
-        if not self.tribu_id:
-            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
-            return
-        
-        # Vérifier les droits
-        with db_connect() as conn:
-            c = conn.cursor()
-            c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
-            row = c.fetchone()
-            
-            if not row:
-                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
-                return
-            
-            if not (est_admin(inter) or inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, inter.user.id)):
-                await inter.response.send_message("❌ Tu n'as pas la permission de modifier la base principale.", ephemeral=True)
-                return
-            
-            # Vérifier si une base existe
-            if not row["base_map"] and not row["base_coords"]:
-                await inter.response.send_message("❌ Aucune base principale n'est définie.", ephemeral=True)
-                return
-            
-            # Retirer la base principale
-            c.execute("UPDATE tribus SET base_map=NULL, base_coords=NULL WHERE id=?", (self.tribu_id,))
-            conn.commit()
-        
-        ajouter_historique(self.tribu_id, inter.user.id, "Base principale retirée", "La base principale a été supprimée")
-        await inter.response.send_message("✅ **Base principale retirée !**", ephemeral=True)
-        try:
-            await afficher_ou_rafraichir_fiche(inter.client, self.tribu_id, inter.guild, inter.channel)
-        except Exception as e:
-            print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
     
     @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
     async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
