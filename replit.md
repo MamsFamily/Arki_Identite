@@ -21,9 +21,10 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 
 **UI/UX Decisions:**
 - **Interactive Panel (`/panneau`):** A centralized entry point with buttons for main actions (Create, Modify, Customize, Guide). Admin panels self-delete to prevent clutter. Includes customizable banner, color, and text.
-- **Admin Configuration Panel (`/parametres`):** Comprehensive admin-only panel with 7 buttons organized in 2 rows:
+- **Admin Configuration Panel (`/parametres`):** Comprehensive admin-only panel with 8 buttons organized in 3 rows:
   - **Row 1 (Appearance):** Banner (with file upload support via link), Color (with color picker link), Text, Tribe Card Channel
   - **Row 2 (Data Management):** Maps (add/remove), Boss (add/remove), Notes (add/remove)
+  - **Row 3 (Premium Features):** Maps Premium (add/remove premium DLC maps)
   - Each button opens a sub-panel with intuitive controls (modals for input, dropdowns for selection)
 - **Customizable Main Panel:** Admins personalize the panel appearance entirely through `/parametres` (banner, color, text) with visual color picker integration
 - **Configurable Tribe Card Channel:** Admins define a dedicated channel for all tribe cards via dropdown in `/parametres`
@@ -40,6 +41,7 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 - **Tribe Management:** Creation, modification (name, color, logo, base map/coords, description, motto, recruitment, objective), ownership transfer, and deletion.
 - **Member Management:** Adding (with in-game name and manager authorization), removal, and ability to leave a tribe.
 - **Outpost Management:** Addition (with auto-generated name) and deletion.
+- **Premium Maps System (November 2025):** Dedicated management for premium DLC maps (Svartalfheim, Némésis). Admins can add/remove premium maps via `/parametres`. Tribe managers can add/remove premium bases via "Mes commandes" panel. Premium bases displayed separately on tribe cards between main base and standard outposts.
 - **Progression System:** Tracking of completed bosses and notes with dual states (validated/not validated).
 - **Interactive Photo Gallery:** Up to 10 photos per tribe with ◀️ ▶️ navigation directly on the profile. Add/remove via `/ajouter_photo` and `/supprimer_photo`, or directly from the "Mes commandes" panel with interactive modal and select menu. Position indicator "📸 Photo X/Y" in the footer.
 - **Action History:** Detailed logging of modifications with user, action, details, and timestamp, viewable via pagination.
@@ -52,8 +54,10 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 - **Default Data:** Pre-defined lists of bosses, notes, and maps, extensible via admin commands.
 
 **System Design Choices:**
-- **SQLite Database (`tribus.db`):** Used for persisting all bot data (tribes, members, outposts, history, bosses, notes, maps, tribe photos).
+- **SQLite Database (`tribus.db`):** Used for persisting all bot data (tribes, members, outposts, history, bosses, notes, maps, tribe photos, premium maps, premium bases).
 - **`photos_tribu` Table:** Stores gallery photos with `id`, `tribu_id`, `url`, `ordre` columns to manage display order and limit to 10 photos per tribe.
+- **`maps_premium` Table:** Stores premium DLC maps with `id`, `guild_id`, `nom`, `created_at` columns. Default maps: Svartalfheim, Némésis.
+- **`bases_premium` Table:** Stores premium bases with `id`, `tribu_id`, `user_id`, `nom`, `map`, `coords`, `created_at` columns following the same pattern as `avant_postes`.
 - **`config` Table:** Stores bot configuration (panel banner, color, text, tribe card channel) with key-value structure per guild
 - **Profile Tracking:** `message_id` and `channel_id` columns in the `tribus` table allow dynamic updating of displayed profiles and deletion of old ones.
 - **Smart Channel Routing:** When a tribe card channel is configured, all tribe cards display there instead of the current channel
