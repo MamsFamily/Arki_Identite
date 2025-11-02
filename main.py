@@ -2561,12 +2561,11 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
         note = "ℹ️ **Autres options disponibles** : Utilise les boutons « Modifier », « Personnaliser » et « Guide » pour compléter ta fiche !"
         await inter.followup.send(f"✅ **Tribu {self.nom.value} créée !**\n{note}", ephemeral=True)
         
-        # Afficher la fiche (sans defer car déjà fait)
-        from discord import Client
-        if isinstance(inter.client, Client):
-            channel = inter.channel
-            if channel:
-                await construire_et_envoyer_fiche(inter.client, tid, channel)
+        # Afficher la fiche automatiquement
+        try:
+            await afficher_ou_rafraichir_fiche(inter.client, tid, inter.guild)
+        except Exception as e:
+            print(f"⚠️ Erreur lors de l'affichage de la fiche tribu {tid}: {e}")
 
 class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
     nom = discord.ui.TextInput(label="Nom de la tribu", required=False)
