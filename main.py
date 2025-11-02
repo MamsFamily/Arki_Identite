@@ -655,7 +655,7 @@ class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
         ajouter_historique(self.tribu_id, inter.user.id, "Photo ajoutée", f"Photo #{nouvel_ordre + 1} ajoutée à la galerie")
         await inter.followup.send(f"✅ **Photo #{nouvel_ordre + 1} ajoutée à {self.tribu_nom} !** ({count + 1}/10)\n🔗 depuis une URL", ephemeral=True)
         try:
-            await afficher_ou_rafraichir_fiche(inter.client, self.tribu_id, inter.guild)
+            await afficher_ou_rafraichir_fiche(inter.client, self.tribu_id, inter.guild, inter.channel)
         except Exception as e:
             print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
 
@@ -688,7 +688,7 @@ class ConfirmationSupprimerPhoto(discord.ui.View):
         ajouter_historique(self.tribu_id, inter.user.id, "Photo supprimée", f"Photo {self.photo_numero} supprimée de la galerie")
         await inter.response.send_message(f"✅ **Photo {self.photo_numero} supprimée de {self.tribu_nom} !** ({count_restant}/10)", ephemeral=True)
         try:
-            await afficher_ou_rafraichir_fiche(inter.client, self.tribu_id, inter.guild)
+            await afficher_ou_rafraichir_fiche(inter.client, self.tribu_id, inter.guild, inter.channel)
         except Exception as e:
             print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
     
@@ -880,7 +880,7 @@ class PanneauMembre(discord.ui.View):
                     ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté en tant que Manager")
                     await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** en tant que **Manager** !", ephemeral=True)
                     try:
-                        await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild)
+                        await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
                     except Exception as e:
                         print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
                 
@@ -895,7 +895,7 @@ class PanneauMembre(discord.ui.View):
                     ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ajouté à la tribu")
                     await btn_inter.response.send_message(f"✅ {self.selected_user.mention} a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
                     try:
-                        await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild)
+                        await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
                     except Exception as e:
                         print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
             
@@ -978,7 +978,7 @@ class PanneauMembre(discord.ui.View):
             ajouter_historique(self.tribu_id, select_inter.user.id, "Membre retiré", f"<@{user_id}> retiré de la tribu")
             await select_inter.response.send_message(f"✅ <@{user_id}> a été retiré de **{self.tribu_nom}** !", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
+                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
         
@@ -1063,7 +1063,7 @@ class PanneauMembre(discord.ui.View):
                 ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} — {map_selectionnee} | {coords}")
                 await modal_inter.response.send_message(f"✅ **{nom_ap} ajouté : {map_selectionnee} !**", ephemeral=True)
                 try:
-                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild)
+                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
                 except Exception as e:
                     print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
             
@@ -1129,7 +1129,7 @@ class PanneauMembre(discord.ui.View):
             ajouter_historique(self.tribu_id, select_inter.user.id, "Avant-poste supprimé", nom_ap)
             await select_inter.response.send_message(f"✅ **{nom_ap}** supprimé de **{self.tribu_nom}** !", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
+                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
         
@@ -1324,7 +1324,7 @@ class PanneauMembre(discord.ui.View):
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss validé", boss_selectionne)
             await select_inter.response.send_message(f"✅ **Boss {boss_selectionne} validé pour {row['nom']} !**", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
+                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
         
@@ -1404,7 +1404,7 @@ class PanneauMembre(discord.ui.View):
             ajouter_historique(self.tribu_id, select_inter.user.id, "Boss non-validé", boss_selectionne)
             await select_inter.response.send_message(f"❌ **Boss {boss_selectionne} marqué comme non-validé pour {row['nom']} !**", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
+                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
         
@@ -1484,7 +1484,7 @@ class PanneauMembre(discord.ui.View):
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note validée", note_selectionnee)
             await select_inter.response.send_message(f"📝 **Note {note_selectionnee} validée pour {row['nom']} !**", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
+                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
         
@@ -1564,7 +1564,7 @@ class PanneauMembre(discord.ui.View):
             ajouter_historique(self.tribu_id, select_inter.user.id, "Note non-validée", note_selectionnee)
             await select_inter.response.send_message(f"📄 **Note {note_selectionnee} marquée comme non-validée pour {row['nom']} !**", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild)
+                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
         
@@ -2139,93 +2139,96 @@ async def rafraichir_fiche_tribu(client, tribu_id: int):
             # Message introuvable ou supprimé, ne rien faire
             pass
 
-async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild):
+async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild, fallback_channel=None):
     """
     Fonction pour créer une NOUVELLE fiche tribu à chaque modification.
     - Supprime l'ancienne fiche si elle existe
-    - Crée toujours une nouvelle fiche dans le salon configuré (ou salon par défaut)
+    - Crée toujours une nouvelle fiche dans le salon configuré (ou fallback_channel)
     """
-    try:
-        with db_connect() as conn:
-            c = conn.cursor()
-            c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
-            tribu = c.fetchone()
-            
-            if not tribu:
-                return
-            
-            # Récupérer les données de la tribu
-            c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (tribu_id,))
-            membres = c.fetchall()
-            c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
-            avant_postes = c.fetchall()
-            c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
-            photos = c.fetchall()
-            
-            # Récupérer l'avatar du créateur
-            createur_avatar_url = None
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
+        tribu = c.fetchone()
+        
+        if not tribu:
+            print(f"⚠️ Tribu {tribu_id} introuvable")
+            return
+        
+        # Récupérer les données de la tribu
+        c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (tribu_id,))
+        membres = c.fetchall()
+        c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        avant_postes = c.fetchall()
+        c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
+        photos = c.fetchall()
+        
+        # Récupérer l'avatar du créateur
+        createur_avatar_url = None
+        try:
+            createur = await client.fetch_user(tribu['proprietaire_id'])
+            if createur:
+                createur_avatar_url = createur.display_avatar.url
+        except:
+            pass
+        
+        # Créer l'embed et la vue
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        
+        # Récupérer message_id et channel_id de l'ancienne fiche
+        message_id = tribu.get("message_id", 0) or 0
+        channel_id = tribu.get("channel_id", 0) or 0
+        
+        # Supprimer l'ancienne fiche si elle existe
+        if message_id and channel_id and channel_id != 0:
             try:
-                createur = await client.fetch_user(tribu['proprietaire_id'])
-                if createur:
-                    createur_avatar_url = createur.display_avatar.url
-            except:
-                pass
-            
-            # Créer l'embed et la vue
-            embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
-            view = MenuFicheTribu(tribu_id, 0, timeout=None)
-            
-            # Récupérer message_id et channel_id de l'ancienne fiche
-            message_id = tribu.get("message_id", 0) or 0
-            channel_id = tribu.get("channel_id", 0) or 0
-            
-            # Supprimer l'ancienne fiche si elle existe
-            if message_id and channel_id:
-                try:
-                    channel = client.get_channel(channel_id)
-                    if channel:
-                        old_message = await channel.fetch_message(message_id)
-                        await old_message.delete()
-                        print(f"🗑️ Ancienne fiche supprimée pour tribu {tribu_id}")
-                except:
-                    pass  # Pas grave si on ne peut pas supprimer l'ancienne
-            
-            # Récupérer le salon configuré pour la nouvelle fiche
-            salon_config = get_config(tribu["guild_id"], "salon_fiche_tribu", "0")
-            target_channel_id = int(salon_config) if salon_config != "0" else 0
-            
-            target_channel = None
-            if target_channel_id:
-                target_channel = client.get_channel(target_channel_id)
-            
-            # Si pas de salon configuré ou salon introuvable, utiliser le premier salon textuel disponible
-            if not target_channel:
-                for channel in guild.text_channels:
-                    if channel.permissions_for(guild.me).send_messages:
-                        target_channel = channel
-                        break
-            
-            # Créer et envoyer la NOUVELLE fiche
+                channel = client.get_channel(channel_id)
+                if channel:
+                    old_message = await channel.fetch_message(message_id)
+                    await old_message.delete()
+                    print(f"🗑️ Ancienne fiche supprimée pour tribu {tribu_id}")
+            except Exception as e:
+                print(f"⚠️ Impossible de supprimer ancienne fiche: {e}")
+        
+        # Déterminer le salon cible pour la nouvelle fiche
+        target_channel = None
+        
+        # 1. Essayer le salon configuré
+        salon_config = get_config(tribu["guild_id"], "salon_fiche_tribu", "0")
+        target_channel_id = int(salon_config) if salon_config != "0" else 0
+        
+        if target_channel_id and target_channel_id != 0:
+            target_channel = client.get_channel(target_channel_id)
             if target_channel:
-                try:
-                    new_message = await target_channel.send(embed=embed, view=view)
-                    # Sauvegarder le nouveau message_id et channel_id
-                    with db_connect() as conn2:
-                        c2 = conn2.cursor()
-                        c2.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
-                                 (new_message.id, new_message.channel.id, tribu_id))
-                        conn2.commit()
-                    print(f"✅ Nouvelle fiche créée pour tribu {tribu_id} (message {new_message.id} dans canal {target_channel.id})")
-                except Exception as e:
-                    print(f"⚠️ Erreur lors de la création de la nouvelle fiche tribu {tribu_id}: {e}")
-                    raise  # Propager l'erreur pour que l'utilisateur la voie
-            else:
-                error_msg = f"Aucun salon accessible trouvé pour créer la fiche"
-                print(f"⚠️ {error_msg} pour tribu {tribu_id}")
-                raise Exception(error_msg)
-    except Exception as e:
-        print(f"⚠️ Erreur dans afficher_ou_rafraichir_fiche pour tribu {tribu_id}: {e}")
-        raise  # Propager l'erreur pour que l'utilisateur la voie
+                print(f"📍 Utilisation du salon configuré: {target_channel.name}")
+        
+        # 2. Sinon, utiliser le fallback_channel (salon de l'interaction)
+        if not target_channel and fallback_channel:
+            target_channel = fallback_channel
+            print(f"📍 Utilisation du salon fallback (interaction): {target_channel.name}")
+        
+        # 3. Sinon, chercher le premier salon textuel disponible
+        if not target_channel:
+            for channel in guild.text_channels:
+                if channel.permissions_for(guild.me).send_messages:
+                    target_channel = channel
+                    print(f"📍 Utilisation du premier salon disponible: {target_channel.name}")
+                    break
+        
+        # Créer et envoyer la NOUVELLE fiche
+        if target_channel:
+            new_message = await target_channel.send(embed=embed, view=view)
+            # Sauvegarder le nouveau message_id et channel_id
+            with db_connect() as conn2:
+                c2 = conn2.cursor()
+                c2.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                         (new_message.id, new_message.channel.id, tribu_id))
+                conn2.commit()
+            print(f"✅ Nouvelle fiche créée pour tribu {tribu_id} (message {new_message.id} dans canal {target_channel.name})")
+        else:
+            error_msg = f"Aucun salon accessible trouvé pour créer la fiche tribu {tribu_id}"
+            print(f"❌ {error_msg}")
+            raise Exception(error_msg)
 
 # ---------- Commandes slash standalone ----------
 
@@ -2337,7 +2340,7 @@ async def tribu_transferer(inter: discord.Interaction, nom: str, nouveau_proprio
     
     # Rafraîchir la fiche APRÈS avoir répondu
     try:
-        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
+        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild, inter.channel)
     except Exception as e:
         await inter.followup.send(f"⚠️ **Note** : Tribu transférée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
@@ -2656,7 +2659,7 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
         
         # Afficher la fiche automatiquement
         try:
-            await afficher_ou_rafraichir_fiche(inter.client, tid, inter.guild)
+            await afficher_ou_rafraichir_fiche(inter.client, tid, inter.guild, inter.channel)
         except Exception as e:
             print(f"⚠️ Erreur lors de l'affichage de la fiche tribu {tid}: {e}")
 
@@ -2710,7 +2713,7 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             ajouter_historique(row["id"], inter.user.id, "Modification", f"Champs modifiés: {', '.join(updates.keys())}")
             await inter.followup.send("✅ **Tribu modifiée !**", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
+                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild, inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
                 await inter.followup.send(f"⚠️ **Note** : Fiche modifiée mais non rafraîchie automatiquement. Utilise `/ma_tribu` pour voir les changements.\n`Erreur: {e}`", ephemeral=True)
@@ -2764,7 +2767,7 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
             
             await inter.followup.send("✅ **Tribu personnalisée !**", ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
+                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild, inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
                 await inter.followup.send(f"⚠️ **Note** : Personnalisation enregistrée mais fiche non rafraîchie. Utilise `/ma_tribu`.\n`Erreur: {e}`", ephemeral=True)
@@ -2855,7 +2858,7 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
             msg_success = "✅ **Détails ajoutés !**\n\nℹ️ *Pour la progression Boss/Notes, utilise les boutons dans la fiche de ta tribu.*"
             await inter.followup.send(msg_success, ephemeral=True)
             try:
-                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
+                await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild, inter.channel)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
         else:
@@ -3356,7 +3359,7 @@ async def ajouter_logo(inter: discord.Interaction, nom: str, url_logo: Optional[
     
     # Rafraîchir la fiche APRÈS avoir répondu
     try:
-        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
+        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild, inter.channel)
     except Exception as e:
         await inter.followup.send(f"⚠️ **Note** : Logo mis à jour mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
@@ -3425,7 +3428,7 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
     
     # Rafraîchir la fiche APRÈS avoir répondu
     try:
-        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
+        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild, inter.channel)
     except Exception as e:
         await inter.followup.send(f"⚠️ **Note** : Photo ajoutée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
