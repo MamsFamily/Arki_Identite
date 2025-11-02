@@ -2168,9 +2168,14 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild):
                     if channel:
                         message = await channel.fetch_message(message_id)
                         await message.edit(embed=embed, view=view)
+                        print(f"✅ Fiche tribu {tribu_id} rafraîchie (message {message_id} dans canal {channel_id})")
                         return
-                except:
-                    pass
+                    else:
+                        print(f"⚠️ Canal {channel_id} introuvable pour tribu {tribu_id}")
+                except discord.NotFound:
+                    print(f"⚠️ Message {message_id} introuvable pour tribu {tribu_id} (supprimé?)")
+                except Exception as e:
+                    print(f"⚠️ Erreur lors du rafraîchissement du message {message_id} pour tribu {tribu_id}: {e}")
             
             # Si on arrive ici, créer une nouvelle fiche
             # Récupérer le salon configuré
@@ -2198,8 +2203,11 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild):
                         c2.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
                                  (message.id, message.channel.id, tribu_id))
                         conn2.commit()
+                    print(f"✅ Nouvelle fiche créée pour tribu {tribu_id} (message {message.id} dans canal {target_channel.id})")
                 except Exception as e:
                     print(f"⚠️ Erreur lors de l'envoi de la fiche tribu {tribu_id}: {e}")
+            else:
+                print(f"⚠️ Aucun salon cible trouvé pour créer la fiche tribu {tribu_id}")
     except Exception as e:
         print(f"⚠️ Erreur dans afficher_ou_rafraichir_fiche pour tribu {tribu_id}: {e}")
 
