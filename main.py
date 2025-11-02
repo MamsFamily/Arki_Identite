@@ -7,6 +7,38 @@ cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id TEXT, data TEXT)")
 conn.commit()
 
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f"✅ Connecté en tant que {bot.user}")
+
+# --- Commande pour enregistrer une donnée de test ---
+@bot.command()
+async def save_test(ctx, *, texte: str):
+    cursor.execute("INSERT INTO users (user_id, data) VALUES (?, ?)", (str(ctx.author.id), texte))
+    conn.commit()
+    await ctx.send(f"Donnée sauvegardée pour {ctx.author.display_name} : `{texte}`")
+
+# --- Commande pour afficher la donnée enregistrée ---
+@bot.command()
+async def show_test(ctx):
+    cursor.execute("SELECT data FROM users WHERE user_id = ?", (str(ctx.author.id),))
+    result = cursor.fetchone()
+    if result:
+        await ctx.send(f"Dernière donnée enregistrée : `{result[0]}`")
+    else:
+        await ctx.send("Aucune donnée trouvée pour toi 🫤")
+
+# --- Lancement du bot ---
+bot.run(os.getenv("DISCORD_TOKEN"))
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
