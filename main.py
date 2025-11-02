@@ -3343,39 +3343,77 @@ class PanneauParametres(discord.ui.View):
             await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
             return
         
-        # Menu dropdown pour choisir le salon
-        class ViewSalonSelect(discord.ui.View):
-            def __init__(self):
-                super().__init__(timeout=300)
-            
-            @discord.ui.select(
-                placeholder="Sélectionne le salon pour les fiches",
-                options=[
-                    discord.SelectOption(label="Salon actuel (par défaut)", value="0", emoji="📍", description="Les fiches s'affichent où la commande est tapée")
-                ]
+        # Modal pour entrer le nom ou l'ID du salon
+        class ModalSalonFiche(discord.ui.Modal, title="📍 Salon pour les fiches tribu"):
+            salon_input = discord.ui.TextInput(
+                label="Nom du salon ou ID",
+                placeholder="Ex: #fiches-tribus ou 123456789012345678 ou 'reset'",
+                style=discord.TextStyle.short,
+                required=True,
+                max_length=100
             )
-            async def select_salon(self, select_inter: discord.Interaction, select: discord.ui.Select):
-                salon_id = select.values[0]
-                set_config(select_inter.guild_id, "salon_fiche_tribu", salon_id)
+            
+            async def on_submit(self, submit_inter: discord.Interaction):
+                input_value = str(self.salon_input).strip().lower()
                 
-                if salon_id == "0":
-                    await select_inter.followup.send("✅ **Configuration réinitialisée !**\n\nLes fiches seront affichées dans le salon actuel (où la commande est exécutée).", ephemeral=True)
-                else:
-                    salon = inter.guild.get_channel(int(salon_id))
-                    if salon:
-                        await select_inter.followup.send(f"✅ **Salon défini !**\n\nToutes les nouvelles fiches seront affichées dans {salon.mention}", ephemeral=True)
-        
-        # Créer le menu avec les salons texte du serveur
-        view = ViewSalonSelect()
-        
-        # Ajouter les salons texte au menu
-        for channel in inter.guild.text_channels:
-            if len(view.children[0].options) < 25:  # Max 25 options
-                view.children[0].options.append(
-                    discord.SelectOption(label=f"#{channel.name}", value=str(channel.id), emoji="💬")
+                # Option reset
+                if input_value in ["reset", "default", "défaut", "0"]:
+                    set_config(submit_inter.guild_id, "salon_fiche_tribu", "0")
+                    await submit_inter.response.send_message(
+                        "✅ **Configuration réinitialisée !**\n\n"
+                        "Les fiches seront affichées dans le salon actuel (où la commande est exécutée).",
+                        ephemeral=True
+                    )
+                    return
+                
+                # Chercher par nom de salon (avec ou sans #)
+                salon_trouve = None
+                search_name = input_value.replace("#", "").strip()
+                
+                for channel in submit_inter.guild.text_channels:
+                    if channel.name.lower() == search_name:
+                        salon_trouve = channel
+                        break
+                
+                # Si pas trouvé par nom, essayer par ID
+                if not salon_trouve:
+                    try:
+                        channel_id = int(input_value.replace("#", "").strip())
+                        salon_trouve = submit_inter.guild.get_channel(channel_id)
+                    except ValueError:
+                        pass
+                
+                if not salon_trouve:
+                    await submit_inter.response.send_message(
+                        "❌ **Salon introuvable !**\n\n"
+                        "**Exemples valides :**\n"
+                        "• `#fiches-tribus` (nom du salon)\n"
+                        "• `fiches-tribus` (sans #)\n"
+                        "• `1234567890123456789` (ID du salon)\n"
+                        "• `reset` (pour réinitialiser)\n\n"
+                        "💡 **Astuce :** Pour obtenir l'ID d'un salon, active le Mode Développeur Discord, "
+                        "clique-droit sur le salon → Copier l'identifiant",
+                        ephemeral=True
+                    )
+                    return
+                
+                # Vérifier que c'est bien un salon texte
+                if not isinstance(salon_trouve, discord.TextChannel):
+                    await submit_inter.response.send_message(
+                        "❌ Ce n'est pas un salon texte valide.",
+                        ephemeral=True
+                    )
+                    return
+                
+                # Sauvegarder la configuration
+                set_config(submit_inter.guild_id, "salon_fiche_tribu", str(salon_trouve.id))
+                await submit_inter.response.send_message(
+                    f"✅ **Salon défini !**\n\n"
+                    f"Toutes les nouvelles fiches seront affichées dans {salon_trouve.mention}",
+                    ephemeral=True
                 )
         
-        await inter.response.send_message("📍 **Choisir le salon pour les fiches tribu :**", view=view, ephemeral=True)
+        await inter.response.send_modal(ModalSalonFiche())
     
     @discord.ui.button(label="Maps", style=discord.ButtonStyle.secondary, emoji="🗺️", row=1)
     async def btn_maps(self, inter: discord.Interaction, button: discord.ui.Button):
