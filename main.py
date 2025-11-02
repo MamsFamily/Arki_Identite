@@ -414,6 +414,13 @@ def ajouter_historique(tribu_id: int, user_id: int, action: str, details: str = 
         """, (tribu_id, user_id, action, details, dt.datetime.utcnow().isoformat()))
         conn.commit()
 
+def get_bases_premium(tribu_id: int):
+    """Récupère les bases premium d'une tribu"""
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM bases_premium WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        return c.fetchall()
+
 # ---------- Bot ----------
 intents = discord.Intents.default()
 intents.guilds = True
@@ -423,7 +430,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
 # ---------- Helpers UI ----------
-def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None, photos=None, photo_index=0) -> discord.Embed:
+def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None, photos=None, photo_index=0, bases_premium=None) -> discord.Embed:
     color = tribu["couleur"] if tribu["couleur"] else 0x2F3136
     
     # Titre et description
@@ -497,6 +504,20 @@ def embed_tribu(tribu, membres=None, avant_postes=None, createur_avatar_url=None
         base_info.append(f"📍 **{coords_base}**")
     base_value = "\n".join(base_info) if base_info else "—"
     e.add_field(name="**🏠 BASE PRINCIPALE**", value=base_value, inline=False)
+    
+    # Bases premium (entre base principale et avant-postes)
+    if bases_premium is not None and len(bases_premium) > 0:
+        bp_lines = []
+        for bp in bases_premium:
+            bp_info = []
+            if bp['map']:
+                bp_info.append(f"{bp['map']}")
+            if bp['coords']:
+                bp_info.append(f"📍 {bp['coords']}")
+            if bp_info:
+                bp_lines.append(f"• {' | '.join(bp_info)}")
+        if bp_lines:
+            e.add_field(name=f"**⭐ BASES MAP PREMIUM ({len(bp_lines)})**", value="\n".join(bp_lines)[:1024], inline=False)
     
     # Avant-postes (liste simple avec tiret) - DÉPLACÉ ICI après BASE PRINCIPALE
     if avant_postes is not None and len(avant_postes) > 0:
@@ -1833,6 +1854,8 @@ class MenuFicheTribu(discord.ui.View):
             membres = c.fetchall()
             c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (self.tribu_id,))
             avant_postes = c.fetchall()
+            c.execute("SELECT * FROM bases_premium WHERE tribu_id=? ORDER BY created_at DESC", (self.tribu_id,))
+            bases_premium = c.fetchall()
         
         # Récupérer l'avatar du créateur
         createur_avatar_url = None
@@ -1844,7 +1867,7 @@ class MenuFicheTribu(discord.ui.View):
             pass
         
         # Créer le nouvel embed avec la nouvelle photo
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, nouvel_index)
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, nouvel_index, bases_premium)
         
         # Mettre à jour la vue avec le nouvel index
         new_view = MenuFicheTribu(self.tribu_id, nouvel_index, timeout=None)
@@ -2115,6 +2138,8 @@ async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: b
         avant_postes = c.fetchall()
         c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
         photos = c.fetchall()
+        c.execute("SELECT * FROM bases_premium WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        bases_premium = c.fetchall()
         
         # Récupérer l'avatar du créateur
         createur_avatar_url = None
@@ -2126,7 +2151,7 @@ async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: b
             pass
         
         # Créer l'embed et le menu
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
         view = MenuFicheTribu(tribu_id, 0, timeout=None)
         
         # Déterminer le salon cible
@@ -2184,6 +2209,8 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
         avant_postes = c.fetchall()
         c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
         photos = c.fetchall()
+        c.execute("SELECT * FROM bases_premium WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        bases_premium = c.fetchall()
         
         # Récupérer l'ancien salon et message
         old_message_id = tribu["message_id"] if "message_id" in tribu.keys() else 0
@@ -2218,7 +2245,7 @@ async def afficher_fiche_mise_a_jour(inter: discord.Interaction, tribu_id: int, 
             pass
         
         # Envoyer le nouveau message avec la fiche et les boutons
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
         view = MenuFicheTribu(tribu_id, 0, timeout=None)
         
         # Répondre à l'interaction (vérifier si déjà différée)
@@ -2261,6 +2288,8 @@ async def rafraichir_fiche_tribu(client, tribu_id: int):
         avant_postes = c.fetchall()
         c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
         photos = c.fetchall()
+        c.execute("SELECT * FROM bases_premium WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        bases_premium = c.fetchall()
         
         # Récupérer l'avatar du créateur
         createur_avatar_url = None
@@ -2272,7 +2301,7 @@ async def rafraichir_fiche_tribu(client, tribu_id: int):
             pass
         
         # Créer l'embed mis à jour
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
         view = MenuFicheTribu(tribu_id, 0, timeout=None)
         
         # Éditer le message existant
@@ -2307,6 +2336,8 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild, fallback_ch
         avant_postes = c.fetchall()
         c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
         photos = c.fetchall()
+        c.execute("SELECT * FROM bases_premium WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        bases_premium = c.fetchall()
         
         # Récupérer l'avatar du créateur
         createur_avatar_url = None
@@ -2318,7 +2349,7 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild, fallback_ch
             pass
         
         # Créer l'embed et la vue
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
+        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
         view = MenuFicheTribu(tribu_id, 0, timeout=None)
         
         # Récupérer message_id et channel_id de l'ancienne fiche
