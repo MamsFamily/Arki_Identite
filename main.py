@@ -2690,6 +2690,7 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
                 await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+                await inter.followup.send(f"⚠️ **Note** : Fiche modifiée mais non rafraîchie automatiquement. Utilise `/ma_tribu` pour voir les changements.\n`Erreur: {e}`", ephemeral=True)
         else:
             await inter.followup.send("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
@@ -2743,6 +2744,7 @@ class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"
                 await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
             except Exception as e:
                 print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+                await inter.followup.send(f"⚠️ **Note** : Personnalisation enregistrée mais fiche non rafraîchie. Utilise `/ma_tribu`.\n`Erreur: {e}`", ephemeral=True)
         else:
             await inter.followup.send("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
@@ -3389,6 +3391,7 @@ async def ajouter_photo(inter: discord.Interaction, nom: str, url_photo: Optiona
         await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild)
     except Exception as e:
         print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {row['id']}: {e}")
+        await inter.followup.send(f"⚠️ **Note** : Photo ajoutée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
 async def autocomplete_photos_tribu(inter: discord.Interaction, current: str):
     """Autocomplétion pour les photos d'une tribu"""
