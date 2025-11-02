@@ -2176,8 +2176,8 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild, fallback_ch
         view = MenuFicheTribu(tribu_id, 0, timeout=None)
         
         # Récupérer message_id et channel_id de l'ancienne fiche
-        message_id = tribu.get("message_id", 0) or 0
-        channel_id = tribu.get("channel_id", 0) or 0
+        message_id = tribu["message_id"] if tribu["message_id"] else 0
+        channel_id = tribu["channel_id"] if tribu["channel_id"] else 0
         
         # Supprimer l'ancienne fiche si elle existe
         if message_id and channel_id and channel_id != 0:
