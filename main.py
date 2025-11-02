@@ -1296,6 +1296,163 @@ class PanneauMembre(discord.ui.View):
         
         await inter.response.send_message("🏠 **Modifier la base principale**\n\nSélectionne d'abord la map :", view=view, ephemeral=True)
     
+    @discord.ui.button(label="Ajouter base premium", style=discord.ButtonStyle.success, emoji="⭐", row=2)
+    async def btn_ajouter_base_premium(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer toutes les maps premium disponibles
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT nom FROM maps_premium WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+            maps = [row["nom"] for row in c.fetchall()]
+        
+        if not maps:
+            await inter.response.send_message("❌ Aucune map premium disponible. Contacte un admin pour en ajouter.", ephemeral=True)
+            return
+        
+        # Créer le menu déroulant des maps premium
+        options = []
+        for map_nom in maps[:25]:  # Discord limite à 25 options
+            options.append(discord.SelectOption(
+                label=map_nom,
+                value=map_nom,
+                emoji="⭐"
+            ))
+        
+        select = discord.ui.Select(
+            placeholder="⭐ Sélectionne la map premium...",
+            options=options
+        )
+        
+        async def select_callback(select_inter: discord.Interaction):
+            # NE PAS DEFER ici car on doit ouvrir un modal !
+            map_selectionnee = select.values[0]
+            
+            # Ouvrir un modal pour les coordonnées
+            modal = discord.ui.Modal(title=f"⭐ Base premium sur {map_selectionnee}")
+            coords_input = discord.ui.TextInput(
+                label="Coordonnées",
+                placeholder="Ex: 45.5, 32.6",
+                required=True,
+                max_length=100,
+                style=discord.TextStyle.short
+            )
+            modal.add_item(coords_input)
+            
+            async def modal_callback(modal_inter: discord.Interaction):
+                # DEFER immédiatement dans le modal callback
+                await modal_inter.response.defer(ephemeral=True)
+                
+                coords = coords_input.value.strip()
+                
+                # Vérifier les droits
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                    row = c.fetchone()
+                    
+                    if not row:
+                        await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
+                        return
+                    
+                    if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
+                        await modal_inter.followup.send("❌ Tu n'as pas la permission d'ajouter des bases premium.", ephemeral=True)
+                        return
+                    
+                    # Générer un nom automatique
+                    c.execute("SELECT COUNT(*) as count FROM bases_premium WHERE tribu_id=?", (self.tribu_id,))
+                    count = c.fetchone()["count"]
+                    nom_base = f"Base premium {count + 1}"
+                    
+                    # Ajouter la base premium
+                    c.execute("""
+                    INSERT INTO bases_premium (tribu_id, user_id, nom, map, coords, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """, (self.tribu_id, modal_inter.user.id, nom_base, map_selectionnee, coords, dt.datetime.utcnow().isoformat()))
+                    conn.commit()
+                
+                ajouter_historique(self.tribu_id, modal_inter.user.id, "Base premium ajoutée", f"{nom_base} — {map_selectionnee} | {coords}")
+                await modal_inter.followup.send(f"✅ **{nom_base} ajoutée : {map_selectionnee} !**", ephemeral=True)
+                try:
+                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
+                except Exception as e:
+                    await modal_inter.followup.send(f"⚠️ **Note** : Base premium ajoutée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
+            
+            modal.on_submit = modal_callback
+            await select_inter.response.send_modal(modal)
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=300)
+        view.add_item(select)
+        
+        await inter.response.send_message("⭐ **Ajouter une base premium**\n\nSélectionne d'abord la map premium :", view=view, ephemeral=True)
+    
+    @discord.ui.button(label="Retirer base premium", style=discord.ButtonStyle.secondary, emoji="🗑️", row=2)
+    async def btn_retirer_base_premium(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not self.tribu_id:
+            await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
+            return
+        
+        # Récupérer les bases premium de la tribu
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, nom, map, coords FROM bases_premium WHERE tribu_id=?", (self.tribu_id,))
+            bases_premium = c.fetchall()
+        
+        if not bases_premium:
+            await inter.response.send_message("❌ Aucune base premium à retirer.", ephemeral=True)
+            return
+        
+        # Créer un menu de sélection
+        options = []
+        for bp in bases_premium:
+            desc = f"{bp['map']}"
+            if bp['coords']:
+                desc += f" ({bp['coords']})"
+            options.append(discord.SelectOption(
+                label=bp['nom'],
+                description=desc,
+                value=str(bp['id'])
+            ))
+        
+        select = discord.ui.Select(placeholder="Sélectionne la base premium à retirer...", options=options[:25])
+        
+        async def select_callback(select_inter: discord.Interaction):
+            # DEFER IMMÉDIATEMENT pour éviter timeout
+            await select_inter.response.defer(ephemeral=True)
+            bp_id = int(select.values[0])
+            
+            # Vérifier les droits
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
+                row = c.fetchone()
+                
+                if not (est_admin(select_inter) or select_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, select_inter.user.id)):
+                    await select_inter.followup.send("❌ Tu n'as pas la permission de retirer des bases premium.", ephemeral=True)
+                    return
+                
+                c.execute("SELECT nom FROM bases_premium WHERE id=?", (bp_id,))
+                bp = c.fetchone()
+                nom_bp = bp["nom"] if bp else "Base premium"
+                
+                c.execute("DELETE FROM bases_premium WHERE id=?", (bp_id,))
+                conn.commit()
+            
+            ajouter_historique(self.tribu_id, select_inter.user.id, "Base premium supprimée", nom_bp)
+            await select_inter.followup.send(f"✅ **{nom_bp}** supprimée de **{self.tribu_nom}** !", ephemeral=True)
+            try:
+                await afficher_ou_rafraichir_fiche(select_inter.client, self.tribu_id, select_inter.guild, select_inter.channel)
+            except Exception as e:
+                print(f"⚠️ Erreur lors du rafraîchissement de la fiche tribu {self.tribu_id}: {e}")
+        
+        select.callback = select_callback
+        view = discord.ui.View(timeout=300)
+        view.add_item(select)
+        await inter.response.send_message("⭐ Sélectionne la base premium à retirer :", view=view, ephemeral=True)
+    
     @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
     async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
         if not self.tribu_id:
@@ -3447,6 +3604,87 @@ class PanneauParametres(discord.ui.View):
             color=0x5865F2
         )
         await inter.response.send_message(embed=e, view=ViewNotesGestion(), ephemeral=True)
+    
+    @discord.ui.button(label="Maps Premium", style=discord.ButtonStyle.secondary, emoji="⭐", row=2)
+    async def btn_maps_premium(self, inter: discord.Interaction, button: discord.ui.Button):
+        if not est_admin(inter):
+            await inter.response.send_message("❌ Réservé aux administrateurs.", ephemeral=True)
+            return
+        
+        # Afficher un sous-menu pour ajouter ou retirer des maps premium
+        class ViewMapsPremiumGestion(discord.ui.View):
+            def __init__(self):
+                super().__init__(timeout=300)
+            
+            @discord.ui.button(label="Ajouter une map premium", style=discord.ButtonStyle.success, emoji="➕")
+            async def btn_ajouter(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                class ModalAjoutMapPremium(discord.ui.Modal, title="⭐ Ajouter une map premium"):
+                    nom = discord.ui.TextInput(
+                        label="Nom de la map premium",
+                        placeholder="Ex: Svartalfheim, Némésis...",
+                        style=discord.TextStyle.short,
+                        required=True,
+                        max_length=100
+                    )
+                    
+                    async def on_submit(self, submit_inter: discord.Interaction):
+                        nom_map = str(self.nom).strip()
+                        try:
+                            with db_connect() as conn:
+                                c = conn.cursor()
+                                c.execute("INSERT INTO maps_premium (guild_id, nom, created_at) VALUES (?, ?, ?)", 
+                                         (submit_inter.guild_id, nom_map, dt.datetime.utcnow().isoformat()))
+                                conn.commit()
+                            await submit_inter.response.send_message(f"✅ Map premium **{nom_map}** ajoutée à la liste !", ephemeral=True)
+                        except sqlite3.IntegrityError:
+                            await submit_inter.response.send_message(f"❌ La map premium **{nom_map}** existe déjà.", ephemeral=True)
+                
+                await btn_inter.response.send_modal(ModalAjoutMapPremium())
+            
+            @discord.ui.button(label="Retirer une map premium", style=discord.ButtonStyle.danger, emoji="➖")
+            async def btn_retirer(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
+                # DEFER immédiatement
+                await btn_inter.response.defer(ephemeral=True)
+                
+                # Créer un menu déroulant avec les maps premium existantes
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT DISTINCT nom FROM maps_premium WHERE guild_id IN (0, ?) ORDER BY nom", (inter.guild_id,))
+                    maps = [row["nom"] for row in c.fetchall()]
+                
+                if not maps:
+                    await btn_inter.followup.send("❌ Aucune map premium à retirer.", ephemeral=True)
+                    return
+                
+                class ViewMapPremiumSelect(discord.ui.View):
+                    def __init__(self):
+                        super().__init__(timeout=300)
+                    
+                    @discord.ui.select(
+                        placeholder="Sélectionne la map premium à retirer",
+                        options=[discord.SelectOption(label=m, value=m) for m in maps[:25]]
+                    )
+                    async def select_map(self, select_inter: discord.Interaction, select: discord.ui.Select):
+                        await select_inter.response.defer(ephemeral=True)
+                        nom_map = select.values[0]
+                        with db_connect() as conn:
+                            c = conn.cursor()
+                            c.execute("DELETE FROM maps_premium WHERE guild_id=? AND nom=?", (select_inter.guild_id, nom_map))
+                            if c.rowcount == 0:
+                                await select_inter.followup.send(f"❌ Map premium **{nom_map}** non trouvée.", ephemeral=True)
+                            else:
+                                conn.commit()
+                                await select_inter.followup.send(f"✅ Map premium **{nom_map}** supprimée de la liste !", ephemeral=True)
+                
+                view = ViewMapPremiumSelect()
+                await btn_inter.followup.send("⭐ **Choisir la map premium à retirer :**", view=view, ephemeral=True)
+        
+        e = discord.Embed(
+            title="⭐ Gestion des Maps Premium",
+            description="Utilise les boutons ci-dessous pour ajouter ou retirer des maps premium de la liste.",
+            color=0x5865F2
+        )
+        await inter.response.send_message(embed=e, view=ViewMapsPremiumGestion(), ephemeral=True)
 
 class PanneauTribu(discord.ui.View):
     def __init__(self, timeout: Optional[float] = None):
