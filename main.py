@@ -2122,10 +2122,9 @@ async def rafraichir_fiche_tribu(client, tribu_id: int):
 
 async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild):
     """
-    Fonction unifiée pour afficher ou rafraîchir une fiche tribu.
-    - Si message_id/channel_id existent → rafraîchir le message existant
-    - Sinon → créer et afficher la fiche dans le salon configuré (ou salon par défaut)
-    - Gère les erreurs silencieusement (message supprimé, canal inaccessible)
+    Fonction pour créer une NOUVELLE fiche tribu à chaque modification.
+    - Supprime l'ancienne fiche si elle existe
+    - Crée toujours une nouvelle fiche dans le salon configuré (ou salon par défaut)
     """
     try:
         with db_connect() as conn:
@@ -2157,28 +2156,22 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild):
             embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0)
             view = MenuFicheTribu(tribu_id, 0, timeout=None)
             
-            # Récupérer message_id et channel_id
+            # Récupérer message_id et channel_id de l'ancienne fiche
             message_id = tribu.get("message_id", 0) or 0
             channel_id = tribu.get("channel_id", 0) or 0
             
-            # Essayer d'abord de rafraîchir le message existant
+            # Supprimer l'ancienne fiche si elle existe
             if message_id and channel_id:
                 try:
                     channel = client.get_channel(channel_id)
                     if channel:
-                        message = await channel.fetch_message(message_id)
-                        await message.edit(embed=embed, view=view)
-                        print(f"✅ Fiche tribu {tribu_id} rafraîchie (message {message_id} dans canal {channel_id})")
-                        return
-                    else:
-                        print(f"⚠️ Canal {channel_id} introuvable pour tribu {tribu_id}")
-                except discord.NotFound:
-                    print(f"⚠️ Message {message_id} introuvable pour tribu {tribu_id} (supprimé?)")
-                except Exception as e:
-                    print(f"⚠️ Erreur lors du rafraîchissement du message {message_id} pour tribu {tribu_id}: {e}")
+                        old_message = await channel.fetch_message(message_id)
+                        await old_message.delete()
+                        print(f"🗑️ Ancienne fiche supprimée pour tribu {tribu_id}")
+                except:
+                    pass  # Pas grave si on ne peut pas supprimer l'ancienne
             
-            # Si on arrive ici, créer une nouvelle fiche
-            # Récupérer le salon configuré
+            # Récupérer le salon configuré pour la nouvelle fiche
             salon_config = get_config(tribu["guild_id"], "salon_fiche_tribu", "0")
             target_channel_id = int(salon_config) if salon_config != "0" else 0
             
@@ -2193,23 +2186,27 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild):
                         target_channel = channel
                         break
             
-            # Envoyer la nouvelle fiche
+            # Créer et envoyer la NOUVELLE fiche
             if target_channel:
                 try:
-                    message = await target_channel.send(embed=embed, view=view)
+                    new_message = await target_channel.send(embed=embed, view=view)
                     # Sauvegarder le nouveau message_id et channel_id
                     with db_connect() as conn2:
                         c2 = conn2.cursor()
                         c2.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
-                                 (message.id, message.channel.id, tribu_id))
+                                 (new_message.id, new_message.channel.id, tribu_id))
                         conn2.commit()
-                    print(f"✅ Nouvelle fiche créée pour tribu {tribu_id} (message {message.id} dans canal {target_channel.id})")
+                    print(f"✅ Nouvelle fiche créée pour tribu {tribu_id} (message {new_message.id} dans canal {target_channel.id})")
                 except Exception as e:
-                    print(f"⚠️ Erreur lors de l'envoi de la fiche tribu {tribu_id}: {e}")
+                    print(f"⚠️ Erreur lors de la création de la nouvelle fiche tribu {tribu_id}: {e}")
+                    raise  # Propager l'erreur pour que l'utilisateur la voie
             else:
-                print(f"⚠️ Aucun salon cible trouvé pour créer la fiche tribu {tribu_id}")
+                error_msg = f"Aucun salon accessible trouvé pour créer la fiche"
+                print(f"⚠️ {error_msg} pour tribu {tribu_id}")
+                raise Exception(error_msg)
     except Exception as e:
         print(f"⚠️ Erreur dans afficher_ou_rafraichir_fiche pour tribu {tribu_id}: {e}")
+        raise  # Propager l'erreur pour que l'utilisateur la voie
 
 # ---------- Commandes slash standalone ----------
 
