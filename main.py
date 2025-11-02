@@ -1724,13 +1724,16 @@ class MenuFicheTribu(discord.ui.View):
             await self.action_staff(inter)
     
     async def action_commandes(self, inter: discord.Interaction):
+        # DEFER immédiatement pour éviter le timeout
+        await inter.response.defer(ephemeral=True)
+        
         # Récupérer les infos de la tribu
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
             tribu = c.fetchone()
             if not tribu:
-                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                await inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                 return
         
         # Afficher le panneau d'aide membre
@@ -1743,7 +1746,7 @@ class MenuFicheTribu(discord.ui.View):
         )
         e.set_footer(text="💡 Panneau visible uniquement par toi • Utilise les boutons pour plus d'infos")
         
-        await inter.response.send_message(embed=e, view=view, ephemeral=True)
+        await inter.followup.send(embed=e, view=view, ephemeral=True)
     
     async def action_personnaliser(self, inter: discord.Interaction):
         # Vérifier les droits (référent, manager, admin ou modo)
@@ -1793,23 +1796,26 @@ class MenuFicheTribu(discord.ui.View):
         await afficher_guide(inter)
     
     async def action_quitter(self, inter: discord.Interaction):
+        # DEFER immédiatement pour éviter le timeout
+        await inter.response.defer(ephemeral=True)
+        
         # Vérifier que l'utilisateur est membre
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
             tribu = c.fetchone()
             if not tribu:
-                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                await inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                 return
             
             # Ne peut pas quitter si référent
             if inter.user.id == tribu["proprietaire_id"]:
-                await inter.response.send_message("❌ Le référent tribu ne peut pas quitter. Utilise `/tribu_transférer` d'abord.", ephemeral=True)
+                await inter.followup.send("❌ Le référent tribu ne peut pas quitter. Utilise `/tribu_transférer` d'abord.", ephemeral=True)
                 return
             
             c.execute("SELECT * FROM membres WHERE tribu_id=? AND user_id=?", (self.tribu_id, inter.user.id))
             if not c.fetchone():
-                await inter.response.send_message("❌ Tu n'es pas membre de cette tribu.", ephemeral=True)
+                await inter.followup.send("❌ Tu n'es pas membre de cette tribu.", ephemeral=True)
                 return
             
             # Retirer le membre
@@ -1817,16 +1823,19 @@ class MenuFicheTribu(discord.ui.View):
             conn.commit()
         
         ajouter_historique(self.tribu_id, inter.user.id, "Quitter tribu", f"<@{inter.user.id}> a quitté la tribu")
-        await inter.response.send_message(f"✅ Tu as quitté la tribu **{tribu['nom']}**.", ephemeral=True)
+        await inter.followup.send(f"✅ Tu as quitté la tribu **{tribu['nom']}**.", ephemeral=True)
     
     async def action_historique(self, inter: discord.Interaction):
+        # DEFER immédiatement pour éviter le timeout
+        await inter.response.defer(ephemeral=True)
+        
         # Vérifier les permissions (managers, admin ou modo)
         with db_connect() as conn:
             c = conn.cursor()
             c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
             tribu = c.fetchone()
             if not tribu:
-                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                await inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                 return
             
             # Vérifier les droits
@@ -1835,7 +1844,7 @@ class MenuFicheTribu(discord.ui.View):
                        est_manager(self.tribu_id, inter.user.id))
             
             if not has_perm:
-                await inter.response.send_message("❌ Seuls les managers, admins et modos peuvent voir l'historique.", ephemeral=True)
+                await inter.followup.send("❌ Seuls les managers, admins et modos peuvent voir l'historique.", ephemeral=True)
                 return
         
         # Créer la vue avec pagination
@@ -1845,16 +1854,19 @@ class MenuFicheTribu(discord.ui.View):
         embed = await view.create_embed()
         
         if embed is None:
-            await inter.response.send_message("📜 Aucun historique pour cette tribu.", ephemeral=True)
+            await inter.followup.send("📜 Aucun historique pour cette tribu.", ephemeral=True)
             return
         
         # Le bouton est maintenant correctement configuré
-        await inter.response.send_message(embed=embed, view=view, ephemeral=True)
+        await inter.followup.send(embed=embed, view=view, ephemeral=True)
     
     async def action_staff(self, inter: discord.Interaction):
+        # DEFER immédiatement pour éviter le timeout
+        await inter.response.defer(ephemeral=True)
+        
         # Vérifie si admin ou modo
         if not est_admin_ou_modo(inter):
-            await inter.response.send_message("❌ Cette fonction est réservée aux admins et modos.", ephemeral=True)
+            await inter.followup.send("❌ Cette fonction est réservée aux admins et modos.", ephemeral=True)
             return
         
         # Récupérer les infos de la tribu
@@ -1863,7 +1875,7 @@ class MenuFicheTribu(discord.ui.View):
             c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
             tribu = c.fetchone()
             if not tribu:
-                await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
+                await inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
                 return
         
         # Afficher le panneau staff
@@ -1876,7 +1888,7 @@ class MenuFicheTribu(discord.ui.View):
         )
         e.set_footer(text="🔒 Panneau visible uniquement par toi • Les actions s'appliquent à cette tribu")
         
-        await inter.response.send_message(embed=e, view=view, ephemeral=True)
+        await inter.followup.send(embed=e, view=view, ephemeral=True)
 
 async def verifier_droits(inter: discord.Interaction, tribu) -> bool:
     if est_admin(inter) or inter.user.id == tribu["proprietaire_id"] or est_manager(tribu["id"], inter.user.id):
