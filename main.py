@@ -917,7 +917,7 @@ class PanneauMembre(discord.ui.View):
                     return
             
             # Ouvrir un modal pour demander le nom in-game
-            class ModalNomIngame(discord.ui.Modal, title=f"👤 Ajouter {selected_user.display_name}"):
+            class ModalNomIngame(discord.ui.Modal, title="👤 Nom in-game du membre"):
                 nom_ingame = discord.ui.TextInput(
                     label="Nom in-game (dans Ark)",
                     placeholder="Ex: Raptor_Killer42",
