@@ -916,6 +916,10 @@ class PanneauMembre(discord.ui.View):
                     await select_inter.response.send_message(f"❌ {selected_user.mention} est déjà membre de cette tribu.", ephemeral=True)
                     return
             
+            # Stocker les variables pour le modal
+            tribu_id_local = self.tribu_id
+            tribu_nom_local = self.tribu_nom
+            
             # Ouvrir un modal pour demander le nom in-game
             class ModalNomIngame(discord.ui.Modal, title="👤 Nom in-game du membre"):
                 nom_ingame = discord.ui.TextInput(
@@ -932,14 +936,13 @@ class PanneauMembre(discord.ui.View):
                     
                     nom_in_game = str(self.nom_ingame).strip()
                     
+                    print(f"✅ DEBUG: Nom in-game reçu: {nom_in_game}")
+                    print(f"✅ DEBUG: Envoi de l'embed avec les boutons manager...")
+                    
                     # Demander si le membre est manager
                     class ViewManagerChoice(discord.ui.View):
-                        def __init__(self, tribu_id: int, tribu_nom: str, user: discord.User, nom_ingame: str):
+                        def __init__(self):
                             super().__init__(timeout=300)
-                            self.tribu_id = tribu_id
-                            self.tribu_nom = tribu_nom
-                            self.selected_user = user
-                            self.nom_ingame = nom_ingame
                         
                         @discord.ui.button(label="Oui, manager", style=discord.ButtonStyle.success, emoji="✅")
                         async def btn_manager(self, btn_inter: discord.Interaction, btn: discord.ui.Button):
@@ -949,13 +952,13 @@ class PanneauMembre(discord.ui.View):
                             with db_connect() as conn:
                                 c = conn.cursor()
                                 c.execute("INSERT INTO membres (tribu_id, user_id, nom_in_game, role, manager) VALUES (?, ?, ?, ?, 1)", 
-                                         (self.tribu_id, self.selected_user.id, self.nom_ingame, "Manager"))
+                                         (tribu_id_local, selected_user.id, nom_in_game, "Manager"))
                                 conn.commit()
                             
-                            ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ({self.nom_ingame}) ajouté en tant que Manager")
-                            await btn_inter.followup.send(f"✅ {self.selected_user.mention} **({self.nom_ingame})** a été ajouté à **{self.tribu_nom}** en tant que **Manager** !", ephemeral=True)
+                            ajouter_historique(tribu_id_local, btn_inter.user.id, "Membre ajouté", f"{selected_user.mention} ({nom_in_game}) ajouté en tant que Manager")
+                            await btn_inter.followup.send(f"✅ {selected_user.mention} **({nom_in_game})** a été ajouté à **{tribu_nom_local}** en tant que **Manager** !", ephemeral=True)
                             try:
-                                await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
+                                await afficher_ou_rafraichir_fiche(btn_inter.client, tribu_id_local, btn_inter.guild, btn_inter.channel)
                             except Exception as e:
                                 await btn_inter.followup.send(f"⚠️ **Note** : Membre ajouté mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
                         
@@ -967,13 +970,13 @@ class PanneauMembre(discord.ui.View):
                             with db_connect() as conn:
                                 c = conn.cursor()
                                 c.execute("INSERT INTO membres (tribu_id, user_id, nom_in_game) VALUES (?, ?, ?)", 
-                                         (self.tribu_id, self.selected_user.id, self.nom_ingame))
+                                         (tribu_id_local, selected_user.id, nom_in_game))
                                 conn.commit()
                             
-                            ajouter_historique(self.tribu_id, btn_inter.user.id, "Membre ajouté", f"{self.selected_user.mention} ({self.nom_ingame}) ajouté à la tribu")
-                            await btn_inter.followup.send(f"✅ {self.selected_user.mention} **({self.nom_ingame})** a été ajouté à **{self.tribu_nom}** !", ephemeral=True)
+                            ajouter_historique(tribu_id_local, btn_inter.user.id, "Membre ajouté", f"{selected_user.mention} ({nom_in_game}) ajouté à la tribu")
+                            await btn_inter.followup.send(f"✅ {selected_user.mention} **({nom_in_game})** a été ajouté à **{tribu_nom_local}** !", ephemeral=True)
                             try:
-                                await afficher_ou_rafraichir_fiche(btn_inter.client, self.tribu_id, btn_inter.guild, btn_inter.channel)
+                                await afficher_ou_rafraichir_fiche(btn_inter.client, tribu_id_local, btn_inter.guild, btn_inter.channel)
                             except Exception as e:
                                 await btn_inter.followup.send(f"⚠️ **Note** : Membre ajouté mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
                     
@@ -982,7 +985,7 @@ class PanneauMembre(discord.ui.View):
                         description=f"**{selected_user.mention} ({nom_in_game})** sera-t-il autorisé à modifier la fiche de la tribu ?",
                         color=0x5865F2
                     )
-                    await modal_inter.followup.send(embed=e, view=ViewManagerChoice(self.tribu_id, self.tribu_nom, selected_user, nom_in_game), ephemeral=True)
+                    await modal_inter.followup.send(embed=e, view=ViewManagerChoice(), ephemeral=True)
             
             await select_inter.response.send_modal(ModalNomIngame())
         
