@@ -1498,41 +1498,43 @@ class PanneauMembre(discord.ui.View):
         tribu_id_local = self.tribu_id
         tribu_nom_local = self.tribu_nom
         
-        # Ouvrir un modal pour modifier la question de recrutement
-        class ModalRecrutement(discord.ui.Modal, title="📢 Question de recrutement"):
-            recrutement_input = discord.ui.TextInput(
-                label="Question de recrutement",
-                placeholder="Ex: Nous recrutons des joueurs PVP actifs !",
-                style=discord.TextStyle.paragraph,
-                required=False,
-                max_length=500,
-                default=recrutement_actuel
-            )
-            
-            async def on_submit(self, modal_inter: discord.Interaction):
-                await modal_inter.response.defer(ephemeral=True)
-                
-                nouveau_recrutement = str(self.recrutement_input).strip()
-                
-                # Mettre à jour le recrutement
-                with db_connect() as conn:
-                    c = conn.cursor()
-                    c.execute("UPDATE tribus SET recrutement=? WHERE id=?", (nouveau_recrutement, tribu_id_local))
-                    conn.commit()
-                
-                if nouveau_recrutement:
-                    ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement modifiée", nouveau_recrutement[:100])
-                    await modal_inter.followup.send(f"✅ Question de recrutement modifiée pour **{tribu_nom_local}** !", ephemeral=True)
-                else:
-                    ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement supprimée", "")
-                    await modal_inter.followup.send(f"✅ Question de recrutement supprimée pour **{tribu_nom_local}** !", ephemeral=True)
-                
-                try:
-                    await afficher_ou_rafraichir_fiche(modal_inter.client, tribu_id_local, modal_inter.guild, modal_inter.channel)
-                except Exception as e:
-                    await modal_inter.followup.send(f"⚠️ **Note** : Question modifiée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
+        # Créer le modal avec le texte pré-rempli
+        modal = discord.ui.Modal(title="📢 Question de recrutement")
+        recrutement_input = discord.ui.TextInput(
+            label="Question de recrutement",
+            placeholder="Ex: Nous recrutons des joueurs PVP actifs !",
+            style=discord.TextStyle.paragraph,
+            required=False,
+            max_length=500,
+            default=recrutement_actuel
+        )
+        modal.add_item(recrutement_input)
         
-        await inter.response.send_modal(ModalRecrutement())
+        async def modal_callback(modal_inter: discord.Interaction):
+            await modal_inter.response.defer(ephemeral=True)
+            
+            nouveau_recrutement = recrutement_input.value.strip()
+            
+            # Mettre à jour le recrutement
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("UPDATE tribus SET recrutement=? WHERE id=?", (nouveau_recrutement, tribu_id_local))
+                conn.commit()
+            
+            if nouveau_recrutement:
+                ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement modifiée", nouveau_recrutement[:100])
+                await modal_inter.followup.send(f"✅ Question de recrutement modifiée pour **{tribu_nom_local}** !", ephemeral=True)
+            else:
+                ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement supprimée", "")
+                await modal_inter.followup.send(f"✅ Question de recrutement supprimée pour **{tribu_nom_local}** !", ephemeral=True)
+            
+            try:
+                await afficher_ou_rafraichir_fiche(modal_inter.client, tribu_id_local, modal_inter.guild, modal_inter.channel)
+            except Exception as e:
+                await modal_inter.followup.send(f"⚠️ **Note** : Question modifiée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
+        
+        modal.on_submit = modal_callback
+        await inter.response.send_modal(modal)
     
     @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
     async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
