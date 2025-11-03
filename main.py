@@ -1479,39 +1479,39 @@ class PanneauMembre(discord.ui.View):
             await inter.response.send_message("❌ Erreur : ID de tribu manquant.", ephemeral=True)
             return
         
-        # Récupérer le texte de recrutement actuel
-        with db_connect() as conn:
-            c = conn.cursor()
-            c.execute("SELECT recrutement, proprietaire_id FROM tribus WHERE id=?", (self.tribu_id,))
-            row = c.fetchone()
-        
-        if not row:
-            await inter.response.send_message("❌ Tribu introuvable.", ephemeral=True)
-            return
-        
-        # Vérifier les droits
-        if not (est_admin(inter) or inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, inter.user.id)):
-            await inter.response.send_message("❌ Tu n'as pas la permission de modifier la question de recrutement.", ephemeral=True)
-            return
-        
-        recrutement_actuel = row["recrutement"] or ""
+        # Stocker les variables localement pour éviter les problèmes de scope
         tribu_id_local = self.tribu_id
         tribu_nom_local = self.tribu_nom
+        user_id = inter.user.id
         
-        # Créer le modal avec le texte pré-rempli
+        # Créer le modal IMMÉDIATEMENT (sans vérifications DB qui ralentissent)
         modal = discord.ui.Modal(title="📢 Question de recrutement")
         recrutement_input = discord.ui.TextInput(
             label="Question de recrutement",
             placeholder="Ex: Nous recrutons des joueurs PVP actifs !",
             style=discord.TextStyle.paragraph,
             required=False,
-            max_length=500,
-            default=recrutement_actuel
+            max_length=500
         )
         modal.add_item(recrutement_input)
         
         async def modal_callback(modal_inter: discord.Interaction):
             await modal_inter.response.defer(ephemeral=True)
+            
+            # MAINTENANT on vérifie les permissions et on récupère les données
+            with db_connect() as conn:
+                c = conn.cursor()
+                c.execute("SELECT recrutement, proprietaire_id FROM tribus WHERE id=?", (tribu_id_local,))
+                row = c.fetchone()
+            
+            if not row:
+                await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
+                return
+            
+            # Vérifier les droits
+            if not (est_admin(modal_inter) or user_id == row["proprietaire_id"] or est_manager(tribu_id_local, user_id)):
+                await modal_inter.followup.send("❌ Tu n'as pas la permission de modifier la question de recrutement.", ephemeral=True)
+                return
             
             nouveau_recrutement = recrutement_input.value.strip()
             
