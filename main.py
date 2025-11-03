@@ -2362,8 +2362,15 @@ def parser_membre_info(texte: str, guild: discord.Guild):
         'manager': manager_flag
     }
 
-async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: bool = False):
-    """Affiche la fiche tribu (utilisée par les boutons et commandes)"""
+async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: bool = False, force_current_channel: bool = False):
+    """Affiche la fiche tribu (utilisée par les boutons et commandes)
+    
+    Args:
+        inter: L'interaction Discord
+        tribu_id: ID de la tribu à afficher
+        ephemeral: Si True, affiche un message éphémère
+        force_current_channel: Si True, ignore le salon configuré et affiche dans le salon actuel (pour /fiche_tribu admin)
+    """
     with db_connect() as conn:
         c = conn.cursor()
         c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
@@ -2396,7 +2403,9 @@ async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: b
         
         # Déterminer le salon cible
         target_channel = inter.channel
-        if not ephemeral:
+        
+        # Si force_current_channel=True (commande admin /fiche_tribu), on ignore le salon configuré
+        if not ephemeral and not force_current_channel:
             # Récupérer le salon configuré
             salon_id_str = get_config(inter.guild_id, "salon_fiche_tribu", "0")
             if salon_id_str != "0":
@@ -2710,7 +2719,7 @@ async def autocomplete_tribus(inter: discord.Interaction, current: str):
     # Discord limite à 25 choix
     return [app_commands.Choice(name=t, value=t) for t in filtered[:25]]
 
-@tree.command(name="fiche_tribu", description="[ADMIN/MODO] Afficher la fiche d'une tribu")
+@tree.command(name="fiche_tribu", description="[ADMIN/MODO] Afficher la fiche d'une tribu dans le salon actuel")
 @app_commands.describe(nom="Nom de la tribu")
 @app_commands.autocomplete(nom=autocomplete_tribus)
 async def fiche_tribu(inter: discord.Interaction, nom: str):
@@ -2723,7 +2732,8 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
         await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
     
-    await afficher_fiche(inter, row["id"])
+    # Forcer l'affichage dans le salon actuel (ignorer le salon configuré)
+    await afficher_fiche(inter, row["id"], ephemeral=False, force_current_channel=True)
 
 
 
