@@ -2413,6 +2413,21 @@ async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: b
                 if configured_channel:
                     target_channel = configured_channel
         
+        # 🗑️ SUPPRIMER L'ANCIENNE FICHE AVANT D'EN CRÉER UNE NOUVELLE
+        if not ephemeral:
+            old_message_id = tribu.get("message_id", 0) or 0
+            old_channel_id = tribu.get("channel_id", 0) or 0
+            
+            if old_message_id and old_channel_id:
+                try:
+                    old_channel = inter.guild.get_channel(old_channel_id)
+                    if old_channel:
+                        old_message = await old_channel.fetch_message(old_message_id)
+                        await old_message.delete()
+                        print(f"🗑️ Ancienne fiche supprimée (message {old_message_id})")
+                except Exception as e:
+                    print(f"⚠️ Impossible de supprimer l'ancienne fiche: {e}")
+        
         # Envoyer la fiche
         if not ephemeral and target_channel != inter.channel:
             # Afficher dans un salon différent
