@@ -2738,13 +2738,16 @@ async def autocomplete_tribus(inter: discord.Interaction, current: str):
 @app_commands.describe(nom="Nom de la tribu")
 @app_commands.autocomplete(nom=autocomplete_tribus)
 async def fiche_tribu(inter: discord.Interaction, nom: str):
+    # DEFER immédiatement pour éviter le timeout (suppression d'ancienne fiche peut prendre du temps)
+    await inter.response.defer()
+    
     if not est_admin_ou_modo(inter):
-        await inter.response.send_message("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
+        await inter.followup.send("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
         return
     
     row = tribu_par_nom(inter.guild_id, nom)
     if not row:
-        await inter.response.send_message("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
     
     # Forcer l'affichage dans le salon actuel (ignorer le salon configuré)
