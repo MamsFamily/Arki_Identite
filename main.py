@@ -2872,12 +2872,53 @@ async def tribu_supprimer_autocomplete(inter: discord.Interaction, current: str)
                 WHERE t.guild_id = ? AND (t.proprietaire_id = ? OR (m.user_id = ? AND m.manager = 1))
                 ORDER BY LOWER(t.nom) ASC
             """, (inter.guild_id, inter.user.id, inter.user.id))
-        
-        tribus = c.fetchall()
+
+
+@tree.command(name="corriger_champ", description="[ADMIN/MODO] Corriger un champ de tribu qui dépasse la limite Discord")
+@app_commands.describe(
+    nom="Nom de la tribu",
+    champ="Champ à corriger (description/devise/objectif)",
+    nouveau_texte="Nouveau texte (max 1024 caractères)"
+)
+@app_commands.autocomplete(nom=autocomplete_tribus)
+async def corriger_champ(inter: discord.Interaction, nom: str, champ: str, nouveau_texte: str):
+    await inter.response.defer(ephemeral=True)
     
-    # Filtrer par la recherche de l'utilisateur
-    filtered = [t["nom"] for t in tribus if current.lower() in t["nom"].lower()][:25]
-    return [app_commands.Choice(name=nom, value=nom) for nom in filtered]
+    if not est_admin_ou_modo(inter):
+        await inter.followup.send("❌ Cette commande est réservée aux admins et modos.", ephemeral=True)
+        return
+    
+    # Vérifier que le champ est valide
+    champs_autorises = ["description", "devise", "objectif"]
+    if champ.lower() not in champs_autorises:
+        await inter.followup.send(f"❌ Champ invalide. Champs autorisés : {', '.join(champs_autorises)}", ephemeral=True)
+        return
+    
+    # Vérifier la longueur
+    if len(nouveau_texte) > 1024:
+        await inter.followup.send(f"❌ Le texte est trop long ({len(nouveau_texte)} caractères). Maximum : 1024 caractères.\n\n**Astuce** : Coupe ton texte pour qu'il fasse moins de 1024 caractères.", ephemeral=True)
+        return
+    
+    row = tribu_par_nom(inter.guild_id, nom)
+    if not row:
+        await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
+        return
+    
+    # Mettre à jour le champ
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute(f"UPDATE tribus SET {champ}=? WHERE id=?", (nouveau_texte, row["id"]))
+        conn.commit()
+    
+    ajouter_historique(row["id"], inter.user.id, f"Correction {champ}", f"Texte corrigé par admin ({len(nouveau_texte)} caractères)")
+    
+    await inter.followup.send(f"✅ **Champ `{champ}` de la tribu {row['nom']} corrigé !**\n\n📝 Nouveau texte ({len(nouveau_texte)} caractères) :\n```\n{nouveau_texte[:500]}{'...' if len(nouveau_texte) > 500 else ''}\n```", ephemeral=True)
+    
+    # Rafraîchir la fiche
+    try:
+        await afficher_ou_rafraichir_fiche(inter.client, row["id"], inter.guild, inter.channel)
+    except Exception as e:
+        await inter.followup.send(f"⚠️ Champ corrigé mais fiche non rafraîchie. Utilise `/fiche_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
 
 
 
