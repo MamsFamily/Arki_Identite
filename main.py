@@ -660,7 +660,8 @@ class ModalAjouterPhoto(discord.ui.Modal, title="📸 Ajouter une photo"):
         label="URL de la photo",
         placeholder="https://... (postimages.org recommandé)",
         required=True,
-        style=discord.TextStyle.short
+        style=discord.TextStyle.short,
+        max_length=500
     )
     
     def __init__(self, tribu_id: int, tribu_nom: str):
@@ -3154,11 +3155,11 @@ async def show_test(inter: discord.Interaction):
 
 # ---------- UI (boutons + modals) ----------
 class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
-    nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", required=True)
-    nom_ingame = discord.ui.TextInput(label="Ton nom In Game", placeholder="Ex: Raptor_Killer42", required=True)
-    map_base = discord.ui.TextInput(label="Base principale - Map", placeholder="Ex: The Island", required=True)
-    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", placeholder="Ex: 45.5, 32.6", required=True)
-    description = discord.ui.TextInput(label="Description (optionnel)", placeholder="Une brève description de la tribu", required=False, style=discord.TextStyle.paragraph)
+    nom = discord.ui.TextInput(label="Nom de la tribu", placeholder="Ex: Les Spinos", required=True, max_length=100)
+    nom_ingame = discord.ui.TextInput(label="Ton nom In Game", placeholder="Ex: Raptor_Killer42", required=True, max_length=100)
+    map_base = discord.ui.TextInput(label="Base principale - Map", placeholder="Ex: The Island", required=True, max_length=100)
+    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", placeholder="Ex: 45.5, 32.6", required=True, max_length=50)
+    description = discord.ui.TextInput(label="Description (optionnel)", placeholder="Une brève description de la tribu", required=False, style=discord.TextStyle.paragraph, max_length=1024)
 
     async def on_submit(self, inter: discord.Interaction):
         # Différer immédiatement pour éviter le timeout (la création prend du temps)
@@ -3201,11 +3202,11 @@ class ModalCreerTribu(discord.ui.Modal, title="✨ Créer une tribu"):
             print(f"⚠️ Erreur lors de l'affichage de la fiche tribu {tid}: {e}")
 
 class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
-    nom = discord.ui.TextInput(label="Nom de la tribu", required=False)
-    map_base = discord.ui.TextInput(label="Base principale - Map", required=False)
-    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", required=False)
-    description = discord.ui.TextInput(label="Une petite description", style=discord.TextStyle.paragraph, required=False)
-    recrutement = discord.ui.TextInput(label="Recrutement ouvert", required=False, placeholder="Ex: Oui, nous recrutons !")
+    nom = discord.ui.TextInput(label="Nom de la tribu", required=False, max_length=100)
+    map_base = discord.ui.TextInput(label="Base principale - Map", required=False, max_length=100)
+    coords_base = discord.ui.TextInput(label="Base principale - Coordonnées", required=False, max_length=50)
+    description = discord.ui.TextInput(label="Une petite description", style=discord.TextStyle.paragraph, required=False, max_length=1024)
+    recrutement = discord.ui.TextInput(label="Recrutement ouvert", required=False, placeholder="Ex: Oui, nous recrutons !", max_length=1024)
 
     async def on_submit(self, inter: discord.Interaction):
         await inter.response.defer(ephemeral=True)
@@ -3258,10 +3259,10 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             await inter.followup.send("ℹ️ Aucun changement n'a été effectué.", ephemeral=True)
 
 class ModalPersonnaliserTribu(discord.ui.Modal, title="🎨 Personnaliser tribu"):
-    couleur_hex = discord.ui.TextInput(label="Couleur", required=False, placeholder="Ex: #00AAFF")
-    logo_url = discord.ui.TextInput(label="Logo", required=False, placeholder="https://...")
-    objectif = discord.ui.TextInput(label="Objectif de tribu", required=False, style=discord.TextStyle.paragraph)
-    devise = discord.ui.TextInput(label="Devise de tribu", required=False)
+    couleur_hex = discord.ui.TextInput(label="Couleur", required=False, placeholder="Ex: #00AAFF", max_length=7)
+    logo_url = discord.ui.TextInput(label="Logo", required=False, placeholder="https://...", max_length=500)
+    objectif = discord.ui.TextInput(label="Objectif de tribu", required=False, style=discord.TextStyle.paragraph, max_length=1024)
+    devise = discord.ui.TextInput(label="Devise de tribu", required=False, max_length=1024)
 
     async def on_submit(self, inter: discord.Interaction):
         await inter.response.defer(ephemeral=True)
@@ -3358,8 +3359,8 @@ async def afficher_guide(inter: discord.Interaction):
 
 # Ancien modal Détailler conservé temporairement pour compatibilité
 class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
-    photo_base = discord.ui.TextInput(label="Photo base (URL)", required=False, placeholder="https://...")
-    objectif = discord.ui.TextInput(label="Objectif", required=False)
+    photo_base = discord.ui.TextInput(label="Photo base (URL)", required=False, placeholder="https://...", max_length=500)
+    objectif = discord.ui.TextInput(label="Objectif", required=False, max_length=1024)
 
     async def on_submit(self, inter: discord.Interaction):
         await inter.response.defer(ephemeral=True)
