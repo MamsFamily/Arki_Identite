@@ -2738,7 +2738,7 @@ async def autocomplete_tribus(inter: discord.Interaction, current: str):
 @app_commands.describe(nom="Nom de la tribu")
 @app_commands.autocomplete(nom=autocomplete_tribus)
 async def fiche_tribu(inter: discord.Interaction, nom: str):
-    # DEFER immédiatement pour éviter le timeout (suppression d'ancienne fiche peut prendre du temps)
+    # DEFER immédiatement pour éviter le timeout
     await inter.response.defer()
     
     if not est_admin_ou_modo(inter):
@@ -2750,8 +2750,56 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
         await inter.followup.send("❌ Aucune tribu trouvée avec ce nom.", ephemeral=True)
         return
     
-    # Forcer l'affichage dans le salon actuel (ignorer le salon configuré)
-    await afficher_fiche(inter, row["id"], ephemeral=False, force_current_channel=True)
+    # Récupérer toutes les données de la tribu
+    tribu_id = row["id"]
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM membres WHERE tribu_id=? ORDER BY manager DESC, user_id ASC", (tribu_id,))
+        membres = c.fetchall()
+        c.execute("SELECT * FROM avant_postes WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        avant_postes = c.fetchall()
+        c.execute("SELECT id, url, ordre FROM photos_tribu WHERE tribu_id=? ORDER BY ordre", (tribu_id,))
+        photos = c.fetchall()
+        c.execute("SELECT * FROM bases_premium WHERE tribu_id=? ORDER BY created_at DESC", (tribu_id,))
+        bases_premium = c.fetchall()
+    
+    # Récupérer l'avatar du créateur
+    createur_avatar_url = None
+    try:
+        createur = await inter.client.fetch_user(row['proprietaire_id'])
+        if createur:
+            createur_avatar_url = createur.display_avatar.url
+    except:
+        pass
+    
+    # Créer l'embed et la vue
+    embed = embed_tribu(row, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
+    view = MenuFicheTribu(tribu_id, 0, timeout=None)
+    
+    # 🗑️ SUPPRIMER L'ANCIENNE FICHE si elle existe
+    if inter.guild:
+        old_message_id = row.get("message_id", 0) or 0
+        old_channel_id = row.get("channel_id", 0) or 0
+        
+        if old_message_id and old_channel_id:
+            try:
+                old_channel = inter.guild.get_channel(old_channel_id)
+                if old_channel and hasattr(old_channel, 'fetch_message'):
+                    old_message = await old_channel.fetch_message(old_message_id)
+                    await old_message.delete()
+                    print(f"🗑️ Ancienne fiche supprimée (message {old_message_id})")
+            except Exception as e:
+                print(f"⚠️ Impossible de supprimer l'ancienne fiche: {e}")
+    
+    # Envoyer la nouvelle fiche dans le salon actuel
+    msg = await inter.followup.send(embed=embed, view=view, wait=True)
+    
+    # Sauvegarder le nouveau message_id et channel_id
+    with db_connect() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                 (msg.id, msg.channel.id, tribu_id))
+        conn.commit()
 
 
 
