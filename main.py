@@ -2773,9 +2773,20 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
     except:
         pass
     
-    # Créer l'embed et la vue
-    embed = embed_tribu(row, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
-    view = MenuFicheTribu(tribu_id, 0, timeout=None)
+    # Créer l'embed et la vue avec gestion d'erreur
+    try:
+        embed = embed_tribu(row, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
+        view = MenuFicheTribu(tribu_id, 0, timeout=None)
+    except Exception as e:
+        await inter.followup.send(
+            f"❌ **Erreur lors de la création de la fiche de tribu `{nom}`**\n\n"
+            f"**Cause probable :** Un ou plusieurs champs dépassent la limite Discord de 1024 caractères.\n\n"
+            f"**Solution :** Utilise `/corriger_champ nom:{nom} champ:description nouveau_texte:[texte raccourci]`\n"
+            f"(Remplace `description` par `devise` ou `objectif` selon le champ problématique)\n\n"
+            f"```Erreur technique: {str(e)[:200]}```",
+            ephemeral=True
+        )
+        return
     
     # 🗑️ SUPPRIMER L'ANCIENNE FICHE si elle existe
     if inter.guild:
@@ -2792,15 +2803,24 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
             except Exception as e:
                 print(f"⚠️ Impossible de supprimer l'ancienne fiche: {e}")
     
-    # Envoyer la nouvelle fiche dans le salon actuel
-    msg = await inter.followup.send(embed=embed, view=view, wait=True)
-    
-    # Sauvegarder le nouveau message_id et channel_id
-    with db_connect() as conn:
-        c = conn.cursor()
-        c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
-                 (msg.id, msg.channel.id, tribu_id))
-        conn.commit()
+    # Envoyer la nouvelle fiche dans le salon actuel avec gestion d'erreur
+    try:
+        msg = await inter.followup.send(embed=embed, view=view, wait=True)
+        
+        # Sauvegarder le nouveau message_id et channel_id
+        with db_connect() as conn:
+            c = conn.cursor()
+            c.execute("UPDATE tribus SET message_id=?, channel_id=? WHERE id=?", 
+                     (msg.id, msg.channel.id, tribu_id))
+            conn.commit()
+    except Exception as e:
+        await inter.followup.send(
+            f"❌ **Erreur lors de l'envoi de la fiche**\n\n"
+            f"**Cause probable :** Un champ dépasse la limite Discord (1024 caractères).\n\n"
+            f"**Solution :** Utilise `/corriger_champ` pour corriger les champs trop longs.\n\n"
+            f"```{str(e)[:300]}```",
+            ephemeral=True
+        )
 
 
 
