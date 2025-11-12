@@ -73,6 +73,14 @@ The bot utilizes `discord.py` and is built on an architecture leveraging modern 
 - **Auto-Refresh/Create System:** Unified `afficher_ou_rafraichir_fiche()` function automatically creates tribe cards if they don't exist or refreshes existing ones, with robust error handling for deleted messages/channels
 - **Stress-Tested:** Designed and validated for 50+ simultaneous users creating/modifying tribes without errors or interaction failures
 
+**Error Handling & Stability (November 2025):**
+- **Discord Character Limit Enforcement:** All text input fields (description, motto, objective, recruitment) enforce Discord's 1024-character limit via `max_length=1024` parameter to prevent embed errors
+- **Comprehensive Error Handling:** All functions calling `embed_tribu()` wrapped in try/except blocks to prevent bot crashes when fields exceed limits
+- **Graceful Degradation:** When `embed_tribu()` fails, bot displays user-friendly error message with solution (`/corriger_champ`) instead of crashing
+- **Protected Functions:** Critical functions `afficher_ou_rafraichir_fiche()` and `rafraichir_fiche_tribu()` secured with error handling to prevent "bot thinking indefinitely" state
+- **Admin Correction Tool:** `/corriger_champ` command allows admins to manually fix tribes with problematic field content
+- **Logging System:** Detailed error logging (tribe ID, field name, error message) in console for debugging without exposing errors to users
+
 ## External Dependencies
 - **Discord API:** The bot interacts directly with the Discord API via the `discord.py` library.
 - **SQLite:** Embedded database for data persistence.

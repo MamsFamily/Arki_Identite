@@ -2565,9 +2565,14 @@ async def rafraichir_fiche_tribu(client, tribu_id: int):
         except:
             pass
         
-        # Créer l'embed mis à jour
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
-        view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        # Créer l'embed mis à jour avec GESTION D'ERREUR
+        try:
+            embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
+            view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        except Exception as e:
+            print(f"❌ ERREUR embed_tribu() dans rafraichir_fiche_tribu pour tribu {tribu_id}: {str(e)[:200]}")
+            print(f"⚠️ Probable: un champ dépasse 1024 caractères. Utiliser /corriger_champ")
+            return
         
         # Éditer le message existant
         try:
@@ -2613,9 +2618,15 @@ async def afficher_ou_rafraichir_fiche(client, tribu_id: int, guild, fallback_ch
         except:
             pass
         
-        # Créer l'embed et la vue
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
-        view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        # Créer l'embed et la vue avec GESTION D'ERREUR
+        try:
+            embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, 0, bases_premium)
+            view = MenuFicheTribu(tribu_id, 0, timeout=None)
+        except Exception as e:
+            print(f"❌ ERREUR embed_tribu() pour tribu {tribu_id} ({tribu['nom']}): {str(e)[:200]}")
+            print(f"⚠️ Probable: un champ dépasse 1024 caractères. Utiliser /corriger_champ")
+            # Ne pas crasher le bot, juste arrêter la mise à jour
+            return
         
         # Récupérer message_id et channel_id de l'ancienne fiche
         message_id = tribu["message_id"] if tribu["message_id"] else 0
