@@ -935,7 +935,7 @@ class PanneauMembre(discord.ui.View):
                     # DEFER après soumission du modal
                     await modal_inter.response.defer(ephemeral=True)
                     
-                    nom_in_game = str(self.nom_ingame).strip()
+                    nom_in_game = self.nom_ingame.value.strip()
                     
                     print(f"✅ DEBUG: Nom in-game reçu: {nom_in_game}")
                     print(f"✅ DEBUG: Envoi de l'embed avec les boutons manager...")
@@ -2107,14 +2107,23 @@ class MenuFicheTribu(discord.ui.View):
         except:
             pass
         
-        # Créer le nouvel embed avec la nouvelle photo
-        embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, nouvel_index, bases_premium)
+        # Créer le nouvel embed avec la nouvelle photo avec GESTION D'ERREUR
+        try:
+            embed = embed_tribu(tribu, membres, avant_postes, createur_avatar_url, photos, nouvel_index, bases_premium)
+        except Exception as e:
+            print(f"❌ ERREUR _changer_photo pour tribu {self.tribu_id}: {str(e)[:200]}")
+            await inter.response.send_message("❌ Erreur lors du changement de photo. Un champ est peut-être trop long.", ephemeral=True)
+            return
         
         # Mettre à jour la vue avec le nouvel index
         new_view = MenuFicheTribu(self.tribu_id, nouvel_index, timeout=None)
         
         # Mettre à jour le message
-        await inter.response.edit_message(embed=embed, view=new_view)
+        try:
+            await inter.response.edit_message(embed=embed, view=new_view)
+        except Exception as e:
+            print(f"⚠️ Erreur edit_message dans _changer_photo: {e}")
+            await inter.response.send_message("❌ Erreur lors de la mise à jour.", ephemeral=True)
     
     async def menu_callback(self, inter: discord.Interaction):
         select = [item for item in self.children if isinstance(item, discord.ui.Select)][0]
@@ -3256,16 +3265,16 @@ class ModalModifierTribu(discord.ui.Modal, title="🛠️ Modifier tribu"):
             return
         
         updates = {}
-        if str(self.nom).strip():
-            updates["nom"] = str(self.nom).strip()
-        if str(self.map_base).strip():
-            updates["map_base"] = str(self.map_base).strip()
-        if str(self.coords_base).strip():
-            updates["coords_base"] = str(self.coords_base).strip()
-        if str(self.description).strip():
-            updates["description"] = str(self.description).strip()
-        if str(self.recrutement).strip():
-            recrutement_texte = str(self.recrutement).strip()
+        if self.nom.value.strip():
+            updates["nom"] = self.nom.value.strip()
+        if self.map_base.value.strip():
+            updates["map_base"] = self.map_base.value.strip()
+        if self.coords_base.value.strip():
+            updates["coords_base"] = self.coords_base.value.strip()
+        if self.description.value.strip():
+            updates["description"] = self.description.value.strip()
+        if self.recrutement.value.strip():
+            recrutement_texte = self.recrutement.value.strip()
             if recrutement_texte.lower() in ["oui", "non"]:
                 updates["ouvert_recrutement"] = 1 if recrutement_texte.lower() == "oui" else 0
             else:
@@ -3409,10 +3418,10 @@ class ModalDetaillerTribu(discord.ui.Modal, title="📋 Détailler tribu"):
             return
         
         updates = {}
-        if str(self.photo_base).strip():
-            updates["photo_base"] = str(self.photo_base).strip()
-        if str(self.objectif).strip():
-            updates["objectif"] = str(self.objectif).strip()
+        if self.photo_base.value.strip():
+            updates["photo_base"] = self.photo_base.value.strip()
+        if self.objectif.value.strip():
+            updates["objectif"] = self.objectif.value.strip()
         
         if updates:
             with db_connect() as conn:
@@ -3473,7 +3482,7 @@ class PanneauParametres(discord.ui.View):
                 )
                 
                 async def on_submit(self, submit_inter: discord.Interaction):
-                    url_value = str(self.url).strip()
+                    url_value = self.url.value.strip()
                     if not url_value.startswith("http://") and not url_value.startswith("https://"):
                         await submit_inter.response.send_message("❌ L'URL doit commencer par http:// ou https://", ephemeral=True)
                         return
@@ -3520,7 +3529,7 @@ class PanneauParametres(discord.ui.View):
                 )
                 
                 async def on_submit(self, submit_inter: discord.Interaction):
-                    couleur_value = str(self.couleur).strip().replace("#", "")
+                    couleur_value = self.couleur.value.strip().replace("#", "")
                     
                     if len(couleur_value) != 6 or not all(c in '0123456789ABCDEFabcdef' for c in couleur_value):
                         await submit_inter.response.send_message("❌ Couleur invalide. Utilise un code hexadécimal à 6 caractères (ex: 5865F2)", ephemeral=True)
@@ -3563,7 +3572,7 @@ class PanneauParametres(discord.ui.View):
             )
             
             async def on_submit(self, submit_inter: discord.Interaction):
-                texte_value = str(self.texte).strip()
+                texte_value = self.texte.value.strip()
                 set_config(submit_inter.guild_id, "texte_panneau", texte_value)
                 await submit_inter.response.send_message(f"✅ **Texte modifié !**\n\n💡 *Utilise `/panneau` pour voir le résultat.*", ephemeral=True)
         
@@ -3586,7 +3595,7 @@ class PanneauParametres(discord.ui.View):
             )
             
             async def on_submit(self, submit_inter: discord.Interaction):
-                input_value = str(self.salon_input).strip().lower()
+                input_value = self.salon_input.value.strip().lower()
                 
                 # Option reset
                 if input_value in ["reset", "default", "défaut", "0"]:
@@ -3670,7 +3679,7 @@ class PanneauParametres(discord.ui.View):
                     )
                     
                     async def on_submit(self, submit_inter: discord.Interaction):
-                        nom_map = str(self.nom).strip()
+                        nom_map = self.nom.value.strip()
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
@@ -3746,7 +3755,7 @@ class PanneauParametres(discord.ui.View):
                     )
                     
                     async def on_submit(self, submit_inter: discord.Interaction):
-                        nom_boss = str(self.nom).strip()
+                        nom_boss = self.nom.value.strip()
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
@@ -3822,7 +3831,7 @@ class PanneauParametres(discord.ui.View):
                     )
                     
                     async def on_submit(self, submit_inter: discord.Interaction):
-                        nom_note = str(self.nom).strip()
+                        nom_note = self.nom.value.strip()
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
@@ -3898,7 +3907,7 @@ class PanneauParametres(discord.ui.View):
                     )
                     
                     async def on_submit(self, submit_inter: discord.Interaction):
-                        nom_map = str(self.nom).strip()
+                        nom_map = self.nom.value.strip()
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
