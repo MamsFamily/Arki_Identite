@@ -814,37 +814,34 @@ class PanneauMembre(discord.ui.View):
     
     @discord.ui.button(label="Changer mon nom in-game", style=discord.ButtonStyle.primary, emoji="✏️", row=0)
     async def btn_nom_ingame(self, inter: discord.Interaction, button: discord.ui.Button):
-        # Ouvrir un modal pour changer le nom in-game
-        modal = discord.ui.Modal(title="✏️ Modifier mon nom in-game")
-        nom_input = discord.ui.TextInput(
-            label="Nouveau nom in-game",
-            placeholder="Ton nom dans Ark: Survival Ascended",
-            required=True,
-            max_length=100,
-            style=discord.TextStyle.short
-        )
-        modal.add_item(nom_input)
-        
-        async def modal_callback(modal_inter: discord.Interaction):
-            nouveau_nom = nom_input.value.strip()
-            if not nouveau_nom:
-                await modal_inter.followup.send("❌ Le nom ne peut pas être vide.", ephemeral=True)
-                return
+        class ModalNomIngame(discord.ui.Modal, title="✏️ Modifier mon nom in-game"):
+            nom = discord.ui.TextInput(
+                label="Nouveau nom in-game",
+                placeholder="Ton nom dans Ark: Survival Ascended",
+                required=True,
+                max_length=100,
+                style=discord.TextStyle.short
+            )
             
-            # Mettre à jour le nom in-game pour toutes les tribus de l'utilisateur
-            with db_connect() as conn:
-                c = conn.cursor()
-                c.execute("UPDATE membres SET nom_in_game=? WHERE user_id=?", (nouveau_nom, modal_inter.user.id))
-                affected = c.rowcount
-                conn.commit()
-            
-            if affected > 0:
-                await modal_inter.followup.send(f"✅ Ton nom in-game a été changé en **{nouveau_nom}** pour toutes tes tribus !", ephemeral=True)
-            else:
-                await modal_inter.followup.send(f"✅ Ton nom in-game a été défini sur **{nouveau_nom}** !", ephemeral=True)
+            async def on_submit(modal_self, modal_inter: discord.Interaction):
+                await modal_inter.response.defer(ephemeral=True)
+                nouveau_nom = modal_self.nom.value.strip()
+                if not nouveau_nom:
+                    await modal_inter.followup.send("❌ Le nom ne peut pas être vide.", ephemeral=True)
+                    return
+                
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("UPDATE membres SET nom_in_game=? WHERE user_id=?", (nouveau_nom, modal_inter.user.id))
+                    affected = c.rowcount
+                    conn.commit()
+                
+                if affected > 0:
+                    await modal_inter.followup.send(f"✅ Ton nom in-game a été changé en **{nouveau_nom}** pour toutes tes tribus !", ephemeral=True)
+                else:
+                    await modal_inter.followup.send(f"✅ Ton nom in-game a été défini sur **{nouveau_nom}** !", ephemeral=True)
         
-        modal.on_submit = modal_callback
-        await inter.response.send_modal(modal)
+        await inter.response.send_modal(ModalNomIngame())
     
     @discord.ui.button(label="Voir ma fiche tribu", style=discord.ButtonStyle.primary, emoji="📋", row=0)
     async def btn_fiche(self, inter: discord.Interaction, button: discord.ui.Button):
@@ -1104,61 +1101,54 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
-            # NE PAS DEFER ici car on doit ouvrir un modal !
             map_selectionnee = select.values[0]
+            tribu_id = self.tribu_id
             
-            # Ouvrir un modal pour les coordonnées
-            modal = discord.ui.Modal(title=f"🏘️ Avant-poste sur {map_selectionnee}")
-            coords_input = discord.ui.TextInput(
-                label="Coordonnées",
-                placeholder="Ex: 45.5, 32.6",
-                required=True,
-                max_length=100,
-                style=discord.TextStyle.short
-            )
-            modal.add_item(coords_input)
+            class ModalCoordsAvantPoste(discord.ui.Modal, title="🏘️ Coordonnées avant-poste"):
+                coords = discord.ui.TextInput(
+                    label="Coordonnées",
+                    placeholder="Ex: 45.5, 32.6",
+                    required=True,
+                    max_length=100,
+                    style=discord.TextStyle.short
+                )
+                
+                async def on_submit(modal_self, modal_inter: discord.Interaction):
+                    await modal_inter.response.defer(ephemeral=True)
+                    
+                    coords_value = modal_self.coords.value.strip()
+                    
+                    with db_connect() as conn:
+                        c = conn.cursor()
+                        c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
+                        row = c.fetchone()
+                        
+                        if not row:
+                            await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
+                            return
+                        
+                        if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(tribu_id, modal_inter.user.id)):
+                            await modal_inter.followup.send("❌ Tu n'as pas la permission d'ajouter des avant-postes.", ephemeral=True)
+                            return
+                        
+                        c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (tribu_id,))
+                        count = c.fetchone()["count"]
+                        nom_ap = f"Avant-poste {count + 1}"
+                        
+                        c.execute("""
+                        INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """, (tribu_id, modal_inter.user.id, nom_ap, map_selectionnee, coords_value, dt.datetime.utcnow().isoformat()))
+                        conn.commit()
+                    
+                    ajouter_historique(tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} — {map_selectionnee} | {coords_value}")
+                    await modal_inter.followup.send(f"✅ **{nom_ap} ajouté : {map_selectionnee} !**", ephemeral=True)
+                    try:
+                        await afficher_ou_rafraichir_fiche(modal_inter.client, tribu_id, modal_inter.guild, modal_inter.channel)
+                    except Exception as e:
+                        await modal_inter.followup.send(f"⚠️ **Note** : Avant-poste ajouté mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
             
-            async def modal_callback(modal_inter: discord.Interaction):
-                # DEFER immédiatement dans le modal callback
-                await modal_inter.response.defer(ephemeral=True)
-                
-                coords = coords_input.value.strip()
-                
-                # Vérifier les droits
-                with db_connect() as conn:
-                    c = conn.cursor()
-                    c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
-                    row = c.fetchone()
-                    
-                    if not row:
-                        await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
-                        return
-                    
-                    if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
-                        await modal_inter.followup.send("❌ Tu n'as pas la permission d'ajouter des avant-postes.", ephemeral=True)
-                        return
-                    
-                    # Générer un nom automatique
-                    c.execute("SELECT COUNT(*) as count FROM avant_postes WHERE tribu_id=?", (self.tribu_id,))
-                    count = c.fetchone()["count"]
-                    nom_ap = f"Avant-poste {count + 1}"
-                    
-                    # Ajouter l'avant-poste
-                    c.execute("""
-                    INSERT INTO avant_postes (tribu_id, user_id, nom, map, coords, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """, (self.tribu_id, modal_inter.user.id, nom_ap, map_selectionnee, coords, dt.datetime.utcnow().isoformat()))
-                    conn.commit()
-                
-                ajouter_historique(self.tribu_id, modal_inter.user.id, "Avant-poste ajouté", f"{nom_ap} — {map_selectionnee} | {coords}")
-                await modal_inter.followup.send(f"✅ **{nom_ap} ajouté : {map_selectionnee} !**", ephemeral=True)
-                try:
-                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
-                except Exception as e:
-                    await modal_inter.followup.send(f"⚠️ **Note** : Avant-poste ajouté mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
-            
-            modal.on_submit = modal_callback
-            await select_inter.response.send_modal(modal)
+            await select_inter.response.send_modal(ModalCoordsAvantPoste())
         
         select.callback = select_callback
         view = discord.ui.View(timeout=300)
@@ -1261,55 +1251,47 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
-            # NE PAS DEFER ici car on doit ouvrir un modal !
             map_selectionnee = select.values[0]
+            tribu_id = self.tribu_id
             
-            # Ouvrir un modal pour les coordonnées
-            modal = discord.ui.Modal(title=f"🏠 Base principale sur {map_selectionnee}")
-            coords_input = discord.ui.TextInput(
-                label="Coordonnées",
-                placeholder="Ex: 45.5, 32.6",
-                required=True,
-                max_length=100,
-                style=discord.TextStyle.short
-            )
-            modal.add_item(coords_input)
+            class ModalCoordsBase(discord.ui.Modal, title="🏠 Coordonnées de la base"):
+                coords = discord.ui.TextInput(
+                    label="Coordonnées",
+                    placeholder="Ex: 45.5, 32.6",
+                    required=True,
+                    max_length=100,
+                    style=discord.TextStyle.short
+                )
+                
+                async def on_submit(modal_self, modal_inter: discord.Interaction):
+                    await modal_inter.response.defer(ephemeral=True)
+                    
+                    coords_value = modal_self.coords.value.strip()
+                    
+                    with db_connect() as conn:
+                        c = conn.cursor()
+                        c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
+                        row = c.fetchone()
+                        
+                        if not row:
+                            await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
+                            return
+                        
+                        if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(tribu_id, modal_inter.user.id)):
+                            await modal_inter.followup.send("❌ Tu n'as pas la permission de modifier la base principale.", ephemeral=True)
+                            return
+                        
+                        c.execute("UPDATE tribus SET base_map=?, base_coords=? WHERE id=?", (map_selectionnee, coords_value, tribu_id))
+                        conn.commit()
+                    
+                    ajouter_historique(tribu_id, modal_inter.user.id, "Base principale modifiée", f"{map_selectionnee} | {coords_value}")
+                    await modal_inter.followup.send(f"✅ **Base principale définie : {map_selectionnee} ({coords_value}) !**", ephemeral=True)
+                    try:
+                        await afficher_ou_rafraichir_fiche(modal_inter.client, tribu_id, modal_inter.guild, modal_inter.channel)
+                    except Exception as e:
+                        await modal_inter.followup.send(f"⚠️ **Note** : Base modifiée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
             
-            async def modal_callback(modal_inter: discord.Interaction):
-                # DEFER immédiatement dans le modal callback
-                await modal_inter.response.defer(ephemeral=True)
-                
-                coords = coords_input.value.strip()
-                
-                # Vérifier les droits
-                with db_connect() as conn:
-                    c = conn.cursor()
-                    c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
-                    row = c.fetchone()
-                    
-                    if not row:
-                        await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
-                        return
-                    
-                    if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
-                        await modal_inter.followup.send("❌ Tu n'as pas la permission de modifier la base principale.", ephemeral=True)
-                        return
-                    
-                    # Mettre à jour la base principale
-                    c.execute("""
-                    UPDATE tribus SET base_map=?, base_coords=? WHERE id=?
-                    """, (map_selectionnee, coords, self.tribu_id))
-                    conn.commit()
-                
-                ajouter_historique(self.tribu_id, modal_inter.user.id, "Base principale modifiée", f"{map_selectionnee} | {coords}")
-                await modal_inter.followup.send(f"✅ **Base principale définie : {map_selectionnee} ({coords}) !**", ephemeral=True)
-                try:
-                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
-                except Exception as e:
-                    await modal_inter.followup.send(f"⚠️ **Note** : Base modifiée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
-            
-            modal.on_submit = modal_callback
-            await select_inter.response.send_modal(modal)
+            await select_inter.response.send_modal(ModalCoordsBase())
         
         select.callback = select_callback
         view = discord.ui.View(timeout=300)
@@ -1348,61 +1330,54 @@ class PanneauMembre(discord.ui.View):
         )
         
         async def select_callback(select_inter: discord.Interaction):
-            # NE PAS DEFER ici car on doit ouvrir un modal !
             map_selectionnee = select.values[0]
+            tribu_id = self.tribu_id
             
-            # Ouvrir un modal pour les coordonnées
-            modal = discord.ui.Modal(title=f"⭐ Base premium sur {map_selectionnee}")
-            coords_input = discord.ui.TextInput(
-                label="Coordonnées",
-                placeholder="Ex: 45.5, 32.6",
-                required=True,
-                max_length=100,
-                style=discord.TextStyle.short
-            )
-            modal.add_item(coords_input)
+            class ModalCoordsPremium(discord.ui.Modal, title="⭐ Coordonnées base premium"):
+                coords = discord.ui.TextInput(
+                    label="Coordonnées",
+                    placeholder="Ex: 45.5, 32.6",
+                    required=True,
+                    max_length=100,
+                    style=discord.TextStyle.short
+                )
+                
+                async def on_submit(modal_self, modal_inter: discord.Interaction):
+                    await modal_inter.response.defer(ephemeral=True)
+                    
+                    coords_value = modal_self.coords.value.strip()
+                    
+                    with db_connect() as conn:
+                        c = conn.cursor()
+                        c.execute("SELECT * FROM tribus WHERE id=?", (tribu_id,))
+                        row = c.fetchone()
+                        
+                        if not row:
+                            await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
+                            return
+                        
+                        if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(tribu_id, modal_inter.user.id)):
+                            await modal_inter.followup.send("❌ Tu n'as pas la permission d'ajouter des bases premium.", ephemeral=True)
+                            return
+                        
+                        c.execute("SELECT COUNT(*) as count FROM bases_premium WHERE tribu_id=?", (tribu_id,))
+                        count = c.fetchone()["count"]
+                        nom_base = f"Base premium {count + 1}"
+                        
+                        c.execute("""
+                        INSERT INTO bases_premium (tribu_id, user_id, nom, map, coords, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """, (tribu_id, modal_inter.user.id, nom_base, map_selectionnee, coords_value, dt.datetime.utcnow().isoformat()))
+                        conn.commit()
+                    
+                    ajouter_historique(tribu_id, modal_inter.user.id, "Base premium ajoutée", f"{nom_base} — {map_selectionnee} | {coords_value}")
+                    await modal_inter.followup.send(f"✅ **{nom_base} ajoutée : {map_selectionnee} !**", ephemeral=True)
+                    try:
+                        await afficher_ou_rafraichir_fiche(modal_inter.client, tribu_id, modal_inter.guild, modal_inter.channel)
+                    except Exception as e:
+                        await modal_inter.followup.send(f"⚠️ **Note** : Base premium ajoutée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
             
-            async def modal_callback(modal_inter: discord.Interaction):
-                # DEFER immédiatement dans le modal callback
-                await modal_inter.response.defer(ephemeral=True)
-                
-                coords = coords_input.value.strip()
-                
-                # Vérifier les droits
-                with db_connect() as conn:
-                    c = conn.cursor()
-                    c.execute("SELECT * FROM tribus WHERE id=?", (self.tribu_id,))
-                    row = c.fetchone()
-                    
-                    if not row:
-                        await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
-                        return
-                    
-                    if not (est_admin(modal_inter) or modal_inter.user.id == row["proprietaire_id"] or est_manager(self.tribu_id, modal_inter.user.id)):
-                        await modal_inter.followup.send("❌ Tu n'as pas la permission d'ajouter des bases premium.", ephemeral=True)
-                        return
-                    
-                    # Générer un nom automatique
-                    c.execute("SELECT COUNT(*) as count FROM bases_premium WHERE tribu_id=?", (self.tribu_id,))
-                    count = c.fetchone()["count"]
-                    nom_base = f"Base premium {count + 1}"
-                    
-                    # Ajouter la base premium
-                    c.execute("""
-                    INSERT INTO bases_premium (tribu_id, user_id, nom, map, coords, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """, (self.tribu_id, modal_inter.user.id, nom_base, map_selectionnee, coords, dt.datetime.utcnow().isoformat()))
-                    conn.commit()
-                
-                ajouter_historique(self.tribu_id, modal_inter.user.id, "Base premium ajoutée", f"{nom_base} — {map_selectionnee} | {coords}")
-                await modal_inter.followup.send(f"✅ **{nom_base} ajoutée : {map_selectionnee} !**", ephemeral=True)
-                try:
-                    await afficher_ou_rafraichir_fiche(modal_inter.client, self.tribu_id, modal_inter.guild, modal_inter.channel)
-                except Exception as e:
-                    await modal_inter.followup.send(f"⚠️ **Note** : Base premium ajoutée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
-            
-            modal.on_submit = modal_callback
-            await select_inter.response.send_modal(modal)
+            await select_inter.response.send_modal(ModalCoordsPremium())
         
         select.callback = select_callback
         view = discord.ui.View(timeout=300)
@@ -1485,57 +1460,51 @@ class PanneauMembre(discord.ui.View):
         tribu_nom_local = self.tribu_nom
         user_id = inter.user.id
         
-        # Créer le modal IMMÉDIATEMENT (sans vérifications DB qui ralentissent)
-        modal = discord.ui.Modal(title="📢 Question de recrutement")
-        recrutement_input = discord.ui.TextInput(
-            label="Question de recrutement",
-            placeholder="Ex: Nous recrutons des joueurs PVP actifs !",
-            style=discord.TextStyle.paragraph,
-            required=False,
-            max_length=500
-        )
-        modal.add_item(recrutement_input)
+        class ModalRecrutement(discord.ui.Modal, title="📢 Question de recrutement"):
+            recrutement = discord.ui.TextInput(
+                label="Question de recrutement",
+                placeholder="Ex: Nous recrutons des joueurs PVP actifs !",
+                style=discord.TextStyle.paragraph,
+                required=False,
+                max_length=500
+            )
+            
+            async def on_submit(modal_self, modal_inter: discord.Interaction):
+                await modal_inter.response.defer(ephemeral=True)
+                
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT recrutement, proprietaire_id FROM tribus WHERE id=?", (tribu_id_local,))
+                    row = c.fetchone()
+                
+                if not row:
+                    await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
+                    return
+                
+                if not (est_admin(modal_inter) or user_id == row["proprietaire_id"] or est_manager(tribu_id_local, user_id)):
+                    await modal_inter.followup.send("❌ Tu n'as pas la permission de modifier la question de recrutement.", ephemeral=True)
+                    return
+                
+                nouveau_recrutement = modal_self.recrutement.value.strip()
+                
+                with db_connect() as conn:
+                    c = conn.cursor()
+                    c.execute("UPDATE tribus SET recrutement=? WHERE id=?", (nouveau_recrutement, tribu_id_local))
+                    conn.commit()
+                
+                if nouveau_recrutement:
+                    ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement modifiée", nouveau_recrutement[:100])
+                    await modal_inter.followup.send(f"✅ Question de recrutement modifiée pour **{tribu_nom_local}** !", ephemeral=True)
+                else:
+                    ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement supprimée", "")
+                    await modal_inter.followup.send(f"✅ Question de recrutement supprimée pour **{tribu_nom_local}** !", ephemeral=True)
+                
+                try:
+                    await afficher_ou_rafraichir_fiche(modal_inter.client, tribu_id_local, modal_inter.guild, modal_inter.channel)
+                except Exception as e:
+                    await modal_inter.followup.send(f"⚠️ **Note** : Question modifiée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
         
-        async def modal_callback(modal_inter: discord.Interaction):
-            await modal_inter.response.defer(ephemeral=True)
-            
-            # MAINTENANT on vérifie les permissions et on récupère les données
-            with db_connect() as conn:
-                c = conn.cursor()
-                c.execute("SELECT recrutement, proprietaire_id FROM tribus WHERE id=?", (tribu_id_local,))
-                row = c.fetchone()
-            
-            if not row:
-                await modal_inter.followup.send("❌ Tribu introuvable.", ephemeral=True)
-                return
-            
-            # Vérifier les droits
-            if not (est_admin(modal_inter) or user_id == row["proprietaire_id"] or est_manager(tribu_id_local, user_id)):
-                await modal_inter.followup.send("❌ Tu n'as pas la permission de modifier la question de recrutement.", ephemeral=True)
-                return
-            
-            nouveau_recrutement = recrutement_input.value.strip()
-            
-            # Mettre à jour le recrutement
-            with db_connect() as conn:
-                c = conn.cursor()
-                c.execute("UPDATE tribus SET recrutement=? WHERE id=?", (nouveau_recrutement, tribu_id_local))
-                conn.commit()
-            
-            if nouveau_recrutement:
-                ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement modifiée", nouveau_recrutement[:100])
-                await modal_inter.followup.send(f"✅ Question de recrutement modifiée pour **{tribu_nom_local}** !", ephemeral=True)
-            else:
-                ajouter_historique(tribu_id_local, modal_inter.user.id, "Question de recrutement supprimée", "")
-                await modal_inter.followup.send(f"✅ Question de recrutement supprimée pour **{tribu_nom_local}** !", ephemeral=True)
-            
-            try:
-                await afficher_ou_rafraichir_fiche(modal_inter.client, tribu_id_local, modal_inter.guild, modal_inter.channel)
-            except Exception as e:
-                await modal_inter.followup.send(f"⚠️ **Note** : Question modifiée mais fiche non rafraîchie. Utilise `/ma_tribu` pour voir.\n`Erreur: {e}`", ephemeral=True)
-        
-        modal.on_submit = modal_callback
-        await inter.response.send_modal(modal)
+        await inter.response.send_modal(ModalRecrutement())
     
     @discord.ui.button(label="Ajouter photo", style=discord.ButtonStyle.success, emoji="📸", row=3)
     async def btn_ajouter_photo(self, inter: discord.Interaction, button: discord.ui.Button):
