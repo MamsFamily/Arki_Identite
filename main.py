@@ -747,7 +747,7 @@ class ModalCoordsBase(discord.ui.Modal, title="🏠 Coordonnées de la base"):
                 await inter.followup.send("❌ Tu n'as pas la permission de modifier la base principale.", ephemeral=True)
                 return
             
-            c.execute("UPDATE tribus SET base_map=?, base_coords=? WHERE id=?", (self.map_selectionnee, coords_value, self.tribu_id))
+            c.execute("UPDATE tribus SET map_base=?, coords_base=? WHERE id=?", (self.map_selectionnee, coords_value, self.tribu_id))
             conn.commit()
         
         ajouter_historique(self.tribu_id, inter.user.id, "Base principale modifiée", f"{self.map_selectionnee} | {coords_value}")
