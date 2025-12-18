@@ -2406,8 +2406,10 @@ async def afficher_fiche(inter: discord.Interaction, tribu_id: int, ephemeral: b
         
         # 🗑️ SUPPRIMER L'ANCIENNE FICHE AVANT D'EN CRÉER UNE NOUVELLE
         if not ephemeral and inter.guild:
-            old_message_id = tribu.get("message_id", 0) or 0
-            old_channel_id = tribu.get("channel_id", 0) or 0
+            old_message_id = tribu["message_id"] if "message_id" in tribu.keys() else 0
+            old_channel_id = tribu["channel_id"] if "channel_id" in tribu.keys() else 0
+            old_message_id = old_message_id or 0
+            old_channel_id = old_channel_id or 0
             
             if old_message_id and old_channel_id:
                 try:
@@ -2529,8 +2531,10 @@ async def rafraichir_fiche_tribu(client, tribu_id: int):
             return
         
         # Récupérer message_id et channel_id
-        message_id = tribu.get("message_id", 0) or 0
-        channel_id = tribu.get("channel_id", 0) or 0
+        message_id = tribu["message_id"] if "message_id" in tribu.keys() else 0
+        channel_id = tribu["channel_id"] if "channel_id" in tribu.keys() else 0
+        message_id = message_id or 0
+        channel_id = channel_id or 0
         
         # Si pas de message existant, ne rien faire
         if not message_id or not channel_id:
@@ -2791,8 +2795,10 @@ async def fiche_tribu(inter: discord.Interaction, nom: str):
     
     # 🗑️ SUPPRIMER L'ANCIENNE FICHE si elle existe
     if inter.guild:
-        old_message_id = row.get("message_id", 0) or 0
-        old_channel_id = row.get("channel_id", 0) or 0
+        old_message_id = row["message_id"] if "message_id" in row.keys() else 0
+        old_channel_id = row["channel_id"] if "channel_id" in row.keys() else 0
+        old_message_id = old_message_id or 0
+        old_channel_id = old_channel_id or 0
         
         if old_message_id and old_channel_id:
             try:
