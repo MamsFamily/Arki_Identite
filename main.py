@@ -3670,7 +3670,8 @@ class PanneauParametres(discord.ui.View):
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
-                                c.execute("INSERT INTO maps (guild_id, nom) VALUES (?, ?)", (submit_inter.guild_id, nom_map))
+                                c.execute("INSERT INTO maps (guild_id, nom, created_at) VALUES (?, ?, ?)", 
+                                         (submit_inter.guild_id, nom_map, dt.datetime.utcnow().isoformat()))
                                 conn.commit()
                             await submit_inter.response.send_message(f"✅ Map **{nom_map}** ajoutée à la liste !", ephemeral=True)
                         except sqlite3.IntegrityError:
@@ -3746,7 +3747,8 @@ class PanneauParametres(discord.ui.View):
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
-                                c.execute("INSERT INTO boss (guild_id, nom) VALUES (?, ?)", (submit_inter.guild_id, nom_boss))
+                                c.execute("INSERT INTO boss (guild_id, nom, created_at) VALUES (?, ?, ?)", 
+                                         (submit_inter.guild_id, nom_boss, dt.datetime.utcnow().isoformat()))
                                 conn.commit()
                             await submit_inter.response.send_message(f"✅ Boss **{nom_boss}** ajouté à la liste !", ephemeral=True)
                         except sqlite3.IntegrityError:
@@ -3822,7 +3824,8 @@ class PanneauParametres(discord.ui.View):
                         try:
                             with db_connect() as conn:
                                 c = conn.cursor()
-                                c.execute("INSERT INTO notes (guild_id, nom) VALUES (?, ?)", (submit_inter.guild_id, nom_note))
+                                c.execute("INSERT INTO notes (guild_id, nom, created_at) VALUES (?, ?, ?)", 
+                                         (submit_inter.guild_id, nom_note, dt.datetime.utcnow().isoformat()))
                                 conn.commit()
                             await submit_inter.response.send_message(f"✅ Note **{nom_note}** ajoutée à la liste !", ephemeral=True)
                         except sqlite3.IntegrityError:
