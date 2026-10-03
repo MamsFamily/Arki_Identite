@@ -16,6 +16,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from flask import Flask
+from tribe_retirement import (
+    TRIBE_SITE_URL, remove_tribe_commands, redirect_retired_component,
+    remove_guild_tribe_commands,
+)
 
 # ---------- Keep-alive HTTP (pour Replit) ----------
 app = Flask(__name__)
@@ -3101,47 +3105,20 @@ async def ma_tribu(inter: discord.Interaction):
 @tree.command(name="aide", description="Afficher la liste des commandes du bot")
 async def aide(inter: discord.Interaction):
     e = discord.Embed(
-        title="❓ Aide — Commandes disponibles",
-        description="Voici toutes les commandes pour gérer les fiches tribu :",
+        title="Aide — Arki Family",
+        description=(
+            "La création et la gestion des fiches tribu se font désormais uniquement "
+            f"sur le site.\n\n[Ouvrir mon espace]({TRIBE_SITE_URL}/mon-espace)\n"
+            f"[Consulter les tribus]({TRIBE_SITE_URL}/tribus)"
+        ),
         color=0x5865F2
     )
-    
-    # Gestion des tribus
     e.add_field(
-        name="🏕️ Gestion des tribus",
-        value=(
-            "• **/créer_tribu** — créer une nouvelle tribu\n"
-            "• **/fiche_tribu** — afficher une fiche tribu complète\n"
-            "• **/quitter_tribu** — quitter ta tribu\n"
-            "• **/tribu_transférer** — transférer la propriété\n"
-            "• **/tribu_supprimer** — supprimer une tribu"
-        ),
+        name="Autres fonctions du bot",
+        value="**/test_bot** — vérifier que le bot répond\n"
+              "**/save_test** et **/show_test** — tests Arki Identité",
         inline=False
     )
-    
-    # Membres et avant-postes
-    e.add_field(
-        name="👥 Membres & Galerie",
-        value=(
-            "• **/mon_nom_ingame** — modifier ton nom in-game\n"
-            "• **/ajouter_photo** — ajouter une photo à ta galerie\n"
-            "• **/ajouter_logo** — ajouter/modifier le logo de ta tribu"
-        ),
-        inline=False
-    )
-    
-    # Interface et Admin
-    e.add_field(
-        name="🎛️ Interface & Admin",
-        value=(
-            "• **/panneau** — ouvrir le panneau interactif\n"
-            "• **/parametres** — gérer les paramètres (Admin)\n"
-            "• **/changer_bannière_panneau** — changer la bannière (Admin)"
-        ),
-        inline=False
-    )
-    
-    e.set_footer(text="💡 Utilise /panneau pour un accès rapide aux fonctions principales")
     await inter.response.send_message(embed=e, ephemeral=True)
 
 # ---------- Commandes de Test DB Arki Identité (pour Railway) ----------
@@ -4239,87 +4216,25 @@ async def panneau(inter: discord.Interaction):
         e.set_footer(text="Astuce : tu peux rouvrir ce panneau à tout moment avec /panneau")
         await inter.response.send_message(embed=e, view=v, ephemeral=True)
 
+remove_tribe_commands(tree)
+
 @bot.event
 async def on_interaction(inter: discord.Interaction):
-    """
-    Listener global pour intercepter les interactions avec les menus de fiche tribu
-    et les boutons de galerie photo même après redémarrage du bot.
-    Ce listener ne s'active QUE si l'interaction n'a pas déjà été traitée par une vue active.
-    """
-    # Vérifier si c'est une interaction avec un composant
+    """Rediriger les anciens boutons vers le site, sans aucune écriture tribu."""
     if inter.type != discord.InteractionType.component:
         return
-    
-    if not inter.data or 'custom_id' not in inter.data:
-        return
-    
-    custom_id = inter.data['custom_id']
-    
-    # Gérer les boutons de galerie photo
-    if custom_id.startswith("galerie_prev:") or custom_id.startswith("galerie_next:"):
-        # Vérifier si l'interaction a déjà été traitée (par une vue active)
-        if inter.response.is_done():
-            return
-        
-        try:
-            tribu_id = int(custom_id.split(":")[1])
-        except (IndexError, ValueError):
-            return
-        
-        # Déterminer la direction
-        direction = -1 if custom_id.startswith("galerie_prev:") else 1
-        
-        # Recréer la vue et exécuter la navigation
-        # On commence à l'index 0 par défaut, la méthode _changer_photo calculera le bon index
-        view = MenuFicheTribu(tribu_id, 0, timeout=None)
-        await view._changer_photo(inter, direction)
-        return
-    
-    # Gérer les menus déroulants
-    if not custom_id.startswith("menu_fiche:"):
-        return
-    
-    # Vérifier si l'interaction a déjà été traitée (par une vue active)
-    if inter.response.is_done():
-        return
-    
-    # Extraire le tribu_id du custom_id
-    try:
-        tribu_id = int(custom_id.split(":")[1])
-    except (IndexError, ValueError):
-        return
-    
-    # Récupérer le choix sélectionné
-    if 'values' not in inter.data or len(inter.data['values']) == 0:
-        return
-    
-    choice = inter.data['values'][0]
-    
-    # Recréer dynamiquement la vue et exécuter l'action
-    view = MenuFicheTribu(tribu_id, 0, timeout=None)
-    
-    if choice == "commandes":
-        await view.action_commandes(inter)
-    elif choice == "quitter":
-        await view.action_quitter(inter)
-    elif choice == "historique":
-        await view.action_historique(inter)
-    elif choice == "staff":
-        await view.action_staff(inter)
+    await redirect_retired_component(inter)
 
 @bot.event
 async def on_ready():
-    db_init()  # Initialiser la DB tribus au démarrage
     identite_db_init()  # Initialiser la DB Arki Identité au démarrage
-    
-    # Ajouter les vues persistantes pour qu'elles fonctionnent après redémarrage
-    bot.add_view(PanneauTribu(timeout=None))
-    
-    # MenuFicheTribu est maintenant géré par le listener on_interaction
-    # qui intercepte les interactions même après redémarrage
+    # Ne plus initialiser la base tribus ni réinstaller ses panneaux interactifs.
+    remove_tribe_commands(tree)
     
     try:
         synced = await tree.sync()
+        removed = await remove_guild_tribe_commands(tree, bot.guilds)
+        print(f"Commandes tribu locales supprimées : {removed}")
         print(f"Commandes synchronisées : {len(synced)}")
         for cmd in synced:
             print(f"  - /{cmd.name}")
