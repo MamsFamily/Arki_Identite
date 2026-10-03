@@ -11,9 +11,25 @@ from tribe_retirement import (
     RETIRED_TRIBE_COMMANDS, redirect_retired_component,
     remove_guild_tribe_commands,
 )
+from scripts.retire_discord_tribe_ui import replacement_components
 
 
 class RetirementTests(unittest.IsolatedAsyncioTestCase):
+    def test_cleanup_preserves_messages_and_unrelated_buttons(self):
+        message = {"author": {"id": "bot"}, "content": "Original", "embeds": [{"title": "Tribu"}],
+                   "components": [{"type": 1, "components": [
+                       {"type": 2, "custom_id": "galerie_next:1"},
+                       {"type": 2, "custom_id": "other:action"},
+                   ]}]}
+        components = replacement_components(message, "bot", "https://example.com/tribus/1")
+        self.assertEqual(components[0]["components"][0]["custom_id"], "other:action")
+        self.assertEqual(components[-1]["components"][0]["style"], 5)
+        self.assertEqual(message["content"], "Original")
+        self.assertEqual(message["embeds"], [{"title": "Tribu"}])
+        self.assertIsNone(replacement_components(message, "another-bot", "https://example.com"))
+        self.assertIsNone(replacement_components(
+            {"author": {"id": "bot"}, "components": components}, "bot", "https://example.com"))
+
     def test_registration_preserves_unrelated_commands(self):
         self.assertEqual(
             {command.name for command in main.tree.get_commands()},
