@@ -1,7 +1,7 @@
 # Lenexus et ArkiFamily : première liaison en lecture seule
 
 Le site est importé depuis l'archive fournie par son propriétaire dans une branche
-de `MamsFamily/Arki_Identite`. Le bot Python, ses commandes de démarrage et les
+de `MamsFamily/Arki_Identite`, dans le dossier isolé `lenexus/`. Le bot Python, ses commandes de démarrage et les
 fichiers de données déjà présents dans le dépôt ne sont pas remplacés.
 Aucune base SQLite réelle ni aucun secret n'est ajouté depuis l'archive.
 Le sandbox de maquettes n'est pas importé.
@@ -23,6 +23,12 @@ Le sandbox de maquettes n'est pas importé.
 Examiner les deux branches et leur documentation avant toute fusion.
 Le bot Python reste démarré avec ses commandes actuelles. Le site et son API
 nécessitent leurs services séparés, pnpm et Node.js >= 22.16 (SQLite natif).
+Les commandes du workspace JavaScript s'exécutent depuis `lenexus/`.
+Le service Railway du bot ne doit pas utiliser ce dossier comme racine.
+Pour le site/API hébergé séparément, la racine du workspace est `lenexus/`.
+Le lancement de développement cherche un runtime Node compatible sans changer
+celui du bot. Une base SQLite manquante bloque les fonctions concernées et
+désactive les synchronisations de fond ; aucune base fictive n'est créée.
 Ne pas utiliser le build du site comme commande de démarrage du bot Railway.
 Les fichiers `.replit`, `Procfile`, `main.py` et les données du bot existant
 ne sont pas remplacés par cet import.

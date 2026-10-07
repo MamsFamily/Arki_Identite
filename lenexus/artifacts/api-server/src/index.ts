@@ -3,6 +3,7 @@ import { logger } from "./lib/logger";
 import { initDinos } from "./lib/dino-catalogue";
 import { initGuides } from "./lib/guide-store";
 import { startShopSync } from "./lib/shop-discord";
+import { database } from "./lib/tribe-store";
 
 const rawPort = process.env["PORT"];
 
@@ -25,6 +26,14 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  // An exported workspace may have no real tribe database. Do not seed another
+  // product's PostgreSQL or start Discord synchronization in that state.
+  try {
+    database();
+  } catch {
+    logger.warn("Existing tribe SQLite unavailable; background synchronization disabled. Configure SQLITE_PATH to the existing database and restart.");
+    return;
+  }
   startShopSync();
   void initGuides()
     .then(() => logger.info("Community guides initialized"))
