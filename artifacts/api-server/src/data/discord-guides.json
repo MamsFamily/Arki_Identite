@@ -1,0 +1,1150 @@
+[
+  {
+    "id": "1391889840991244319",
+    "title": "SIR-5RM8",
+    "content": "",
+    "authorId": "756482368063144047",
+    "authorName": "DeathGun🔹Les Éléments",
+    "images": [],
+    "messages": [
+      {
+        "id": "1391889840991244319",
+        "authorId": "756482368063144047",
+        "authorName": "DeathGun🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-07T21:13:18.155000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/245e9e305cbba64480a34b8c0a3f72afc0cc39d30caee53605e3374a546c8763",
+            "name": "ChatGPT_Image_13_mai_2025_18_50_21.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1391890171087032330",
+        "authorId": "756482368063144047",
+        "authorName": "DeathGun🔹Les Éléments",
+        "content": "# 🤖 Configuration du Robot pour le Mode Rangement (💜 Violet)\nUne fois que tu poses le robot au sol, tu peux le réveiller et lui changer son mode de fonctionnement. Dans notre cas, on utilise le mode \"Rangement\" ➜ 💜 Couleur Violette.\n\n⚠️ Une fois ce mode activé, ne touche plus à rien sur le robot. Il va faire le boulot tout seul (t’inquiète, on va le régler juste après 😎).\n\nPour l'exemple nous allons créer une ferme automatisée.\n\n### 🌱 1. Les Baies\nTu as 2 choses à indiquer au robot :\n📥 Où les prendre et 📦 Où les ranger.\n\n🔸 Pour qu’il les ramasse :\n➡️ Va dans l’inventaire du carré de culture\n➡️ Clique sur l’icône du robot en bas à droite\n➡️ Ça lui dit : “Vas-y, tu peux te servir dedans !” 🍓\n\n🔸 Pour qu’il les range :\nPrends 1 baie (par exemple une 🥕 carotte) dans ton inventaire\n\nMets-la dans le frigo où tu veux qu’elle soit rangée\n\nClique joystick droit (console) ou clic droit (PC) sur la carotte dans le frigo\n\nAppuie sur \"Add Stack\" et définis le nombre de stacks que tu veux avoir dans ce frigo\n\n✅ Le robot comprend maintenant qu’il doit :\n\n🥕 Aller chercher X stacks de carottes dans le carré de culture\n\n📦 Les ranger dans le bon frigo\n\n⚙️ Un seul robot peut gérer plusieurs types de baies, dans plusieurs frigos, à partir de plusieurs carrés de culture !\n\n### 🌾 2. Les Engrais\nPas de changement côté méthode !\n🧪 Le robot ne va pas chercher dans les dinos, et l’engrais ne se stack pas comme les baies.\n\n ⚙️ Configuration :\nDans chaque carré de culture, clique sur \"Add Stack\" et règle sur 8 stacks (🌿 pour les grands carrés)\n\n⚠️ Laisse 2 emplacements libres pour la graine et les baies, sinon le robot va tout saturer avec trop d’engrais\n\nPlace un coffre à engrais (🪵 récupéré depuis les bousiers) près de tes champs\n\nActive le ramassage auto du robot (toujours avec le petit bouton en bas à droite de son inventaire)\n\n✅ Et voilà ! Ton robot est prêt à bosser 💪\n\n\n## 🧠 Astuce de Pro - Placement du Robot\n💡 Pour éviter que ton robot se transforme en déco, place-le dans un faux sol ou un faux plafond, avec un mur de hauteur mais sans mur ou pilier juste à côté.\n\n✅ Il peut récupérer les ressources à travers les plafonds\n❌ Mais pas à travers les murs ou les piliers ! (oui, c’est pas le robot du siècle 🤖)\n\n⚠️ Évite de lui donner plus de 4 carrés de culture par type de baie.\nSinon :\n\nIl galère à tout ranger 🥴\n\nEt si tu en mets plusieurs pour \"aller plus vite\"… spoiler: ils deviennent bêtes comme leurs pieds 👣🤖",
+        "createdAt": "2025-07-07T21:14:36.856000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1391891679442767883",
+        "authorId": "756482368063144047",
+        "authorName": "DeathGun🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-07T21:20:36.476000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/245e9e305cbba64480a34b8c0a3f72afc0cc39d30caee53605e3374a546c8763",
+            "name": "ChatGPT_Image_13_mai_2025_18_50_21.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1391913237322272939",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "un exemple pour définir le nombre de stacks à ranger ?",
+        "createdAt": "2025-07-07T22:46:16.275000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1391929152973570169",
+        "authorId": "756482368063144047",
+        "authorName": "DeathGun🔹Les Éléments",
+        "content": "Pour les engrais des grands carrés de culture il faut régler sur 8, pour les frigos c'est comme tu veux, tout dépend de la quantité de stack que tu veux avoir ^^",
+        "createdAt": "2025-07-07T23:49:30.862000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1396120271911649292",
+        "authorId": "1083710600309395456",
+        "authorName": "Getget (Dalton)",
+        "content": "<@857751500540084254>",
+        "createdAt": "2025-07-19T13:23:31.484000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1391889840991244319",
+    "source": "discord",
+    "createdAt": "2025-07-07T21:13:18.155Z",
+    "updatedAt": "2025-07-19T13:23:31.484000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1392601155472719953",
+    "title": "Scanner de gène 🧬",
+    "content": "",
+    "authorId": "611623597643137024",
+    "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+    "images": [],
+    "messages": [
+      {
+        "id": "1392601155472719953",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-09T20:19:48.743000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/4906edb80ce88bfeecc01dc3d394b5d8b74b1dd69d6fb5616453f968814e63d0",
+            "name": "image.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392601469638938876",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "# 🧬 TUTO — GESTION DES TRAITS & EMBRYONS 🦖\nDonne un coup d’avance à ton élevage avec le système de traits et la gestion des embryons !\nVoici tout ce que tu dois savoir ⬇️\n\n## 🎯 Repérage & Infos Créatures\nLe scanner de gêne peut indiquer la direction d'une créature recherchée 📡",
+        "createdAt": "2025-07-09T20:21:03.646000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392601538991489227",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-09T20:21:20.181000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/d40fe0b120b856e5947682bdc0852d7a91c745d146fb10c8fb348817cd0758b2",
+            "name": "Capture_decran_2025-07-09_212041.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/8acea060ffb57dcbc5e24c297dc58e906505a018a4aa9ad20b837435c01029a4",
+            "name": "Capture_decran_2025-07-09_212058.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/b4319880886e34ccce0f9e002fbc729101da00f286dfe3d8de5323dc160c2570",
+            "name": "Capture_decran_2025-07-09_212117.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/be65b2aa1198d525df4d4cb3212e8cab7ab45ea7050e9ef2acefde4ebd0d0f53",
+            "name": "Capture_decran_2025-07-09_212126.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392601647548600400",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "En visant une créature, il affiche les traits qu’elle possède 🧠\nSuper utile pour scanner rapidement ton élevage !\n\n## 🧪 Système de Traits\nPour ajouter ou extraire un trait :\n\nIl faut piquer un bébé qui t'appartient 🍼 (⚠️ uniquement les bébés, pas les adultes)\n\nCela ouvre un menu permettant :\n\n✅ d’extraire un trait pour le conserver, le scanner peut en stocker 10\n\n✅ d’appliquer un trait précédemment conservé",
+        "createdAt": "2025-07-09T20:21:46.063000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392601845402177537",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-09T20:22:33.235000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/4b9920e54c0c6d479aff2c9cf03becbe4d3c51904dc0c0c6870a5c3ef96e0a47",
+            "name": "Capture_decran_2025-07-09_213547.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/07866f68843de42e230030d5a8a8ae8691b2353648df9b33d5dcc19003f5f865",
+            "name": "Capture_decran_2025-07-09_212436.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392602009974341753",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "## 🔢 Fonctionnement des Traits\nLes traits ne sont pas hérités des parents ❌👨‍👩‍👦\n\nChaque dinosaure a ses propres traits spécifiques :\n🚫 Impossible de mettre un trait de Rex sur un Raptor, par exemple\n\nUn dino peut avoir jusqu’à :\n\n✅ 5 traits\n\n✅ Possiblement 5 traits de niveau 3 max 💪\n\nIl existe 3 niveaux de traits :\n\n⭐ Niveau 1",
+        "createdAt": "2025-07-09T20:23:12.472000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392602043046170784",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-09T20:23:20.357000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/74b42279d78f13a3607eb37543bd97b1b90d04580f1ab34acb44e28c40da33cd",
+            "name": "Capture_decran_2025-07-09_212239.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392602190044074166",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "⭐⭐ Niveau 2",
+        "createdAt": "2025-07-09T20:23:55.404000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392602221689962618",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-09T20:24:02.949000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/39dbb393b7dcf9b2e3f0e4a27230071bc08ae1656ac2ae97f2e3aa261349bfc5",
+            "name": "Capture_decran_2025-07-09_212252.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392602324685295800",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "⭐⭐⭐ Niveau 3",
+        "createdAt": "2025-07-09T20:24:27.505000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392602482194120796",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "",
+        "createdAt": "2025-07-09T20:25:05.058000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/62385a689b74fb67580f6aa5bc64ba4752882384f4b1301f0e6e8e8ba1681f2a",
+            "name": "Capture_decran_2025-07-09_212305.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392602496421073007",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "Le niveau influence sur la puissance du trait.\n\n📦 Les traits peuvent être stockés dans le stockage de gênes\n\n## 🧫 Extraction d’Embryon\nTu peux extraire l'embryon d’un dino en gestation 🤰\n➜ Cela redémarre le timer de reproduction\n➜ L'embryon peut ensuite être :\n\n🔥 Incubé dans l'incubateur à embryons\n\n🌊 Fonctionne aussi sous l'eau pour les créatures aquatiques 🐟",
+        "createdAt": "2025-07-09T20:25:08.450000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392606709662482463",
+        "authorId": "1083710600309395456",
+        "authorName": "Getget (Dalton)",
+        "content": "Merci <@611623597643137024>",
+        "createdAt": "2025-07-09T20:41:52.965000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392905263807201333",
+        "authorId": "1176969945939202165",
+        "authorName": "🌸 Choops 🌸 Les Oompa Loompa",
+        "content": "Une fois les embryons mis dans l'incubateur on fait comment pour les ressortir? Svp",
+        "createdAt": "2025-07-10T16:28:13.820000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1392961095844630578",
+        "authorId": "611623597643137024",
+        "authorName": "乂🄽🅁🅅乂🔹Les Éléments",
+        "content": "<@1176969945939202165>\nDans l'incubateur à embryons\ntu sélectionne l'embryon qui c'est Incubé à 100%\nen bas de la page au centre il y a marqué \nHATCH EMBRYO tu clic !\n🪄le bébé spawn devant toi 😉",
+        "createdAt": "2025-07-10T20:10:05.215000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1409267553787973724",
+        "authorId": "1030260863841615922",
+        "authorName": "[Roroberta] 🤟 solo leveling",
+        "content": "merci pour ce tuto sa me servir bcp",
+        "createdAt": "2025-08-24T20:06:07.748000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1392601155472719953",
+    "source": "discord",
+    "createdAt": "2025-07-09T20:19:48.743Z",
+    "updatedAt": "2025-08-24T20:06:07.748000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1394086010979221787",
+    "title": "Contrôles Dreadmare",
+    "content": "",
+    "authorId": "549274576698212372",
+    "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+    "images": [],
+    "messages": [
+      {
+        "id": "1394086010979221787",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Capacité du dreadmare \n\nPour les joueurs PlayStation<:ps4logo:1313978936887218287> :\n\n- mélée : R2\n- lame de vent : maintenir L2 + R2\n- vent sombre : L2 + maintenir R2\n- bouclier terreur : R1 + <:carr:1370568899887759453> \n- aura de haine : R1 + ⚫ \n- trou noir : joystick R \n- basculer l’aide à la clés de l’interface utilisateur : R1 + L1\n\nPour les joueurs Xbox <:xboxlogo:1314009068100390942> :\n\n- mélée : RT\n- lame de vent : maintenir LT + RT\n- vent sombre : LT + maintenir RT\n- bouclier terreur : RB + <:croix:1370569041751838730> \n- aura de haine : RB + 🅱️ \n- trou noir : joystick R \n- basculer l’aide à la clés de l’interface utilisateur : RB + LB\n\nréalisé par <@1070268325571088395>",
+        "createdAt": "2025-07-13T22:40:05.883000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/8ed89d92376ef36d2bc35cd90b975d313b31ae0ca75cc7797a27ca54278800d2",
+            "name": "1280px-Dossier_Dreadmare.webp",
+            "contentType": "image/webp"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1394970817128824925",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Je vous propose un mod personnel pour le Dreadmare",
+        "createdAt": "2025-07-16T09:16:00.108000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1394970881503268955",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "https://www.curseforge.com/ark-survival-ascended/mods/shinestallion-dreadmare-costume",
+        "createdAt": "2025-07-16T09:16:15.456000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/c2294334072b580c1d7de79ba129e5bb70a061b885326cb950dec258f6bb06df",
+            "name": "screenshot-2025-04-11-035822-png.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/e326138010295baee18391bfd9cf7578b8ee05f26196f3fd50b1a4d475f72b48",
+            "name": "screenshot-2025-04-11-040107-png.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/f67e0534db82d4085d4d31def7001d44125ec5ce0bcbdfe129755dd57d751dcb",
+            "name": "screenshot-2025-04-11-040007-png.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/7aad35e3f7dcf8df8be32474704468475d0c22d8b8c6b842a261b0e3c0ea97f9",
+            "name": "screenshot-2025-04-11-035836-png.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [
+          {
+            "title": "Shinestallion Dreadmare Costume!",
+            "description": "A Shinestallion Costume for the Dreadmare!\n438.3K Downloads | Mods",
+            "url": "https://www.curseforge.com/ark-survival-ascended/mods/shinestallion-dreadmare-costume",
+            "image": "/api/storage/objects/guide-media/cdddae1b83ad4a8f4e5caa5777f9dc811aa7eae6e9f23b10a3392f074ce8695c",
+            "fields": []
+          }
+        ],
+        "system": false
+      },
+      {
+        "id": "1463525025809301516",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "https://www.curseforge.com/ark-survival-ascended/mods/pegasus-dreadmare-costume",
+        "createdAt": "2026-01-21T13:25:57.133000+00:00",
+        "media": [],
+        "embeds": [
+          {
+            "title": "Pegasus Dreadmare Costume!",
+            "description": "This costumes gives your Dreadmare the appearance of a Pegasus!\n344.0K Downloads | Mods",
+            "url": "https://www.curseforge.com/ark-survival-ascended/mods/pegasus-dreadmare-costume",
+            "image": "/api/storage/objects/guide-media/7628f8aec4f352254272351ecf4b5cb3fe0a7417c49d8cccd24ab8517d33ceaa",
+            "fields": []
+          }
+        ],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1394086010979221787",
+    "source": "discord",
+    "createdAt": "2025-07-13T22:40:05.883Z",
+    "updatedAt": "2026-01-21T13:25:57.133000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1394672023128772678",
+    "title": "Aide discord",
+    "content": "",
+    "authorId": "549274576698212372",
+    "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+    "images": [],
+    "messages": [
+      {
+        "id": "1394672023128772678",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-07-15T13:28:42.067000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/8ea8e311c27159fe566d6caa8d94a6d3c2ab32545b3039ce0290a487f772d86c",
+            "name": "discord.webp",
+            "contentType": "image/webp"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1394674065448636467",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "__**Comment Identifier ta base ou ton avant poste et le modifier**__\n\nhttps://discord.com/channels/1156256997403000874/1157995465736999042",
+        "createdAt": "2025-07-15T13:36:48.994000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1394674200895029349",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-07-15T13:37:21.287000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/1e92451e1aca99bb1fe4362e6768107ff691786b7c69cdf60e727809cf44d1ad",
+            "name": "SVID_20250708_092330_1.mp4",
+            "contentType": "video/mp4"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1395325097593802874",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "__**Comment ajouter le nom de tribu au nom Discord**__",
+        "createdAt": "2025-07-17T08:43:47.153000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1395325430080471080",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-07-17T08:45:06.424000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/5fd8a9b6452a44972e35eee352157d787e31168f0210079e51c7bc03ecb83579",
+            "name": "SVID_20250717_104105_1.mp4",
+            "contentType": "video/mp4"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1394672023128772678",
+    "source": "discord",
+    "createdAt": "2025-07-15T13:28:42.067Z",
+    "updatedAt": "2025-07-17T08:45:06.424000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1395899248956018870",
+    "title": "Rhyniognatha Taming et contrôle",
+    "content": "",
+    "authorId": "549274576698212372",
+    "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+    "images": [],
+    "messages": [
+      {
+        "id": "1395899248956018870",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "https://ark.wiki.gg/fr/wiki/Rhyniognatha",
+        "createdAt": "2025-07-18T22:45:15.505000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/3ca69e05676c2e821c73e383e9566cfb39141fb185f91485f4ab5086727a3a46",
+            "name": "298px-Dossier_Rhyniognatha.jpg",
+            "contentType": "image/jpeg"
+          }
+        ],
+        "embeds": [
+          {
+            "title": "Rhyniognatha",
+            "description": "La Rhyniognatha est une des Créatures du jeu ARK: Survival Evolved.\nElle a été soumise au vote public par le Community Crunch 347 en février 2023 et a été déclarée vainqueur dans le Community Crunch 348. Elle a été annoncée dans le Community Crunch 356, puis officiellement présentée dans le Community...",
+            "url": "https://ark.wiki.gg/fr/wiki/Rhyniognatha",
+            "image": "/api/storage/objects/guide-media/99b3be0a78c65bab838aae8a3bd0587793b90cc8f01f38ec82463e84e4897d25",
+            "fields": []
+          }
+        ],
+        "system": false
+      },
+      {
+        "id": "1395899632701280467",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Pour ce soir, je vous partage la liste des demandes de l'embryon",
+        "createdAt": "2025-07-18T22:46:46.997000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1395899730445467658",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-07-18T22:47:10.301000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/e7ccaef49415950b865b5e1ac94e6464e1452e3701b3bd818f8ba08e3371f5bc",
+            "name": "Capture_decran_2025-07-19_004300.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1395899248956018870",
+    "source": "discord",
+    "createdAt": "2025-07-18T22:45:15.505Z",
+    "updatedAt": "2025-07-18T22:47:10.301000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1409633200904601681",
+    "title": "Gigantoraptor",
+    "content": "",
+    "authorId": "260705772911067148",
+    "authorName": "꧁♛✮Diablesse✮♛꧂",
+    "images": [],
+    "messages": [
+      {
+        "id": "1409633200904601681",
+        "authorId": "260705772911067148",
+        "authorName": "꧁♛✮Diablesse✮♛꧂",
+        "content": "- Les plumes ; la stat la plus haute donnera la plume souhaitée.",
+        "createdAt": "2025-08-25T20:19:04.814000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1409633200904601681",
+    "source": "discord",
+    "createdAt": "2025-08-25T20:19:04.814Z",
+    "updatedAt": "2025-08-25T20:19:04.814000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1411235173621829733",
+    "title": "Des fraises des fraises des fraiiises🍓",
+    "content": "",
+    "authorId": "1113095131374035024",
+    "authorName": "djfilton 🔹 SpartVictim",
+    "images": [],
+    "messages": [
+      {
+        "id": "1411235173621829733",
+        "authorId": "1113095131374035024",
+        "authorName": "djfilton 🔹 SpartVictim",
+        "content": "Alors aujourd'hui je partage plus un info qu'une astuce, \nSi vous voulez faire des fraises 🍓 faite les loots sur Islande vous récupérez plein de choses utiles et régulièrement des fraises 😏",
+        "createdAt": "2025-08-30T06:24:44.873000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1411235173621829733",
+    "source": "discord",
+    "createdAt": "2025-08-30T06:24:44.873Z",
+    "updatedAt": "2025-08-30T06:24:44.873000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1412426108208549928",
+    "title": "🦖MUTATION NÉGATIVE🦖",
+    "content": "",
+    "authorId": "755512007364575332",
+    "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+    "images": [],
+    "messages": [
+      {
+        "id": "1421226499134197901",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "Vous l’attendez fortement, le voici !! 🤩\n\nTout ce qu’il faut savoir sur les Mutations Négatives 👍🏻\n\nPour ce tuto, je vais décomposer le processus en 7 parties bien distinctes, pour que cela soit le plus clair possible pour tout le monde ! 🫶🏻\n\nPREMIÈRE ÉTAPE : LE COUPLE PARFAIT 👩🏻‍❤️‍👨🏻\n\nComme dans toutes bonne reproduction, il vous faut commencer par créer votre couple parfait, cela veux dire que votre femelle et votre mâle doivent avoir identiquement les mêmes statistiques comme sur les photos si dessous ! 👇🏻",
+        "createdAt": "2025-09-26T20:06:42.505000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/1dbdcc4f6753a88fec4247bfbafc3e7bcaf673bcd7aff7379ecb424d77b35ba5",
+            "name": "3b64655d-8db6-4243-9974-116ac06df9be.jpg",
+            "contentType": "image/jpeg"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/4df392eb49746e54044a76e59fa21c1debaab878e672c2693244c0fc6834e048",
+            "name": "6570cd79-64e3-4568-be49-c794e30927a5.jpg",
+            "contentType": "image/jpeg"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421227444525862983",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "DEUXIÈME ÉTAPE : LES PREMIÈRES MUTATIONS PARENTALES 💪🏻\n\nPour commencer votre lignée de Mutations Négatives, vous devez drop une mutation côté paternelle pour le mâle et une mutation maternelle pour la femelle, favoriser une mutation dans la ou les stats que vous souhaitez augmenter. Pour cela, reproduisez votre couple parfait ( PS : Plus il y a de femelle Parfaite pour le mâle Parfait, plus vous avez de chances d’avoir des mutations ) jusqu’à arrivé à ce résultat. 👇🏻",
+        "createdAt": "2025-09-26T20:10:27.904000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/fcf7cef2dc2f47f47db0644e7c9100a5f93ef122c42988ba4686bc81a3e9d9c6",
+            "name": "29831d2c-1bd1-49b1-8ad8-b0879ca91d60.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/0763e73268e8eeaa1f969e8415da83c0407b4fd486c07b7f925debefac5bf944",
+            "name": "ba2e41ea-034e-41f2-80c7-98395cdb227c.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421228118969942169",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "TROISIÈME ÉTAPE : LE REGROUPEMENT 🤜🏻🤛🏻\n\nNous allons ensuite regrouper les mutations, c’est à dire avoir la mutation paternelle et maternelle sur un seul et même bébé. Pour cela rien de plus simple, reproduisez les 2 spécimens créé à l’étape 2 jusqu’à obtention d’un couple comme celui si dessous ! 👇🏻",
+        "createdAt": "2025-09-26T20:13:08.704000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/9932040306996b7db57b9879e9037f422152640e0ac191adb236a6181f81e6b4",
+            "name": "5e339443-5ce2-478e-b5fb-afd77223c651.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/6e24fdad9b3d35c3effad7df251b5b5bdd7460985bbadb31382b93376cc3a81d",
+            "name": "5fd91f88-a816-418a-b8bc-df38ea736229.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421228976956768360",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "QUATRIÈME ÉTAPE : DOUBLEMENT DES MUTATIONS ✌🏻\n\nMaintenant que vous avez votre premier couple avec une mutation de chaque côté parental, vous allez pouvoir doubler les mutations, c’est à dire passez de 1 mutations à 2, puis de 2 à 4, de 4 à 8 et ainsi de suite comme vous l’indique les photos juste la 👇🏻",
+        "createdAt": "2025-09-26T20:16:33.264000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/aa2d0de24fdf299894bb590ffd0ab859d7d8ffaa15462c6e6219ac8eb11287bd",
+            "name": "6e43ff59-3fd9-4abe-bb23-481639532498.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/8c17d7df8765dac075c97434a6c5498891b56949e9e78093ee0672c036c49ea7",
+            "name": "a9ae7131-4706-488e-99ac-9ca18c82c143.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/55f19f0a054f755f47947d69df01c7129ce62c97aa219f050d942b0cdb2faa3f",
+            "name": "c84c0bfd-e33c-4d0e-8d06-f7fd394caeae.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421229647609331925",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "Pour en arriver là, même principe, on prend le couple avec 1 mutations de chaque côté parental et on le reproduit ( Dédicace à mes copains du Nord 😅 ) pour obtenir un couple avec 2 mutations parentales de chaque côtés, puis rebelote, le couple avec 2 mutations va créer un couple avec 4 mutations et ainsi de suite pour arriver à….. ( Roulement de Tambour ) un chiffre que je n’ai pas envie d’écrire, donc je vous laisse voir par vous même ! 😅👇🏻",
+        "createdAt": "2025-09-26T20:19:13.160000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/3fa90cd5dbc03a30ea4a4c658d28d1bd630bc5454d27810acb95b4639e4ecd35",
+            "name": "5b6b909e-ec6d-4f89-b025-2f32c0ac4cb1.png",
+            "contentType": "image/png"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/748f70439b9ce3cc1c024e431753a7bc25168d359f6cbf310f186fcab883dbe1",
+            "name": "f79d4d7a-e1ae-4dc3-9fbd-f871976ec580.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421230190226440203",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "CINQUIÈME ÉTAPE : LE PASSAGE EN NÉGATIF 🤩\n\nL’heure est venu de passer en négatif et pour ne pas changer, on prend ce dernier couple de la fin de l’étape 4, on le fait ce reproduire et TADAM!!! Bienvenue dans le monde de la Mutations Négatives 😍😍😍",
+        "createdAt": "2025-09-26T20:21:22.530000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/2079d6e75731193388c0e2106a199affe83cea94482a4718b7ae8c05739b50e9",
+            "name": "51400c94-2a4c-452f-b178-1e5df86f15ed.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421241866145366107",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "PETITE INTERLUDE : MAIS POURQUOI FAIRE DES MUTATIONS NÉGATIVES ? \n\nLa raison est simple, en mutation standard le jeu va vous limiter à 20 mutations pour l’ensemble des stats ( Exemple : 5 mutations en Vie, 5 en dégât, 5 en stam et 5 en Nourriture ou 20 en Vie ) même si vous allez au delà des 20 mutations, seulement ces 20 dernières seront « active ». Passer en mutation négative va vous permettre d’aller bien au delà de cette limite de 20 en créant un « bug » du jeu qui va estimer qu’il y a bien assez de marge pour ajouter plus de mutations. Vous pourrez donc allez jusqu’à 254 mutations non pas en totalité mais bien par stat souhaitez ( Exemple : 254 mutations en vie et 254 mutations en dégât ). 😱\n\nNon seulement vous allez gagner dans ce cas 508 points de stats en mutation mais également 508 niveaux pour votre Dino ! 😍😍",
+        "createdAt": "2025-09-26T21:07:46.286000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421243567493615960",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "SIXIÈME PARTIE : L’AJOUT DE MUTATION 👍🏻\n\nMaintenant que vous êtes passé en négatif, vous allez pouvoir ajouter des mutations dans la stats que vous voulez. Pour cela, on reprend le schéma classique de la mutation standard sauf que vous allez reproduire votre Mâle en négatif avec votre ou vos femelles parfaites SANS AUCUNE MUTATION et en changeant à chaque fois uniquement que le Mâle Négatif, à chaque nouvelle mutation !! À savoir que plus il y a de femelles et plus vous avez de chance de drop des mutations. Voici ce que cela donne avec 2 Rex Tek, un Mâle avec 40 mutations en Vie et une Femelle avec 10 Mutations en attaque👇🏻",
+        "createdAt": "2025-09-26T21:14:31.919000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/d0930f5105cea6f28d12b86fb4d9077b46960b44de7c934fda2edf44fc03a103",
+            "name": "38a95883-c59e-45a8-a1fd-940ebf3ced00.jpg",
+            "contentType": "image/jpeg"
+          },
+          {
+            "url": "/api/storage/objects/guide-media/db0305e8e670c2b9cf9bcccc926584b9a984c3797133190164c94e71943b5592",
+            "name": "89669cee-afa6-4e1a-a432-93e89d1102eb.jpg",
+            "contentType": "image/jpeg"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421244226363982005",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "SEPTIÈME PARTIE : RÉUNIFICATION DES MUTATIONS 💪🏻\n\nMaintenant que nous avons accumulé des mutations, nous voulons les réunir dans un seul et même Dino. Vous allez prendre l’exemple juste au dessus donc, un Mâle Négatif avec des mutations en Vie et une Femelle Négative avec des mutations en attaques par exemple. Vous allez les reproduire jusqu’à tomber sur le graal, un bébé avec toutes vos mutations réunis 😍",
+        "createdAt": "2025-09-26T21:17:09.006000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/40d8068864fb8dedab6a0f08626913a26501e375a7385bc4fc471e3545769188",
+            "name": "5b4abf3a-20ca-4332-aa3b-6282644a402f.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421246334563909674",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "PETITE ASTUCE ! \n\nPour augmenter vos chances de drop des mutations, je vous invites à lire le tutoriel de <@611623597643137024> sur le scanner de gêne, il vous servira à y ajouter les traits qui augmente la chance d’avoir une mutation dans la stat indiqué sur le trait comme présent ci dessous 👇🏻",
+        "createdAt": "2025-09-26T21:25:31.640000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/5a9daedad780a2afc13dbf6c7429621b3598af9bb958a10d524e6ebc45f866ac",
+            "name": "33cc1678-227a-4af0-a3e6-4ec34641ef88.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1421246672947642439",
+        "authorId": "755512007364575332",
+        "authorName": "Bebzzz/ 🦕 Arki’ Admin 🦕",
+        "content": "Vous avez maintenant toutes les clés en main pour créer vos monstres ! J’espère que le tuto vous sera utile et qu’il était assez claire pour vous ! Merci de m’avoir lu et au plaisir croisés vos meilleurs Dino sur le jeu ! LA BISE ! 🫶🏻",
+        "createdAt": "2025-09-26T21:26:52.317000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1412426108208549928",
+    "source": "discord",
+    "createdAt": "2025-09-02T13:17:05.805Z",
+    "updatedAt": "2025-09-26T21:26:52.317000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": true
+  },
+  {
+    "id": "1447561281887272970",
+    "title": "Gaulcus Tame et Contrôle",
+    "content": "",
+    "authorId": "549274576698212372",
+    "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+    "images": [],
+    "messages": [
+      {
+        "id": "1447561281887272970",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-12-08T12:11:43.990000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/191daec8576da8a058fab575f8492b11289466c0eb1eafa3bb21ab4ee0091d72",
+            "name": "telechargement_1.jpeg",
+            "contentType": "image/jpeg"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1447563787610624010",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Hello\n\nLe Glaucus est un mod Myrm's Custom Creations: Draconis Glaucus\nhttps://www.curseforge.com/ark-survival-ascended/mods/draconis-glaucus\n\nLe taming est particulier faudra lui donner, peut importe le LVL 10 cadavre de méduse. A la 10ieme celui-ci vous attaquera donc veillé a avoir un dinos de combat proche de vous. \nFortement recommandé d'avoir des palmes et de quoi tuer les méduses \n\nUne fois tamer vous aurez besoin de ça selle, vous pouvez en looter sur des glaucus alpha. \nPlus grand et très agressif \n\nSite en anglais : \nhttps://ark.wiki.gg/wiki/Mod:Custom_Creations/Draconis_Glaucus",
+        "createdAt": "2025-12-08T12:21:41.401000+00:00",
+        "media": [],
+        "embeds": [
+          {
+            "title": "Myrm's Custom Creations: Draconis Glaucus",
+            "description": "Adds the Glaucus, a custom creature.\n1.5M Downloads | Mods",
+            "url": "https://www.curseforge.com/ark-survival-ascended/mods/draconis-glaucus",
+            "image": "/api/storage/objects/guide-media/db3e2cb34a5dca8080d318b3b24e19206b54cbe9e899edd8557e05ef9452e19f",
+            "fields": []
+          },
+          {
+            "title": "Draconis Glaucus",
+            "description": "This mod adds a completely new, custom creature to the ARKs- an aquatic Wyvern inspired by the real-life blue glaucus sea slug. The Glaucus has a variety of electrical attacks, and is able to move about on land, albeit becoming weakened without water to keep itself from drying out. It has an Alpha variant...",
+            "url": "https://ark.wiki.gg/wiki/Mod:Custom_Creations/Draconis_Glaucus",
+            "image": "/api/storage/objects/guide-media/75cafb95f4e16f83a6e503816f004d4e8533e92d07e7d81d0f327b55f8c702db",
+            "fields": []
+          }
+        ],
+        "system": false
+      },
+      {
+        "id": "1447564135289065614",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-12-08T12:23:04.294000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/6ed0023d9904726f2cd1c0c04e355dbaa5ea1d12560bdfeb86f640c208b175ba",
+            "name": "Capture_decran_2025-12-08_132226.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1447564451720073337",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Se nourri principalement de biotoxine tout au long de ça croissance",
+        "createdAt": "2025-12-08T12:24:19.737000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1450912423220347104",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-12-17T18:07:58.345000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/10e4c31ad5d3952576f7c5d209913b985de25b7ddf9faf319a0510722a3fba24",
+            "name": "ChatGPT_Image_17_dec._2025_19_07_37.jpeg",
+            "contentType": "image/jpeg"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1447561281887272970",
+    "source": "discord",
+    "createdAt": "2025-12-08T12:11:43.990Z",
+    "updatedAt": "2025-12-17T18:07:58.345000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1450899082020126890",
+    "title": "Pyroman - DLC Officiel",
+    "content": "",
+    "authorId": "549274576698212372",
+    "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+    "images": [],
+    "messages": [
+      {
+        "id": "1450899082020126890",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Control et teaming",
+        "createdAt": "2025-12-17T17:14:57.555000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/d7bce40a86f023001a89401644ec039d4e1b3efc4165cdd1ca421d051b887a4e",
+            "name": "320px-Dossier_Pyromane.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1450899250354585621",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "https://ark.wiki.gg/wiki/Pyromane",
+        "createdAt": "2025-12-17T17:15:37.689000+00:00",
+        "media": [],
+        "embeds": [
+          {
+            "title": "Pyromane",
+            "description": "The Pyromane is the first of the paid DLC ARK Fantastic Tames, released in conjunction with The Center map. It is a lion-like creature made of fire that utilizes pyrokinesis-based abilities for many different utilities.",
+            "url": "https://ark.wiki.gg/wiki/Pyromane",
+            "image": "/api/storage/objects/guide-media/ad12fe1c724b0d7aac6f283d5821e6babd2bd09ae924384d8449b98756c2971b",
+            "fields": []
+          }
+        ],
+        "system": false
+      },
+      {
+        "id": "1450899572548174036",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "**Sauvage**\n\nPyromane est-il un chat qui contrôle le feu, ou le feu vivant qui peut se faire ressembler à un chat? Il semble avoir plus en commun avec le Phoenix de cette ARCHE désertique que n'importe quel lion. Un auteur nommé Clarke a déclaré que la technologie suffisamment avancée serait indiscernable de la magie... Je dirais que tout ce qui a conçu cette créature était assez avancé.\nUn Pyromane non ébouriffé restera à faible brûlure et rétrécira son profil. Mais lorsqu'il est troqué, ce petit chat peut soudainement s'enflammer dans un enfer de la taille d'un lion.\nIl semble boire dans n'importe quel incendie à proximité, en utilisant ce pouvoir pour cautériser ses propres blessures et alimenter son arsenal d'attaques incendiaires.\n\n**Domestiqué**\n\nJe n'ai vu qu'un seul apprivoisé Pyromane jusqu'à présent. Son cavalier semblait indéfectible par les flammes de la bête, et au-delà de cela, immunisé contre la chaleur en général, tout en étant monté. Elle a affirmé qu'elle pourrait même la porter en toute sécurité à travers un champ de lave. Cette survivante a déclaré qu'elle avait passé des âges à essayer de gagner son chat, avant de remarquer qu'il semblait plus lent sous la pluie.\nDans sa forme plus petite, son animal de compagnie a doublé comme un lance-flamme félin monté sur l'épaule. Et de retour dans leur camping, elle m'a montré comment son animal pouvait alimenter une forge et sécher la viande en saccadée. Je peux certainement voir pourquoi une créature aussi improbable mais polyvalente aurait pu être conçue, même si je ne comprends pas comment.",
+        "createdAt": "2025-12-17T17:16:54.506000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1450900726623768666",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "**Teaming Passif**\n\n*L'apprivoisement du Pyromane est l'un des plus originaux de ARK: Survival Ascended. Ce n'est pas un taming passif classique, c'est un combat de gestion d'énergie.*",
+        "createdAt": "2025-12-17T17:21:29.659000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1450900779232788802",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Voici les étapes précises à suivre :\n**1. Préparation**\n\n    Localisation : On le trouve principalement dans les zones volcaniques ou sur l'île de \"The Center\".\n\n    Équipement : Prévoyez une bonne armure (il fait chaud et il cogne fort) et surtout une créature aquatique ou de l'eau à proximité.\n\n**2. Étape 1 : Le combat initial**\n\n    Vous devez d'abord affronter le Pyromane sauvage.\n\n    Réduisez ses points de vie jusqu'à ce qu'il tombe à environ 10 % de sa santé.\n\n    À ce moment-là, il va s'éteindre (ses flammes disparaissent) et il deviendra vulnérable.\n\n**3. Étape 2 : Le passage dans l'eau**\n\n    Une fois affaibli, vous devez le pousser ou l'attirer dans une source d'eau (rivière, mer ou même une flaque d'eau profonde).\n\n    Lorsqu'il entre dans l'eau alors qu'il est affaibli, il devient \"Doused\" (trempé). C'est là que vous pouvez interagir avec lui.\n\n    Approchez-vous et appuyez sur la touche d'action (Y sur Xbox) pour le monter.\n\n**4. Étape 3 : Le rodéo (La jauge de Taming)**\n\nC'est la partie la plus importante. Une fois sur son dos :\n\n    Tuer des cibles : Vous devez attaquer et tuer d'autres créatures sauvages aux alentours.\n\n    Absorber les flammes : En attaquant, vous accumulez de l'énergie de feu.\n\n    La jauge de Taming : Elle monte à mesure que vous tuez des cibles et que vous utilisez vos capacités de feu.\n\n    Le Timer : Attention, vous avez un temps limité. Si vous ne tuez pas assez vite, il vous éjectera et vous devrez recommencer.\n\n**5. Étape 4 : La validation finale (Le finish)**\n\nDès que la barre de taming affiche 100 % :\n\n    Ne descendez pas !\n\n    Réalisez immédiatement la combinaison de touches pour consommer toute l'énergie : RB + RT (sur Xbox).\n\n    Une explosion de flammes se produit et le Pyromane est à vous.",
+        "createdAt": "2025-12-17T17:21:42.202000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1450900786367172820",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "💡 **Petite Astuces :**\n\n    Cibles idéales : Visez des créatures avec pas mal de PV mais peu dangereuses (comme des herbivores) pour remplir la jauge rapidement.\n\n    Attention à la pluie : Si la pluie commence pendant le taming, cela peut compliquer les choses car il aura du mal à rester enflammé.\n\n    Soin : Si le Pyromane prend trop de dégâts pendant que vous le montez pour le tamer, la qualité de l'apprivoisement va baisser.",
+        "createdAt": "2025-12-17T17:21:43.903000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1450904075007819989",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "",
+        "createdAt": "2025-12-17T17:34:47.976000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/6cca45362ff7c84abf70ebc969b9178626a71372a717ddf5ff2d67644b261d48",
+            "name": "ChatGPT_Image_17_dec._2025_18_33_05.jpeg",
+            "contentType": "image/jpeg"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1450899082020126890",
+    "source": "discord",
+    "createdAt": "2025-12-17T17:14:57.555Z",
+    "updatedAt": "2025-12-17T17:34:47.976000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  },
+  {
+    "id": "1552248845948293160",
+    "title": "Sites utiles",
+    "content": "",
+    "authorId": "549274576698212372",
+    "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+    "images": [],
+    "messages": [
+      {
+        "id": "1552248845948293160",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Retrouver les liens utiles à votre survie et aide",
+        "createdAt": "2026-09-23T09:22:44.263000+00:00",
+        "media": [
+          {
+            "url": "/api/storage/objects/guide-media/414a59e4886c83ce6b1fbf82d008e4d775c829a903ec4bd44f748e1474d3388c",
+            "name": "file_00000000744881f4a600091f5018bae8.png",
+            "contentType": "image/png"
+          }
+        ],
+        "embeds": [],
+        "system": false
+      },
+      {
+        "id": "1552249361784774737",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "<:arki:1440506413083398327> - Suivez vos states  https://arki-family.swapdevstudio.fr/guides/scanner",
+        "createdAt": "2026-09-23T09:24:47.248000+00:00",
+        "media": [],
+        "embeds": [
+          {
+            "title": "Arki'Family - Tracker de Dinosaures ARK",
+            "description": "Arki'Family - Plateforme communautaire pour les éleveurs ARK. Rejoins une tribu, élève tes dinosaures, partage tes aventures.",
+            "url": "https://arki-family.swapdevstudio.fr/guides/scanner",
+            "image": "",
+            "fields": []
+          }
+        ],
+        "system": false
+      },
+      {
+        "id": "1552250059373154334",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "<a:dancingdino:1303157077702869054> - Dododex la bible d'ark (info et taming)  \nhttps://www.dododex.com/",
+        "createdAt": "2026-09-23T09:27:33.566000+00:00",
+        "media": [],
+        "embeds": [
+          {
+            "title": "Dododex | ARK Taming Calculator | ARK: Survival Ascended & Evolved",
+            "description": "Dododex a companion app for ARK: Survival Evolved & Ascended. Using the Taming Calculator, you can estimate how long it'll take to tame almost any dinosaur as well as the food and narcotics required for each.",
+            "url": "https://www.dododex.com/",
+            "image": "/api/storage/objects/guide-media/c0fcd8c1f72ae8c4c0258f0b52418a3ff36b0f85d84228f13377edd7c9958233",
+            "fields": []
+          }
+        ],
+        "system": false
+      },
+      {
+        "id": "1552251057617244161",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "🎨  - Tester vos couleurs  https://www.arkimplant.com/dinos?species=rex",
+        "createdAt": "2026-09-23T09:31:31.566000+00:00",
+        "media": [],
+        "embeds": [
+          {
+            "title": "Rex Color Build + Stats",
+            "description": "Preview Rex color regions from Ark: Survival Ascended and share custom palettes instantly.",
+            "url": "https://www.arkimplant.com/dinos?species=rex",
+            "image": "/api/storage/objects/guide-media/a042c60f9e83aab139f056fcf6efdfa4c061a54e23ab1f8543629c02438e263f",
+            "fields": []
+          }
+        ],
+        "system": false
+      },
+      {
+        "id": "1552257673100136489",
+        "authorId": "549274576698212372",
+        "authorName": "K𝕪𝕒𝕣𝕒🐺Arki’Admin",
+        "content": "Sites utiles",
+        "createdAt": "2026-09-23T09:57:48.820000+00:00",
+        "media": [],
+        "embeds": [],
+        "system": true
+      }
+    ],
+    "sourceUrl": "https://discord.com/channels/1156256997403000874/1552248845948293160",
+    "source": "discord",
+    "createdAt": "2026-09-23T09:22:44.263Z",
+    "updatedAt": "2026-09-23T09:57:48.820000+00:00",
+    "revision": 1,
+    "canEdit": false,
+    "starterMissing": false
+  }
+]

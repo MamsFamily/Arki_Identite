@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Arki Family — Tribus"
+description = "Le site public d’Arki Family pour découvrir les tribus ARK, consulter leurs fiches et permettre aux joueurs connectés avec Discord de créer et gérer les tribus qu’ils possèdent ou administrent."
+version = "1.0.0"
+id = "artifacts/arki-tribes"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22065
+
+[services.development]
+run = "pnpm --filter @workspace/arki-tribes run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/arki-tribes", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/arki-tribes/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22065"
+BASE_PATH = "/"

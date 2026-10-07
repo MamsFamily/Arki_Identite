@@ -1,0 +1,586 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cinzel:wght@500;600;700;800&family=Spline+Sans+Mono:wght@400;600&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-primary-border: var(--sidebar-primary-border);
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-accent-border: var(--sidebar-accent-border);
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Arki Family — midnight expedition palette */
+:root {
+  color-scheme: dark;
+  --button-outline: rgba(255, 255, 255, 0.1);
+  --badge-outline: rgba(255, 255, 255, 0.05);
+
+  /* Automatic computation of border around primary / danger buttons */
+  --opaque-button-border-intensity: -8; /* In terms of percentages */
+
+  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --elevate-1: rgba(255, 255, 255, 0.04);
+  --elevate-2: rgba(255, 255, 255, 0.09);
+
+  --background: 225 43% 7%;
+
+  --foreground: 210 30% 94%;
+
+  --border: 222 26% 23%;
+
+  --card: 224 36% 11%;
+
+  --card-foreground: 210 30% 94%;
+
+  --card-border: 222 26% 23%;
+
+  --sidebar: 225 42% 9%;
+
+  --sidebar-foreground: 210 30% 94%;
+
+  --sidebar-border: 222 26% 23%;
+
+  --sidebar-primary: 190 96% 62%;
+
+  --sidebar-primary-foreground: 225 43% 7%;
+
+  --sidebar-accent: 224 30% 17%;
+
+  --sidebar-accent-foreground: 210 30% 94%;
+
+  --sidebar-ring: 190 96% 62%;
+
+  --popover: 224 36% 11%;
+
+  --popover-foreground: 210 30% 94%;
+
+  --popover-border: 222 26% 23%;
+
+  --primary: 190 96% 62%;
+
+  --primary-foreground: 225 43% 7%;
+
+  --secondary: 224 30% 17%;
+
+  --secondary-foreground: 210 30% 94%;
+
+  --muted: 224 29% 15%;
+
+  --muted-foreground: 215 17% 68%;
+
+  --accent: 267 89% 72%;
+
+  --accent-foreground: 225 43% 7%;
+
+  --destructive: 6 85% 68%;
+
+  --destructive-foreground: 0 0% 7%;
+
+  --input: 220 20% 36%;
+  --ring: 190 96% 62%;
+  --chart-1: 190 96% 62%;
+  --chart-2: 267 89% 72%;
+  --chart-3: 6 85% 68%;
+  --chart-4: 333 85% 73%;
+  --chart-5: 215 17% 68%;
+
+  --app-font-sans: 'Manrope', sans-serif;
+  --app-font-serif: 'Cinzel', 'Times New Roman', serif;
+  --app-font-mono: 'Spline Sans Mono', monospace;
+  --radius: 0.75rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0); /*replace with H S L */
+  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0); /*replace with H S L */
+  --shadow-sm:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-md:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 2px 4px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-lg:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-xl:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
+
+  /* Fallback for older browsers */
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(
+    from hsl(var(--sidebar-primary)) h s
+      calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  /* Fallback for older browsers */
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(
+    from hsl(var(--sidebar-accent)) h s
+      calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  /* Fallback for older browsers */
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(
+    from hsl(var(--primary)) h s
+      calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  /* Fallback for older browsers */
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(
+    from hsl(var(--secondary)) h s
+      calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  /* Fallback for older browsers */
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(
+    from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) /
+      alpha
+  );
+
+  /* Fallback for older browsers */
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(
+    from hsl(var(--accent)) h s
+      calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  /* Fallback for older browsers */
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(
+    from hsl(var(--destructive)) h s
+      calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+}
+
+.dark {
+  --button-outline: rgba(255, 255, 255, 0.1);
+  --badge-outline: rgba(255, 255, 255, 0.05);
+
+  --opaque-button-border-intensity: 9; /* In terms of percentages */
+
+  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --elevate-1: rgba(255, 255, 255, 0.04);
+  --elevate-2: rgba(255, 255, 255, 0.09);
+
+  --background: 225 43% 7%;
+
+  --foreground: 210 30% 94%;
+
+  --border: 222 26% 23%;
+
+  --card: 224 36% 11%;
+
+  --card-foreground: 210 30% 94%;
+
+  --card-border: 222 26% 23%;
+
+  --sidebar: 225 42% 9%;
+
+  --sidebar-foreground: 210 30% 94%;
+
+  --sidebar-border: 222 26% 23%;
+
+  --sidebar-primary: 190 96% 62%;
+
+  --sidebar-primary-foreground: 225 43% 7%;
+
+  --sidebar-accent: 224 30% 17%;
+
+  --sidebar-accent-foreground: 210 30% 94%;
+
+  --sidebar-ring: 190 96% 62%;
+
+  --popover: 224 36% 11%;
+
+  --popover-foreground: 210 30% 94%;
+
+  --popover-border: 222 26% 23%;
+
+  --primary: 190 96% 62%;
+
+  --primary-foreground: 225 43% 7%;
+
+  --secondary: 224 30% 17%;
+
+  --secondary-foreground: 210 30% 94%;
+
+  --muted: 224 29% 15%;
+
+  --muted-foreground: 215 17% 68%;
+
+  --accent: 267 89% 72%;
+
+  --accent-foreground: 225 43% 7%;
+
+  --destructive: 6 85% 68%;
+
+  --destructive-foreground: 0 0% 7%;
+
+  /* Used as the border around inputs. Dark mode: Should be a border that is light enough to have high contrast when rendered on a --card background. More contrast than standard --border */
+  --input: 220 20% 36%;
+  --ring: 190 96% 62%;
+  --chart-1: 190 96% 62%;
+  --chart-2: 267 89% 72%;
+  --chart-3: 6 85% 68%;
+  --chart-4: 333 85% 73%;
+  --chart-5: 215 17% 68%;
+
+  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-sm:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-md:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 2px 4px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-lg:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-xl:
+    0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0),
+    0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0);
+  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/**
+ * Using the elevate system.
+ * Automatic contrast adjustment.
+ *
+ * <element className="hover-elevate" />
+ * <element className="active-elevate-2" />
+ *
+ * // Using the tailwind utility when a data attribute is "on"
+ * <element className="toggle-elevate data-[state=on]:toggle-elevated" />
+ * // Or manually controlling the toggle state
+ * <element className="toggle-elevate toggle-elevated" />
+ *
+ * Elevation systems have to handle many states.
+ * - not-hovered, vs. hovered vs. active  (three mutually exclusive states)
+ * - toggled or not
+ * - focused or not (this is not handled with these utilities)
+ *
+ * Even without handling focused or not, this is six possible combinations that
+ * need to be distinguished from eachother visually.
+ */
+@layer utilities {
+  /* Hide ugly search cancel button in Chrome until we can style it properly */
+  input[type='search']::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+
+  /* Placeholder styling for contentEditable div */
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+
+  /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
+   * buttons/badges can remove the automatic brightness adjustment on interactions
+   * and program their own. */
+  .no-default-hover-elevate {
+  }
+
+  .no-default-active-elevate {
+  }
+
+  /**
+   * Toggleable backgrounds go behind the content. Hoverable/active goes on top.
+   * This way they can stack/compound. Both will overlap the parent's borders!
+   * So borders will be automatically adjusted both on toggle, and hover/active,
+   * and they will be compounded.
+   */
+  .toggle-elevate::before,
+  .toggle-elevate-2::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    /*border-radius: inherit;   match rounded corners */
+    border-radius: inherit;
+    z-index: -1;
+    /* sits behind content but above backdrop */
+  }
+
+  .toggle-elevate.toggle-elevated::before {
+    background-color: var(--elevate-2);
+  }
+
+  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
+  .border.toggle-elevate::before {
+    inset: -1px;
+  }
+
+  /* Does not work on elements with overflow:hidden! */
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    /*border-radius: inherit;   match rounded corners */
+    border-radius: inherit;
+    z-index: 999;
+    /* sits in front of content */
+  }
+
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
+  }
+
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
+  }
+
+  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+    inset: -1px;
+  }
+}
+
+@layer base { h1,h2,h3,.display{font-family:var(--app-font-serif);letter-spacing:-0.01em} body{background-image:none} }
+@layer components {
+ .field{width:100%;border:1.5px solid hsl(var(--input));background:hsl(var(--card));padding:.55rem .75rem;border-radius:.25rem;font-size:.95rem}
+ .field:focus{outline:2px solid hsl(var(--ring));outline-offset:1px}
+ .lbl{display:block;font-family:var(--app-font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;color:hsl(var(--muted-foreground))}
+ .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1rem;border-radius:.25rem;font-weight:700;font-size:.9rem;border:1.5px solid hsl(var(--primary));transition:transform .15s,background .15s;cursor:pointer}
+ .btn:active{transform:translateY(1px)} .btn:disabled{opacity:.5;cursor:not-allowed}
+ .btn-primary{background:hsl(var(--primary));color:hsl(var(--primary-foreground))}
+ .btn-primary:hover:not(:disabled){background:hsl(37 62% 62%)}
+ .btn-ghost{background:transparent;color:hsl(var(--primary))} .btn-ghost:hover:not(:disabled){background:hsl(var(--secondary))}
+ .btn-danger{background:hsl(var(--destructive));border-color:hsl(var(--destructive));color:hsl(var(--destructive-foreground))}
+ .btn-sm{padding:.3rem .65rem;font-size:.8rem}
+ .panel{background:hsl(var(--card));border:1.5px solid hsl(var(--border));border-radius:.35rem;padding:1.25rem;box-shadow:3px 3px 0 hsl(var(--border))}
+ .chip{display:inline-flex;align-items:center;gap:.3rem;font-family:var(--app-font-mono);font-size:.72rem;padding:.15rem .5rem;border:1px solid hsl(var(--primary));border-radius:999px}
+ .rise{animation:rise .5s both} @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+}
+
+:root,.dark{
+ --background:225 43% 7%;--foreground:210 30% 94%;--border:222 26% 23%;--card:224 36% 11%;--card-foreground:210 30% 94%;--card-border:222 26% 23%;
+ --popover:224 36% 11%;--popover-foreground:210 30% 94%;--popover-border:222 26% 23%;
+ --primary:190 96% 62%;--primary-foreground:225 43% 7%;--accent:267 89% 72%;--accent-foreground:225 43% 7%;
+ --secondary:224 30% 17%;--secondary-foreground:210 30% 94%;--muted:224 29% 15%;--muted-foreground:215 17% 68%;
+ --input:220 20% 36%;--ring:190 96% 62%;--destructive:6 78% 66%;
+ --chart-1:190 96% 62%;--chart-2:267 89% 72%;--chart-3:212 92% 66%;
+ --sidebar-primary:190 96% 62%;--sidebar-ring:190 96% 62%;
+}
+body{background-color:hsl(var(--background));background-image:radial-gradient(55rem 34rem at 90% -12%,hsl(267 70% 38%/.17),transparent),radial-gradient(48rem 32rem at -12% 26%,hsl(190 85% 30%/.12),transparent),linear-gradient(180deg,hsl(225 43% 7%),hsl(226 48% 6%));background-attachment:fixed}
+.portal-header{background:hsl(225 43% 7%/.91);backdrop-filter:blur(16px);border-bottom:1px solid hsl(var(--border));box-shadow:0 10px 35px hsl(225 50% 3%/.28)}
+.portal-header>div{max-width:80rem}
+/* Keep the existing header controls visible on narrow community-guide pages. */
+@media(max-width:639px){
+  .guides-shell .portal-header>div{gap:.5rem;padding-inline:.75rem}
+  .guides-shell .portal-header [data-testid="link-home"]{gap:.4rem}
+  .guides-shell .portal-header [data-testid="img-site-logo"]{width:2rem;height:2rem}
+  .guides-shell .portal-header .wordmark{font-size:.78rem;letter-spacing:.13em}
+}
+@media(max-width:359px){
+  .guides-shell .portal-header [data-testid="link-home"]>span{display:none}
+}
+.nav-link{padding:.55rem .85rem;border-radius:999px;font-size:.83rem;font-weight:700;color:hsl(var(--muted-foreground));transition:background .2s,color .2s}
+.nav-link:hover{background:hsl(var(--secondary));color:hsl(var(--foreground))}
+.nav-link-on{background:hsl(var(--primary)/.11);color:hsl(var(--primary))}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:3px}
+.btn,.field{border-radius:.65rem}
+.btn{transition:transform .2s,background .2s,border-color .2s}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn-primary{box-shadow:0 0 24px hsl(190 96% 62%/.12)}
+.btn-primary:hover:not(:disabled){background:hsl(190 96% 70%)}
+.btn-ghost{color:hsl(var(--foreground));border-color:hsl(var(--input));background:hsl(224 36% 11%/.38)}
+.panel{position:relative;overflow:hidden;border-radius:1rem;box-shadow:0 16px 42px hsl(226 50% 3%/.2);border:1px solid hsl(var(--border));background:linear-gradient(145deg,hsl(224 36% 12%/.96),hsl(225 43% 9%/.96))}
+.chip{border-color:hsl(var(--accent)/.55);color:hsl(var(--foreground));background:hsl(var(--accent)/.07)}
+.eyebrow{font-family:var(--app-font-mono);font-size:.7rem;letter-spacing:.17em;text-transform:uppercase;color:hsl(var(--primary))}
+.hero{position:relative;min-height:clamp(400px,52vw,570px);overflow:hidden;border-radius:1.25rem;border:1px solid hsl(190 96% 62%/.28);background:linear-gradient(135deg,hsl(224 45% 15%),hsl(225 43% 7%));box-shadow:0 24px 75px hsl(226 60% 2%/.42)}
+.hero:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,hsl(225 43% 7%/.94) 0%,hsl(225 43% 7%/.68) 42%,transparent 100%),linear-gradient(0deg,hsl(225 43% 7%/.7),transparent 48%)}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.82;animation:world-drift 22s ease-in-out infinite alternate}
+.hero-shade{display:none}
+.hero-copy{position:relative;z-index:1}
+.hero-title{font-size:clamp(3.1rem,8vw,6.9rem);line-height:.91;letter-spacing:-.065em;max-width:11ch;text-wrap:balance}
+.hero-title .hero-accent{color:hsl(var(--primary));text-shadow:0 0 34px hsl(190 96% 62%/.23)}
+.portal-kicker{display:flex;align-items:center;gap:.7rem}
+.portal-kicker:before{content:"";display:block;width:2.4rem;height:1px;background:hsl(var(--primary))}
+.tribe-card{min-height:190px;transition:transform .25s,border-color .25s,box-shadow .25s;background:linear-gradient(145deg,hsl(224 36% 12%),hsl(225 43% 9%))}
+.tribe-card:hover{transform:translateY(-4px);border-color:hsl(var(--primary)/.4);box-shadow:0 20px 44px hsl(190 70% 8%/.2)}
+.tribe-card:before{content:"";position:absolute;right:-34px;top:-56px;width:170px;height:170px;border:1px solid hsl(var(--primary)/.08);border-radius:50%;box-shadow:0 0 0 18px hsl(var(--primary)/.025),0 0 0 38px hsl(var(--accent)/.025);pointer-events:none}
+.section-rule{height:1px;background:linear-gradient(90deg,hsl(var(--primary)/.5),hsl(var(--accent)/.18),transparent)}
+.page-heading{position:relative;padding:1rem 0 1.5rem}
+.page-heading:after{content:"";position:absolute;left:0;bottom:0;width:min(10rem,35vw);height:2px;background:linear-gradient(90deg,hsl(var(--primary)),hsl(var(--accent)),transparent)}
+.page-heading h1{color:hsl(var(--foreground));letter-spacing:-.045em}
+.field{background:hsl(225 45% 8%/.78);border-color:hsl(var(--border))}
+.field::placeholder{color:hsl(var(--muted-foreground)/.8)}
+footer{background:hsl(225 43% 6%/.65)}
+@keyframes world-drift{from{transform:scale(1.025) translateX(0)}to{transform:scale(1.075) translateX(-.7%)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media(max-width:640px){.hero{min-height:440px}.hero:after{background:linear-gradient(90deg,hsl(225 43% 7%/.88),hsl(225 43% 7%/.38)),linear-gradient(0deg,hsl(225 43% 7%/.85),transparent 75%)}}
+
+/* ===== Nexus design system (brief v2) ===== */
+:root,.dark{
+ --background:223 47% 6%;--foreground:214 42% 97%;--card:219 41% 11%;--card-foreground:214 42% 97%;
+ --popover:219 41% 11%;--popover-foreground:214 42% 97%;
+ --primary:197 100% 70%;--primary-foreground:223 47% 6%;--accent:253 100% 74%;--accent-foreground:223 47% 6%;
+ --muted-foreground:213 20% 66%;--border:218 30% 21%;--ring:197 100% 70%;--input:218 22% 34%;
+ --secondary:219 34% 15%;--muted:219 34% 13%;
+}
+h1,h2,h3,.display{font-family:var(--app-font-serif);font-weight:600;letter-spacing:.06em}
+body{background-color:#080C16;background-image:radial-gradient(60rem 36rem at 92% -10%,rgba(101,71,216,.2),transparent),radial-gradient(52rem 34rem at -10% 30%,rgba(101,216,255,.08),transparent),linear-gradient(180deg,#080C16,#0a0f1c 60%,#080C16)}
+.portal-header{background:rgba(8,12,22,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(154,234,255,.12)}
+.wordmark{font-family:var(--app-font-serif);letter-spacing:.2em;font-weight:700;font-size:.98rem;line-height:1}
+.nav-link{font-size:.78rem;letter-spacing:.04em;padding:.5rem .72rem;position:relative}
+.nav-link-on{background:transparent;color:#9AEAFF}
+.nav-link-on:after{content:"";position:absolute;left:.7rem;right:.7rem;bottom:.1rem;height:2px;border-radius:2px;background:linear-gradient(90deg,#65D8FF,#9C7CFF);box-shadow:0 0 10px rgba(101,216,255,.7)}
+.btn{border-radius:999px;letter-spacing:.04em;border-width:1px}
+.btn-primary{background:linear-gradient(110deg,#65D8FF,#9C7CFF);border-color:rgba(154,234,255,.7);color:#080C16;box-shadow:0 0 0 rgba(101,216,255,0)}
+.btn-primary:hover:not(:disabled){background:linear-gradient(110deg,#9AEAFF,#b09cff);box-shadow:0 0 26px rgba(101,216,255,.35)}
+.btn-ghost{border-color:rgba(154,234,255,.32);background:rgba(15,25,42,.5);backdrop-filter:blur(8px)}
+.btn-ghost:hover:not(:disabled){border-color:#65D8FF;background:rgba(101,216,255,.08);box-shadow:0 0 22px rgba(101,216,255,.18)}
+.btn-lg{padding:.85rem 1.6rem;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase}
+.panel,.glass{background:rgba(15,25,42,.8);backdrop-filter:blur(14px);border:1px solid rgba(154,234,255,.13);border-radius:16px;box-shadow:0 14px 40px rgba(2,5,12,.35)}
+.panel{padding:1.25rem}
+.chip{border-radius:999px;border-color:rgba(156,124,255,.5);background:rgba(156,124,255,.1)}
+.field{background:rgba(8,12,22,.7);border-radius:999px;padding:.6rem 1rem}
+textarea.field{border-radius:16px}
+select.field{border-radius:999px}
+.eyebrow{color:#65D8FF;letter-spacing:.22em}
+.pill{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:999px;border:1px solid rgba(154,234,255,.2);background:rgba(15,25,42,.6);font-size:.82rem;font-weight:600;color:#c3cee0;transition:all .25s;cursor:pointer}
+.pill:hover{border-color:#65D8FF;color:#fff}
+.pill[aria-selected=true],.pill[aria-pressed=true]{background:linear-gradient(110deg,rgba(101,216,255,.95),rgba(156,124,255,.9));color:#080C16;border-color:transparent}
+.tabs-row{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.4rem;scrollbar-width:none;border-bottom:1px solid rgba(154,234,255,.1)}
+.tabs-row::-webkit-scrollbar{display:none}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+/* hero */
+.nx-hero{position:relative;min-height:min(100dvh,860px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;isolation:isolate;padding:5rem 1rem 9rem}
+.nx-hero-img{position:absolute;inset:-3%;width:106%;height:106%;object-fit:cover;z-index:-3;animation:nx-drift 26s ease-in-out infinite alternate}
+.nx-hero:before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(ellipse at 50% 42%,rgba(8,12,22,.5),rgba(8,12,22,.12) 60%),linear-gradient(180deg,rgba(8,12,22,.5) 0%,rgba(8,12,22,.1) 35%,rgba(8,12,22,.55) 78%,#080C16 100%)}
+.nx-hero:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 50% 100%,rgba(156,124,255,.18),transparent 55%)}
+.nx-title{font-family:var(--app-font-serif);font-weight:600;font-size:clamp(2.6rem,9vw,6.4rem);letter-spacing:.14em;line-height:1;color:#F4F7FB;text-shadow:0 0 40px rgba(101,216,255,.45),0 4px 30px rgba(8,12,22,.8);padding-left:.14em}
+.nx-sub{font-family:var(--app-font-serif);letter-spacing:.7em;font-size:clamp(.78rem,1.8vw,1.1rem);color:#9AEAFF;padding-left:.7em;margin-top:.9rem;text-shadow:0 2px 14px rgba(8,12,22,.9)}
+.nx-slogan{font-family:var(--app-font-serif);letter-spacing:.14em;font-size:clamp(.78rem,1.8vw,1.05rem);text-transform:uppercase;color:#e6ecf6;margin-top:1.4rem;text-shadow:0 2px 16px rgba(8,12,22,.9)}
+.nx-emblem{width:clamp(280px,42vw,500px);max-width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 0 22px rgba(101,216,255,.55));margin-bottom:1rem}
+.nx-otter{position:absolute;right:max(1rem,4vw);bottom:-.4rem;width:clamp(96px,16vw,230px);filter:drop-shadow(0 10px 30px rgba(8,12,22,.8)) drop-shadow(0 0 14px rgba(156,124,255,.35));pointer-events:none;animation:nx-float 6s ease-in-out infinite;z-index:1}
+.nx-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:700;color:#F4F7FB;text-shadow:0 1px 10px rgba(8,12,22,.9)}
+.nx-tag+.nx-tag:before{content:"";width:3px;height:3px;border-radius:50%;background:#9AEAFF;margin-right:.55rem}
+/* stats */
+.stat-wrap{margin-top:-6.5rem;position:relative;z-index:2}
+.stat-cell{display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:1.1rem .5rem;text-align:center}
+.stat-ico{color:#65D8FF;filter:drop-shadow(0 0 8px rgba(101,216,255,.7))}
+.stat-val{font-family:var(--app-font-serif);font-size:1.9rem;font-weight:700;letter-spacing:.04em;line-height:1}
+/* cards */
+.media-card{position:relative;display:block;overflow:hidden;border-radius:16px;border:1px solid rgba(154,234,255,.14);background:#101827;aspect-ratio:4/3;transition:transform .35s,border-color .35s,box-shadow .35s}
+.media-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+.media-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,12,22,0) 35%,rgba(8,12,22,.92));pointer-events:none}
+.media-card:hover,.media-card:focus-visible{transform:translateY(-4px);border-color:rgba(101,216,255,.65);box-shadow:0 0 34px rgba(101,216,255,.2)}
+.media-card:hover img{transform:scale(1.07)}
+.media-card .mc-body{position:absolute;inset:auto 0 0 0;padding:1rem;z-index:1}
+.media-card .mc-cta{position:absolute;right:.8rem;top:.8rem;z-index:1;opacity:0;transform:translateY(-6px);transition:all .3s;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.4rem .8rem;border-radius:999px;background:rgba(8,12,22,.7);border:1px solid #65D8FF;color:#9AEAFF}
+.media-card:hover .mc-cta,.media-card:focus-visible .mc-cta{opacity:1;transform:none}
+.media-card.is-event{border-color:rgba(243,154,201,.6);box-shadow:0 0 24px rgba(255,160,120,.14)}
+.media-card.is-event:hover{border-color:#FFA078;box-shadow:0 0 34px rgba(255,160,120,.28)}
+.demo-tag{display:inline-flex;align-items:center;font-family:var(--app-font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;padding:.2rem .55rem;border-radius:999px;border:1px dashed rgba(243,154,201,.55);color:#F39AC9;background:rgba(243,154,201,.06)}
+/* banner */
+.nx-banner{position:relative;overflow:hidden;border-radius:20px;border:1px solid rgba(154,234,255,.16);isolation:isolate;margin-bottom:1.5rem;min-height:230px;display:flex;align-items:flex-end}
+.nx-banner>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.nx-banner:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(8,12,22,.9),rgba(8,12,22,.35) 70%),linear-gradient(0deg,rgba(8,12,22,.7),transparent 60%)}
+.nx-h1{font-size:clamp(1.9rem,5.5vw,3.6rem);letter-spacing:.14em;line-height:1.05}
+.rule-glow{height:1px;background:linear-gradient(90deg,transparent,rgba(101,216,255,.6),rgba(156,124,255,.5),transparent)}
+.dots{display:inline-flex;gap:.25rem}.dots i{width:.6rem;height:.6rem;border-radius:50%;background:rgba(154,168,186,.25)}.dots i.on{background:#65D8FF;box-shadow:0 0 8px rgba(101,216,255,.7)}
+@keyframes nx-drift{from{transform:scale(1) translateX(0)}to{transform:scale(1.05) translateX(-1.2%)}}
+@keyframes nx-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(max-width:640px){.nx-hero{padding-bottom:8rem}.stat-wrap{margin-top:-5rem}.nx-otter{opacity:.9}}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.nx-hero-img,.nx-otter{animation:none}}

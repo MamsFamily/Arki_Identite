@@ -1,0 +1,2458 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Api",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "tags": [
+    {
+      "name": "tribes"
+    }
+  ],
+  "paths": {
+    "/shop": {
+      "get": {"operationId":"getShop","responses":{"200":{"description":"Shop et dons réservés aux comptes Discord connectés","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ShopCatalog"}}}},"401":{"description":"Connexion Discord obligatoire"}}}
+    },
+    "/donations": {
+      "get": {"operationId":"getDonations","responses":{"200":{"description":"Dons réservés aux comptes Discord connectés","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ShopDonations"}}}},"401":{"description":"Connexion Discord obligatoire"}}}
+    },
+    "/guides": {
+      "get": {"operationId":"listGuides","responses":{"200":{"description":"Guides publics de la communauté","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/CommunityGuide"}}}}}}},
+      "post": {"operationId":"createGuide","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideInput"}}}},"responses":{"201":{"description":"Guide publié directement","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CommunityGuide"}}}}}}
+    },
+    "/guides/{guideId}": {
+      "parameters":[{"name":"guideId","in":"path","required":true,"schema":{"type":"string"}}],
+      "get":{"operationId":"getGuide","responses":{"200":{"description":"Guide et transcription complète du fil Discord","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CommunityGuide"}}}}}},
+      "put":{"operationId":"updateGuide","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideInput"}}}},"responses":{"200":{"description":"Guide modifié sans altérer les messages Discord importés","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CommunityGuide"}}}}}},
+      "delete":{"operationId":"deleteGuide","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideRevision"}}}},"responses":{"200":{"description":"Guide retiré du site uniquement","content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideStatus"}}}}}}
+    },
+    "/guide-uploads/request-url": {
+      "post":{"operationId":"requestGuideImage","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideImageRequest"}}}},"responses":{"200":{"description":"Envoi direct d'une image dans le stockage durable","content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideImageUpload"}}}}}}
+    },
+    "/guide-uploads/publish": {
+      "post":{"operationId":"publishGuideImage","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideImagePath"}}}},"responses":{"200":{"description":"Image vérifiée et disponible pour un guide","content":{"application/json":{"schema":{"$ref":"#/components/schemas/GuideImagePublished"}}}}}}
+    },
+    "/dino-catalogue": {
+      "get": {"operationId":"listDinoSpecies","parameters":[{"name":"all","in":"query","schema":{"type":"boolean"}}],"responses":{"200":{"description":"Catalogue lié aux maps et mods du site","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/DinoSpecies"}}}}}}},
+      "post":{"operationId":"createDinoSpecies","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoSpeciesInput"}}}},"responses":{"201":{"description":"Espèce ou variante ajoutée par un administrateur ou propriétaire du site","content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoSpecies"}}}}}}
+    },
+    "/dino-catalogue/{speciesId}": {
+      "parameters":[{"name":"speciesId","in":"path","required":true,"schema":{"type":"integer"}}],
+      "put":{"operationId":"updateDinoSpecies","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoSpeciesInput"}}}},"responses":{"200":{"description":"Créature modifiée","content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoSpecies"}}}}}}
+    },
+    "/tribes/{id}/dino-records": {
+      "parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"integer"}}],
+      "get":{"operationId":"listDinoRecords","responses":{"200":{"description":"Records privés de la tribu","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/DinoRecord"}}}}}}}
+    },
+    "/tribes/{id}/dino-records/{speciesId}": {
+      "parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"integer"}},{"name":"speciesId","in":"path","required":true,"schema":{"type":"integer"}}],
+      "put":{"operationId":"saveDinoRecord","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoRecordInput"}}}},"responses":{"200":{"description":"Records confirmés","content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoRecord"}}}}}},
+      "delete":{"operationId":"deleteDinoRecord","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoRecordDelete"}}}},"responses":{"200":{"description":"Fiche supprimée après confirmation","content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoDeleteStatus"}}}}}}
+    },
+    "/tribes/{id}/dino-photo": {
+      "parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"integer"}}],
+      "post":{"operationId":"readDinoPhoto","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoPhotoInput"}}}},"responses":{"200":{"description":"Lecture à vérifier, sans enregistrement automatique","content":{"application/json":{"schema":{"$ref":"#/components/schemas/DinoPhotoResult"}}}}}}
+    },
+    "/tribes/{id}/dino-history": {
+      "parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"integer"}}],
+      "get":{"operationId":"listDinoHistory","responses":{"200":{"description":"Les 100 dernières modifications","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/DinoRecordHistory"}}}}}}}
+    },
+    "/site-maps": {
+      "get": {
+        "operationId": "listSiteMaps", "tags": ["tribes"], "summary": "Fiches publiques des maps",
+        "responses": {"200": {"description": "Maps", "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/SiteMap"}}}}}}
+      }
+    },
+    "/site-maps/{slug}": {
+      "parameters": [{"name": "slug", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[a-z0-9-]+$", "maxLength": 80}}],
+      "get": {
+        "operationId": "getSiteMap", "tags": ["tribes"], "summary": "Consulter une map",
+        "responses": {"200": {"description": "Map", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SiteMap"}}}}, "404": {"description": "Map introuvable"}}
+      },
+      "put": {
+        "operationId": "updateSiteMap", "tags": ["tribes"], "summary": "Modifier une map en tant que propriétaire du site",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SiteMapInput"}}}},
+        "responses": {
+          "200": {"description": "Map enregistrée", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SiteMap"}}}},
+          "400": {"description": "Formulaire invalide"}, "401": {"description": "Connexion requise"}, "403": {"description": "Propriétaire requis"}, "404": {"description": "Map introuvable"}, "409": {"description": "Map modifiée par un autre propriétaire"}
+        }
+      }
+    },
+    "/site-maps/{slug}/settlements": {
+      "parameters": [{"name":"slug","in":"path","required":true,"schema":{"type":"string","pattern":"^[a-z0-9-]+$","maxLength":80}}],
+      "get": {"operationId":"getMapSettlements","tags":["tribes"],"summary":"Tribus dont la base principale est sur cette map",
+        "responses":{"200":{"description":"Implantations déclarées et carte","content":{"application/json":{"schema":{"$ref":"#/components/schemas/MapSettlements"}}}},"404":{"description":"Map introuvable"}}}
+    },
+    "/site-maps/{slug}/cartography": {
+      "parameters": [{"name":"slug","in":"path","required":true,"schema":{"type":"string","pattern":"^[a-z0-9-]+$","maxLength":80}}],
+      "put":{"operationId":"saveMapCartography","tags":["tribes"],"summary":"Enregistrer la carte officielle en tant que propriétaire",
+        "requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/MapCartographyInput"}}}},
+        "responses":{"200":{"description":"Carte enregistrée","content":{"application/json":{"schema":{"$ref":"#/components/schemas/MapCartography"}}}},"400":{"description":"Image invalide"},"401":{"description":"Connexion requise"},"403":{"description":"Propriétaire requis"},"409":{"description":"Carte modifiée entre-temps"}}}
+    },
+    "/my-tribes/name": {
+      "put": {
+        "operationId": "updateMyTribeName", "tags": ["tribes"],
+        "summary": "Modifier son propre nom en jeu dans toutes ses tribus du serveur",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/MemberNameInput"}}}},
+        "responses": {
+          "200": {"description": "Nom enregistré", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/StatusResponse"}}}},
+          "400": {"description": "Nom invalide"}, "401": {"description": "Connexion requise"}, "403": {"description": "CSRF invalide"}, "404": {"description": "Aucune tribu"}
+        }
+      }
+    },
+    "/tribes/{id}/leave": {
+      "post": {
+        "operationId": "leaveTribe", "tags": ["tribes"],
+        "summary": "Quitter soi-même une tribu, sauf pour son propriétaire",
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer", "minimum": 1}}],
+        "responses": {
+          "200": {"description": "Tribu quittée", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/StatusResponse"}}}},
+          "400": {"description": "Le propriétaire doit transférer la propriété"}, "401": {"description": "Connexion requise"}, "403": {"description": "Action interdite"}, "404": {"description": "Membre introuvable"}
+        }
+      }
+    },
+    "/tribes/{id}/history": {
+      "get": {
+        "operationId": "getTribeHistory", "tags": ["tribes"],
+        "summary": "Historique complet paginé, réservé aux gestionnaires",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer", "minimum": 1}},
+          {"name": "before", "in": "query", "schema": {"type": "integer", "minimum": 1}}
+        ],
+        "responses": {
+          "200": {"description": "Page d’historique", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TribeHistoryPage"}}}},
+          "400": {"description": "Pagination invalide"}, "401": {"description": "Connexion requise"}, "403": {"description": "Accès réservé"}
+        }
+      }
+    },
+    "/community-invite": {
+      "get": {
+        "operationId":"getCommunityInvite", "tags":["tribes"],
+        "summary":"Lien d’invitation Discord après identification, y compris pour les non-membres",
+        "responses":{
+          "200":{"description":"Invitation","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CommunityInvite"}}}},
+          "401":{"description":"Identification Discord requise"}
+        }
+      }
+    },
+    "/player-search": {
+      "get": {
+        "operationId": "searchPlayerProfiles", "tags": ["tribes"],
+        "summary": "Recherche de joueurs réservée aux membres du serveur Discord",
+        "parameters": [{"name":"q","in":"query","required":true,"schema":{"type":"string","minLength":2,"maxLength":80}}],
+        "responses": {
+          "200":{"description":"Informations publiques des joueurs du serveur","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PlayerSearchResults"}}}},
+          "400":{"description":"Recherche invalide"}, "401":{"description":"Connexion requise"},
+          "403":{"description":"Appartenance au serveur requise"}, "503":{"description":"Discord indisponible"}
+        }
+      }
+    },
+    "/site-mods": {
+      "get": {
+        "operationId": "listSiteMods", "tags": ["tribes"], "summary": "Catalogue public des mods du cluster", "security": [],
+        "responses": {
+          "200": {"description": "Catalogue public des mods", "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/SiteMod"}}}}}
+        }
+      },
+      "post": {
+        "operationId": "createSiteMod", "tags": ["tribes"], "summary": "Ajouter un mod en tant que propriétaire",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SiteModInput"}}}},
+        "responses": {"201": {"description": "Mod créé", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SiteMod"}}}}, "403": {"description": "Accès propriétaire requis"}}
+      }
+    },
+    "/site-mods/{id}": {
+      "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer", "minimum": 1}}],
+      "put": {
+        "operationId": "updateSiteMod", "tags": ["tribes"], "summary": "Modifier un mod en tant que propriétaire",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SiteModInput"}}}},
+        "responses": {"200": {"description": "Mod modifié", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SiteMod"}}}}, "403": {"description": "Accès propriétaire requis"}, "404": {"description": "Mod introuvable"}}
+      },
+      "delete": {
+        "operationId": "deleteSiteMod", "tags": ["tribes"], "summary": "Supprimer un mod en tant que propriétaire",
+        "responses": {"200": {"description": "Mod supprimé", "content": {"application/json": {"schema": {"type": "object", "required": ["status"], "properties": {"status": {"type": "string"}}}}}}, "403": {"description": "Accès propriétaire requis"}, "404": {"description": "Mod introuvable"}}
+      }
+    },
+    "/tribe-review": {
+      "get": {
+        "operationId": "getTribeReview",
+        "tags": ["tribes"],
+        "summary": "Alertes réservées au staff du site",
+        "responses": {
+          "200": {"description": "Contrôle des références et de la présence Discord", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TribeReview"}}}},
+          "401": {"description": "Connexion requise"},
+          "403": {"description": "Droits administrateur requis"}
+        }
+      }
+    },
+    "/discord-players": {
+      "get": {
+        "operationId": "listDiscordPlayers", "tags": ["tribes"],
+        "parameters": [
+          {"name":"q","in":"query","schema":{"type":"string","maxLength":80}},
+          {"name":"after","in":"query","schema":{"type":"string","pattern":"^[0-9]{17,20}$"}},
+          {"name":"tribeId","in":"query","schema":{"type":"integer","minimum":1}}
+        ],
+        "responses": {
+          "200":{"description":"Server players","content":{"application/json":{"schema":{"$ref":"#/components/schemas/DiscordPlayerPage"}}}},
+          "400":{"description":"Invalid query"}, "401":{"description":"Login required"}, "403":{"description":"Forbidden"},
+          "503":{"description":"Discord member directory unavailable"}
+        }
+      }
+    },
+    "/tribe-images/uploads": {
+      "post": {
+        "operationId": "requestTribeImageUpload", "tags": ["tribes"],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TribeImageUploadInput"}}}},
+        "responses": {
+          "200": {"description": "Upload ticket", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BrandingUpload"}}}},
+          "400": {"description": "Invalid image"}, "401": {"description": "Authentication required"},
+          "403": {"description": "Forbidden"}, "429": {"description": "Upload quota exceeded"}, "503": {"description": "Storage unavailable"}
+        }
+      }
+    },
+    "/tribe-images/publish": {
+      "post": {
+        "operationId": "publishTribeImage", "tags": ["tribes"],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TribeImagePublishInput"}}}},
+        "responses": {
+          "200": {"description": "Verified immutable image", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TribeImagePublished"}}}},
+          "400": {"description": "Invalid image"}, "401": {"description": "Authentication required"},
+          "403": {"description": "Forbidden"}, "503": {"description": "Storage unavailable"}
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "healthCheck",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      }
+    },
+    "/session": {
+      "get": {
+        "operationId": "getSession",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "operationId": "logout",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      }
+    },
+    "/overview": {
+      "get": {
+        "operationId": "getOverview",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Overview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      }
+    },
+    "/options": {
+      "get": {
+        "operationId": "getOptions",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "tribeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Options"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      },
+      "post": {
+        "operationId": "addOption",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Options"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptionInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeOption",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Options"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptionInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tribes": {
+      "get": {
+        "operationId": "listTribes",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "map",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recruiting",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "mine",
+            "in": "query",
+            "description": "Tribus dont le compte Discord connecté est propriétaire ou membre, indépendamment de ses droits d'administration du site.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Tribe"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTribe",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TribeCreationInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tribes/{id}": {
+      "get": {
+        "operationId": "getTribe",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateTribe",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TribeInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTribe",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      }
+    },
+    "/tribes/{id}/members": {
+      "put": {
+        "operationId": "saveMember",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tribes/{id}/members/{userId}": {
+      "delete": {
+        "operationId": "removeMember",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      }
+    },
+    "/tribes/{id}/places": {
+      "post": {
+        "operationId": "addPlace",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tribes/{id}/images/{digest}": {
+      "get": {
+        "operationId": "getTribeImage",
+        "tags": ["tribes"],
+        "summary": "Afficher une image récupérée encore associée à la tribu",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "digest", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image originale sauvegardée",
+            "content": { "application/octet-stream": { "schema": { "type": "string", "format": "binary" } } }
+          },
+          "404": { "description": "Image introuvable ou retirée de la tribu" }
+        }
+      }
+    },
+    "/tribes/{id}/gallery": {
+      "put": {
+        "operationId": "saveGallery",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GalleryInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tribes/{id}/progression": {
+      "put": {
+        "operationId": "saveProgression",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Progression"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tribes/{id}/owner": {
+      "put": {
+        "operationId": "transferOwnership",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tribes/{id}/places/{kind}/{placeId}": {
+      "delete": {
+        "operationId": "removePlace",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "placeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "outpost",
+                "premium"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TribeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflicting name"
+          },
+          "503": {
+            "description": "Configuration unavailable"
+          }
+        }
+      }
+    },
+    "/site-access": {
+      "get": {
+        "operationId": "listSiteAccess",
+        "tags": [
+          "tribes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteAccess"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Site owner required"
+          },
+          "503": {
+            "description": "Discord verification unavailable"
+          }
+        }
+      },
+      "put": {
+        "operationId": "grantSiteAccess",
+        "tags": [
+          "tribes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteAccessInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteAccess"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Site owner required"
+          },
+          "503": {
+            "description": "Discord verification unavailable"
+          }
+        }
+      }
+    },
+    "/site-access/{userId}": {
+      "delete": {
+        "operationId": "revokeSiteAccess",
+        "tags": [
+          "tribes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{17,20}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteAccess"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Site owner required"
+          },
+          "503": {
+            "description": "Discord verification unavailable"
+          }
+        }
+      }
+    },
+    "/site-branding": {
+      "get": {
+        "operationId": "getSiteBranding",
+        "tags": [
+          "tribes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Site identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteBranding"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid image or input"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Site owner required"
+          },
+          "503": {
+            "description": "Storage temporarily unavailable"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateSiteBranding",
+        "tags": [
+          "tribes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteBrandingInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Site identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteBranding"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid image or input"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Site owner required"
+          },
+          "503": {
+            "description": "Storage temporarily unavailable"
+          }
+        }
+      }
+    },
+    "/site-branding/uploads": {
+      "post": {
+        "operationId": "requestBrandingUpload",
+        "tags": [
+          "tribes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandingUploadInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed direct-to-storage upload URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandingUpload"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid image or input"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Site owner required"
+          },
+          "429": {
+            "description": "Too many uploads"
+          },
+          "503": {
+            "description": "Storage temporarily unavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ShopMedia": {
+        "type":"object","required":["id","name","contentType","url"],
+        "properties":{"id":{"type":"string"},"name":{"type":"string"},"contentType":{"type":"string"},"url":{"type":"string"}}
+      },
+      "ShopMessage": {
+        "type":"object","required":["id","content","authorName","createdAt","updatedAt","sourceUrl","media"],
+        "properties":{"id":{"type":"string"},"content":{"type":"string"},"authorName":{"type":"string"},"createdAt":{"type":"string"},"updatedAt":{"type":"string"},"sourceUrl":{"type":"string"},"media":{"type":"array","items":{"$ref":"#/components/schemas/ShopMedia"}}}
+      },
+      "ShopPrice": {
+        "type":"object","required":["variant","diamonds","strawberries"],
+        "properties":{"variant":{"type":"string"},"diamonds":{"type":"number"},"strawberries":{"type":"number"}}
+      },
+      "ShopProduct": {
+        "type":"object","required":["id","name","description","media","sourceUrl","tags","available","prices"],
+        "properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"sourceUrl":{"type":"string"},"media":{"type":"array","items":{"$ref":"#/components/schemas/ShopMedia"}},"tags":{"type":"array","items":{"type":"string"}},"available":{"type":"boolean"},"prices":{"type":"array","items":{"$ref":"#/components/schemas/ShopPrice"}}}
+      },
+      "ShopSection": {
+        "type":"object","required":["id","title","channelUrl","messages","products","lastSyncedAt","nextSyncAt","error"],
+        "properties":{"id":{"type":"string"},"title":{"type":"string"},"channelUrl":{"type":"string"},"messages":{"type":"array","items":{"$ref":"#/components/schemas/ShopMessage"}},"products":{"type":"array","items":{"$ref":"#/components/schemas/ShopProduct"}},"lastSyncedAt":{"type":["string","null"]},"nextSyncAt":{"type":["string","null"]},"error":{"type":["string","null"]}}
+      },
+      "ShopCatalog": {
+        "type":"object","required":["sections","shopTicketUrl"],
+        "properties":{"sections":{"type":"array","items":{"$ref":"#/components/schemas/ShopSection"}},"shopTicketUrl":{"type":"string"}}
+      },
+      "ShopDonations": {
+        "type":"object","required":["section","ticketUrl"],
+        "properties":{"section":{"$ref":"#/components/schemas/ShopSection"},"ticketUrl":{"type":"string"}}
+      },
+      "GuideMedia": {
+        "type":"object","required":["url","name","contentType"],
+        "properties":{"url":{"type":"string"},"name":{"type":"string"},"contentType":{"type":"string"}}
+      },
+      "GuideEmbed": {
+        "type":"object","required":["title","description","url","image","fields"],
+        "properties":{"title":{"type":"string"},"description":{"type":"string"},"url":{"type":"string"},"image":{"type":"string"},"fields":{"type":"array","items":{"type":"object","required":["name","value"],"properties":{"name":{"type":"string"},"value":{"type":"string"}}}}}
+      },
+      "GuideMessage": {
+        "type":"object","required":["id","authorId","authorName","content","createdAt","media","embeds","system"],
+        "properties":{"id":{"type":"string"},"authorId":{"type":"string"},"authorName":{"type":"string"},"content":{"type":"string"},"createdAt":{"type":"string"},"media":{"type":"array","items":{"$ref":"#/components/schemas/GuideMedia"}},"embeds":{"type":"array","items":{"$ref":"#/components/schemas/GuideEmbed"}},"system":{"type":"boolean"}}
+      },
+      "CommunityGuide": {
+        "type":"object","required":["id","title","content","authorId","authorName","images","messages","sourceUrl","source","createdAt","updatedAt","revision","canEdit","starterMissing"],
+        "properties":{"id":{"type":"string"},"title":{"type":"string"},"content":{"type":"string"},"authorId":{"type":"string"},"authorName":{"type":"string"},"images":{"type":"array","items":{"type":"string"}},"messages":{"type":"array","items":{"$ref":"#/components/schemas/GuideMessage"}},"sourceUrl":{"type":"string"},"source":{"type":"string","enum":["discord","site"]},"createdAt":{"type":"string"},"updatedAt":{"type":"string"},"revision":{"type":"integer"},"canEdit":{"type":"boolean"},"starterMissing":{"type":"boolean"}}
+      },
+      "GuideInput": {
+        "type":"object","required":["title","content","images","revision"],
+        "properties":{"title":{"type":"string","minLength":1,"maxLength":180},"content":{"type":"string","maxLength":20000},"images":{"type":"array","maxItems":16,"uniqueItems":true,"items":{"type":"string","maxLength":256}},"revision":{"type":"integer","minimum":0}}
+      },
+      "GuideRevision":{"type":"object","required":["revision"],"properties":{"revision":{"type":"integer","minimum":1}}},
+      "GuideStatus":{"type":"object","required":["status"],"properties":{"status":{"type":"string"}}},
+      "GuideImageRequest":{"type":"object","required":["size","contentType"],"properties":{"size":{"type":"integer","minimum":1,"maximum":10485760},"contentType":{"type":"string","enum":["image/png","image/jpeg","image/webp"]}}},
+      "GuideImagePath":{"type":"object","required":["objectPath"],"properties":{"objectPath":{"type":"string","maxLength":256}}},
+      "GuideImageUpload":{"type":"object","required":["objectPath","uploadURL"],"properties":{"objectPath":{"type":"string"},"uploadURL":{"type":"string"}}},
+      "GuideImagePublished":{"type":"object","required":["url"],"properties":{"url":{"type":"string"}}},
+      "DinoDeleteStatus":{"type":"object","required":["status"],"properties":{"status":{"type":"string"}}},
+      "DinoStats":{"type":"object","additionalProperties":false,"required":["health","stamina","oxygen","food","weight","melee","speed"],"properties":{
+        "health":{"type":["integer","null"],"minimum":0,"maximum":65535},"stamina":{"type":["integer","null"],"minimum":0,"maximum":65535},"oxygen":{"type":["integer","null"],"minimum":0,"maximum":65535},"food":{"type":["integer","null"],"minimum":0,"maximum":65535},"weight":{"type":["integer","null"],"minimum":0,"maximum":65535},"melee":{"type":["integer","null"],"minimum":0,"maximum":65535},"speed":{"type":["integer","null"],"minimum":0,"maximum":65535}
+      }},
+      "DinoSpecies":{"type":"object","required":["id","name","origin","modId","maps","sourceUrl","active","revision"],"properties":{"id":{"type":"integer"},"name":{"type":"string"},"origin":{"type":"string","enum":["official","mod"]},"modId":{"type":["integer","null"]},"maps":{"type":"array","items":{"type":"string"}},"sourceUrl":{"type":"string"},"active":{"type":"boolean"},"revision":{"type":"integer"}}},
+      "DinoSpeciesInput":{"type":"object","required":["name","origin","modId","maps","sourceUrl","active","revision"],"properties":{"name":{"type":"string","minLength":1,"maxLength":120},"origin":{"type":"string","enum":["official","mod"]},"modId":{"type":["integer","null"]},"maps":{"type":"array","items":{"type":"string"},"maxItems":50},"sourceUrl":{"type":"string","maxLength":600},"active":{"type":"boolean"},"revision":{"type":"integer","minimum":0}}},
+      "DinoRecord":{"type":"object","required":["species","tribeId","stats","revision","updatedAt","note","source"],"properties":{"species":{"$ref":"#/components/schemas/DinoSpecies"},"tribeId":{"type":"integer"},"stats":{"$ref":"#/components/schemas/DinoStats"},"revision":{"type":"integer"},"updatedAt":{"type":"string"},"note":{"type":"string"},"source":{"type":"string","enum":["manual","photo"]}}},
+      "DinoRecordInput":{"type":"object","required":["stats","revision","confirmed","mode","note","source"],"properties":{"stats":{"$ref":"#/components/schemas/DinoStats"},"revision":{"type":"integer","minimum":0},"confirmed":{"type":"boolean"},"mode":{"type":"string","enum":["best","replace"]},"note":{"type":"string","maxLength":1000},"source":{"type":"string","enum":["manual","photo"]}}},
+      "DinoRecordDelete":{"type":"object","required":["revision","confirmed"],"properties":{"revision":{"type":"integer","minimum":1},"confirmed":{"type":"boolean"}}},
+      "DinoPhotoInput":{"type":"object","required":["image"],"properties":{"image":{"type":"string","maxLength":8500000}}},
+      "DinoPhotoResult":{"type":"object","required":["speciesName","stats","warnings"],"properties":{"speciesName":{"type":["string","null"]},"stats":{"$ref":"#/components/schemas/DinoStats"},"warnings":{"type":"array","items":{"type":"string"}}}},
+      "DinoRecordHistory":{"type":"object","required":["id","speciesName","action","before","after","createdAt"],"properties":{"id":{"type":"integer"},"speciesName":{"type":"string"},"action":{"type":"string"},"before":{"oneOf":[{"$ref":"#/components/schemas/DinoStats"},{"type":"null"}]},"after":{"oneOf":[{"$ref":"#/components/schemas/DinoStats"},{"type":"null"}]},"createdAt":{"type":"string"}}},
+      "CommunityInvite": {
+        "type":"object", "required":["url"],
+        "properties":{"url":{"type":"string","format":"uri"}}
+      },
+      "PlayerTribe": {
+        "type":"object", "required":["id","name","role","manager","isOwner"],
+        "properties":{"id":{"type":"integer"},"name":{"type":"string"},"role":{"type":"string"},"manager":{"type":"boolean"},"isOwner":{"type":"boolean"}}
+      },
+      "PlayerProfile": {
+        "type":"object", "required":["id","name","username","avatar","joinedAt","tribes"],
+        "properties":{
+          "id":{"type":"string"},"name":{"type":"string"},"username":{"type":"string"},"avatar":{"type":"string"},
+          "joinedAt":{"type":["string","null"]},
+          "tribes":{"type":"array","items":{"$ref":"#/components/schemas/PlayerTribe"}}
+        }
+      },
+      "PlayerSearchResults": {
+        "type":"object", "required":["players","hasMore"],
+        "properties":{"players":{"type":"array","items":{"$ref":"#/components/schemas/PlayerProfile"}},"hasMore":{"type":"boolean"}}
+      },
+      "SiteModInput": {
+        "type": "object",
+        "required": ["name", "category", "description", "image", "sourceUrl"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "maxLength": 120},
+          "category": {"type": "string", "enum": ["Créatures", "Construction", "Qualité de vie", "Interface", "Administration", "Divers"]},
+          "description": {"type": "string", "minLength": 1, "maxLength": 2000},
+          "image": {"type": "string", "maxLength": 2048},
+          "sourceUrl": {"type": "string", "maxLength": 2048}
+        }
+      },
+      "SiteMod": {
+        "allOf": [
+          {"$ref": "#/components/schemas/SiteModInput"},
+          {"type": "object", "required": ["id"], "properties": {"id": {"type": "integer"}}}
+        ]
+      },
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "avatar"
+        ]
+      },
+      "Session": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "oauthConfigured": {
+            "type": "boolean"
+          },
+          "canCreate": {
+            "type": "boolean"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "csrfToken": {
+            "type": "string"
+          },
+          "configurationMessage": {
+            "type": "string"
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "isPrimaryOwner": {
+            "type": "boolean"
+          },
+          "siteRole": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "member",
+              "admin",
+              "owner"
+            ]
+          }
+        },
+        "required": [
+          "user",
+          "oauthConfigured",
+          "canCreate",
+          "isAdmin",
+          "csrfToken",
+          "configurationMessage",
+          "isOwner",
+          "isPrimaryOwner",
+          "siteRole"
+        ]
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "manager": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "manager"
+        ]
+      },
+      "MemberInput": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "pattern": "^[0-9]{17,20}$"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "role": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "manager": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "userId",
+          "name",
+          "role",
+          "manager"
+        ]
+      },
+      "Place": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "outpost",
+              "premium"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "map": {
+            "type": "string"
+          },
+          "coords": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "map",
+          "coords"
+        ]
+      },
+      "PlaceInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "outpost",
+              "premium"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "map": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "coords": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "map",
+          "coords"
+        ]
+      },
+      "Activity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "action": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "details",
+          "createdAt"
+        ]
+      },
+      "MemberNameInput": {
+        "type": "object", "additionalProperties": false,
+        "properties": {"name": {"type": "string", "minLength": 1, "maxLength": 100}},
+        "required": ["name"]
+      },
+      "StatusResponse": {
+        "type": "object", "properties": {"status": {"type": "string"}}, "required": ["status"]
+      },
+      "TribeHistoryEntry": {
+        "allOf": [
+          {"$ref": "#/components/schemas/Activity"},
+          {"type": "object", "properties": {"actorId": {"type": "string"}}, "required": ["actorId"]}
+        ]
+      },
+      "TribeHistoryPage": {
+        "type": "object",
+        "properties": {
+          "entries": {"type": "array", "items": {"$ref": "#/components/schemas/TribeHistoryEntry"}},
+          "nextBefore": {"type": ["integer", "null"]}
+        },
+        "required": ["entries", "nextBefore"]
+      },
+      "TribeInput": {
+        "type": "object",
+        "properties": {
+          "coverUrl": {"type": "string", "maxLength": 1000, "description": "Couverture indépendante de la galerie. Omettre pour conserver, chaîne vide pour retirer."},
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 3000
+          },
+          "motto": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "objective": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "color": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16777215
+          },
+          "logoUrl": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "base": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "map": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "coords": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "tags": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "recruiting": {
+            "type": "boolean"
+          },
+          "recruitmentText": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "motto",
+          "objective",
+          "color",
+          "logoUrl",
+          "base",
+          "map",
+          "coords",
+          "tags",
+          "recruiting",
+          "recruitmentText"
+        ]
+      },
+      "TribeCreationInput": {
+        "allOf": [
+          {"$ref":"#/components/schemas/TribeInput"},
+          {"type":"object","properties":{
+            "members":{"type":"array","maxItems":100,"items":{"$ref":"#/components/schemas/MemberInput"}},
+            "places":{"type":"array","maxItems":100,"items":{"$ref":"#/components/schemas/PlaceInput"}},
+            "gallery":{"type":"array","maxItems":10,"items":{"type":"string","maxLength":1000}},
+            "progression":{"$ref":"#/components/schemas/Progression"}
+          }}
+        ]
+      },
+      "DiscordPlayer": {
+        "type":"object","required":["id","name","username","avatar"],
+        "properties":{
+          "id":{"type":"string","pattern":"^[0-9]{17,20}$"},
+          "name":{"type":"string"},"username":{"type":"string"},"avatar":{"type":"string"}
+        }
+      },
+      "ReviewTribe": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"}, "name": {"type": "string"}, "memberCount": {"type": "integer"},
+          "departedPlayers": {"type": "array", "items": {"$ref": "#/components/schemas/DepartedPlayer"}}
+        },
+        "required": ["id", "name", "memberCount"]
+      },
+      "DepartedPlayer": {
+        "type": "object",
+        "required": ["userId", "name", "departedAt", "sourceUrl", "match"],
+        "properties": {
+          "userId": {"type": "string"},
+          "name": {"type": "string"},
+          "departedAt": {"type": ["string", "null"]},
+          "sourceUrl": {"type": ["string", "null"]},
+          "match": {"type": ["string", "null"], "enum": ["id", "pseudo", null]}
+        }
+      },
+      "DuplicatePlayer": {
+        "type": "object",
+        "properties": {
+          "userId": {"type": "string"},
+          "name": {"type": "string"},
+          "tribes": {"type": "array", "items": {"$ref": "#/components/schemas/ReviewTribe"}}
+        },
+        "required": ["userId", "name", "tribes"]
+      },
+      "TribeReview": {
+        "type": "object",
+        "properties": {
+          "tribeCount": {"type": "integer"},
+          "duplicates": {"type": "array", "items": {"$ref": "#/components/schemas/DuplicatePlayer"}},
+          "removable": {"type": "array", "items": {"$ref": "#/components/schemas/ReviewTribe"}},
+          "uncheckedCount": {"type": "integer"},
+          "discordAvailable": {"type": "boolean"},
+          "checkedAt": {"type": ["string", "null"]},
+          "departureLogsAvailable": {"type": "boolean"},
+          "departureLogsComplete": {"type": "boolean"},
+          "departureLogsMessage": {"type": "string"},
+          "departureChannelUrl": {"type": ["string", "null"]},
+          "message": {"type": "string"}
+        },
+        "required": ["tribeCount", "duplicates", "removable", "uncheckedCount", "discordAvailable", "checkedAt", "message"]
+      },
+      "DiscordPlayerPage": {
+        "type":"object","required":["players","nextAfter"],
+        "properties":{
+          "players":{"type":"array","items":{"$ref":"#/components/schemas/DiscordPlayer"}},
+          "nextAfter":{"type":["string","null"]}
+        }
+      },
+      "Tribe": {
+        "type": "object",
+        "properties": {
+          "coverUrl": {"type": "string"},
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "motto": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "color": {
+            "type": "integer"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "base": {
+            "type": "string"
+          },
+          "map": {
+            "type": "string"
+          },
+          "coords": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "string"
+          },
+          "recruiting": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "memberCount": {
+            "type": "integer"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "recruitmentText": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "motto",
+          "objective",
+          "color",
+          "logoUrl",
+          "base",
+          "map",
+          "coords",
+          "tags",
+          "recruiting",
+          "createdAt",
+          "memberCount",
+          "canEdit",
+          "canManage",
+          "recruitmentText"
+        ]
+      },
+      "Progression": {
+        "type": "object",
+        "properties": {
+          "boss": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pendingBoss": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pendingNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "boss",
+          "notes",
+          "pendingBoss",
+          "pendingNotes"
+        ]
+      },
+      "GalleryInput": {
+        "type": "object",
+        "properties": {
+          "urls": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          }
+        },
+        "required": [
+          "urls"
+        ]
+      },
+      "TransferInput": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "pattern": "^[0-9]{17,20}$"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "TribeDataImport": {
+        "type": "object",
+        "properties": {
+          "sourceRetrievedAt": { "type": "string", "format": "date-time" },
+          "importedAt": { "type": "string", "format": "date-time" },
+          "tribeCount": { "type": "integer" },
+          "memberCount": { "type": "integer" }
+        },
+        "required": ["sourceRetrievedAt", "importedAt", "tribeCount", "memberCount"]
+      },
+      "Options": {
+        "type": "object",
+        "properties": {
+          "dataImport": {
+            "$ref": "#/components/schemas/TribeDataImport"
+          },
+          "maps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "premiumMaps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boss": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "maps",
+          "premiumMaps",
+          "boss",
+          "notes"
+        ]
+      },
+      "OptionInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "maps",
+              "premiumMaps",
+              "boss",
+              "notes"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "kind",
+          "name"
+        ]
+      },
+      "Overview": {
+        "type": "object",
+        "properties": {
+          "tribes": {
+            "type": "integer"
+          },
+          "members": {
+            "type": "integer"
+          },
+          "recruiting": {
+            "type": "integer"
+          },
+          "maps": {
+            "type": "integer"
+          },
+          "recentActivity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Activity"
+            }
+          }
+        },
+        "required": [
+          "tribes",
+          "members",
+          "recruiting",
+          "maps",
+          "recentActivity"
+        ]
+      },
+      "TribeDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tribe"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "members": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Member"
+                }
+              },
+              "places": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Place"
+                }
+              },
+              "gallery": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "progression": {
+                "$ref": "#/components/schemas/Progression"
+              },
+              "activity": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Activity"
+                }
+              }
+            },
+            "required": [
+              "members",
+              "places",
+              "gallery",
+              "progression",
+              "activity"
+            ]
+          }
+        ]
+      },
+      "SiteAccess": {
+        "type": "object",
+        "required": [
+          "userId",
+          "role",
+          "primary",
+          "eligible",
+          "grantedAt"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nom d’affichage du compte Discord, ou null si Discord est indisponible."
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nom d’utilisateur Discord."
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL de l’avatar Discord, ou null si absent ou indisponible."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "owner"
+            ]
+          },
+          "primary": {
+            "type": "boolean"
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "grantedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SiteAccessInput": {
+        "type": "object",
+        "required": [
+          "userId",
+          "role"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "pattern": "^[0-9]{17,20}$"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "owner"
+            ]
+          }
+        }
+      },
+      "SiteBranding": {
+        "type": "object",
+        "required": [
+          "logoUrl",
+          "coverUrl",
+          "logoPath",
+          "coverPath",
+          "updatedAt"
+        ],
+        "properties": {
+          "logoUrl": {
+            "type": "string"
+          },
+          "coverUrl": {
+            "type": "string"
+          },
+          "logoPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SiteBrandingInput": {
+        "type": "object",
+        "properties": {
+          "logoPath": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^/objects/uploads/[a-f0-9-]{36}$"
+          },
+          "coverPath": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^/objects/uploads/[a-f0-9-]{36}$"
+          }
+        }
+      },
+      "BrandingUploadInput": {
+        "type": "object",
+        "required": [
+          "kind",
+          "name",
+          "size",
+          "contentType"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "logo",
+              "cover"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10485760
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ]
+          }
+        }
+      },
+      "TribeImageUploadInput": {
+        "type": "object", "required": ["kind", "size", "contentType"],
+        "properties": {
+          "kind": {"type": "string", "enum": ["logo", "cover", "gallery"]},
+          "size": {"type": "integer", "minimum": 1, "maximum": 10485760},
+          "contentType": {"type": "string", "enum": ["image/png", "image/jpeg", "image/webp"]}
+        }
+      },
+      "TribeImagePublishInput": {
+        "type": "object", "required": ["objectPath"],
+        "properties": {"objectPath": {"type": "string", "pattern": "^/objects/uploads/[a-f0-9-]{36}$"}}
+      },
+      "TribeImagePublished": {
+        "type": "object", "required": ["url"],
+        "properties": {"url": {"type": "string"}}
+      },
+      "BrandingUpload": {
+        "type": "object",
+        "required": [
+          "uploadURL",
+          "objectPath"
+        ],
+        "properties": {
+          "uploadURL": {
+            "type": "string"
+          },
+          "objectPath": {
+            "type": "string"
+          }
+        }
+      },
+      "MapCartographyInput":{"type":"object","required":["image","revision"],"properties":{"image":{"type":"string","maxLength":2048},"revision":{"type":"integer","minimum":0}}},
+      "MapCartography":{"type":"object","required":["image","revision"],"properties":{"image":{"type":"string"},"revision":{"type":"integer","minimum":0}}},
+      "MapSettlement":{"type":"object","required":["id","name","coords","latitude","longitude"],"properties":{"id":{"type":"integer"},"name":{"type":"string"},"coords":{"type":"string"},"latitude":{"type":["number","null"],"minimum":0,"maximum":100},"longitude":{"type":["number","null"],"minimum":0,"maximum":100}}},
+      "MapSettlements":{"type":"object","required":["count","tribes","cartography"],"properties":{"count":{"type":"integer","minimum":0},"tribes":{"type":"array","items":{"$ref":"#/components/schemas/MapSettlement"}},"cartography":{"$ref":"#/components/schemas/MapCartography"}}},
+      "SiteMapInput": {
+        "type": "object",
+        "required": ["name","kind","image","size","biomes","difficulty","transfers","specials","blurb","description","creatures","zones","rules","gallery","revision"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "maxLength": 80},
+          "kind": {"type": "string", "enum": ["main","premium","event"]},
+          "image": {"type": "string", "maxLength": 2048},
+          "size": {"type": "string", "maxLength": 200},
+          "biomes": {"type": "string", "maxLength": 400},
+          "difficulty": {"type": "integer", "minimum": 1, "maximum": 5},
+          "transfers": {"type": "string", "maxLength": 400},
+          "specials": {"type": "string", "maxLength": 400},
+          "resourcesUrl": {"type": "string", "maxLength": 2048, "description": "Lien facultatif de localisation des ressources ; vide pour retirer le lien"},
+          "dinosUrl": {"type": "string", "maxLength": 2048, "description": "Lien facultatif de localisation des dinos ; vide pour retirer le lien"},
+          "blurb": {"type": "string", "maxLength": 1000},
+          "description": {"type": "string", "maxLength": 10000},
+          "creatures": {"type": "array", "maxItems": 100, "items": {"type": "string", "minLength": 1, "maxLength": 500}},
+          "zones": {"type": "array", "maxItems": 100, "items": {"type": "string", "minLength": 1, "maxLength": 1000}},
+          "rules": {"type": "array", "maxItems": 100, "items": {"type": "string", "minLength": 1, "maxLength": 1000}},
+          "gallery": {"type": "array", "maxItems": 24, "items": {"type": "string", "minLength": 1, "maxLength": 2048}},
+          "revision": {"type": "integer", "minimum": 0}
+        }
+      },
+      "SiteMap": {
+        "allOf": [
+          {"$ref": "#/components/schemas/SiteMapInput"},
+          {"type": "object", "required": ["slug","updatedAt"], "properties": {"slug": {"type": "string"}, "updatedAt": {"type": ["string","null"]}}}
+        ]
+      }
+    }
+  }
+}
