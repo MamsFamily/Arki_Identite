@@ -1,0 +1,2970 @@
+[
+  {
+    "id": "the-island-broodmother-lysrix",
+    "mapId": "the-island",
+    "name": "BROODMOTHER LYSRIX",
+    "type": "Gardien",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 30,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 50,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 5
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 5
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 5
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 5
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 70,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 10
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 10
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "the-island-megapithecus",
+    "mapId": "the-island",
+    "name": "MEGAPITHECUS",
+    "type": "Gardien",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 45,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 65,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Megalania Toxin",
+            "quantity": 5
+          },
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 5
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 5
+          },
+          {
+            "name": "Therizino Claws",
+            "quantity": 5
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 5
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 85,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Megalania Toxin",
+            "quantity": 10
+          },
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 10
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 10
+          },
+          {
+            "name": "Therizino Claws",
+            "quantity": 10
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "the-island-dragon",
+    "mapId": "the-island",
+    "name": "DRAGON",
+    "type": "Gardien",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 55,
+        "artifacts": [
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 75,
+        "artifacts": [
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Allosaurus Brain",
+            "quantity": 5
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 5
+          },
+          {
+            "name": "Giganotosaurus Heart",
+            "quantity": 1
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 5
+          },
+          {
+            "name": "Tyrannosaurus Arm",
+            "quantity": 5
+          },
+          {
+            "name": "Yutyrannus Lungs",
+            "quantity": 5
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 100,
+        "artifacts": [
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Allosaurus Brain",
+            "quantity": 10
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 10
+          },
+          {
+            "name": "Giganotosaurus Heart",
+            "quantity": 2
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 10
+          },
+          {
+            "name": "Tyrannosaurus Arm",
+            "quantity": 15
+          },
+          {
+            "name": "Yutyrannus Lungs",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "the-island-overseer-tek-cave",
+    "mapId": "the-island",
+    "name": "OVERSEER / TEK CAVE",
+    "type": "Boss final / Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 60,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [
+          {
+            "name": "Gamma Broodmother Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Gamma Megapithecus Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Gamma Dragon Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": 5
+      },
+      "beta": {
+        "playerLevel": 80,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Raptor Claw",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Carnotaurus Arm",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Tyrannosaur Tooth",
+            "quantity": 1
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Beta Broodmother Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Beta Megapithecus Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Beta Dragon Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": 10
+      },
+      "alpha": {
+        "playerLevel": 100,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Raptor Claw",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Carnotaurus Arm",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Tyrannosaur Tooth",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Megalodon Fin",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Mosasaur Tooth",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Tusoteuthis Eye",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Leedsichthys Blubber",
+            "quantity": 1
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Alpha Broodmother Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Megapithecus Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Dragon Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": 15
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": null,
+    "notes": [
+      "Les objets utilisés pour ouvrir la Tek Cave ne sont pas consommés."
+    ],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "scorched-earth-manticore",
+    "mapId": "scorched-earth",
+    "name": "MANTICORE",
+    "type": "Gardien / Boss final / Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 55,
+        "artifacts": [
+          {
+            "name": "Artifact of the Gatekeeper",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Crag",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Destroyer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Fire Talon",
+            "quantity": 2
+          },
+          {
+            "name": "Lightning Talon",
+            "quantity": 2
+          },
+          {
+            "name": "Poison Talon",
+            "quantity": 2
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 5
+      },
+      "beta": {
+        "playerLevel": 70,
+        "artifacts": [
+          {
+            "name": "Artifact of the Gatekeeper",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Crag",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Destroyer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Fire Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Lightning Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Poison Talon",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 10
+      },
+      "alpha": {
+        "playerLevel": 95,
+        "artifacts": [
+          {
+            "name": "Artifact of the Gatekeeper",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Crag",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Destroyer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Fire Talon",
+            "quantity": 20
+          },
+          {
+            "name": "Lightning Talon",
+            "quantity": 20
+          },
+          {
+            "name": "Poison Talon",
+            "quantity": 20
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 15
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "the-center-broodmother-megapithecus",
+    "mapId": "the-center",
+    "name": "BROODMOTHER + MEGAPITHECUS",
+    "type": "Combat de boss double",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 70,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 80,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 10
+          },
+          {
+            "name": "Megalania Toxin",
+            "quantity": 10
+          },
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 10
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 10
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 10
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 10
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 10
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 10
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 90,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 25
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 25
+          },
+          {
+            "name": "Megalania Toxin",
+            "quantity": 25
+          },
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 25
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 25
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 25
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 25
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 25
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 25
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 25
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [
+      "Les deux boss sont combattus pendant le même combat."
+    ],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "aberration-rockwell",
+    "mapId": "aberration",
+    "name": "ROCKWELL",
+    "type": "Boss final / Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 60,
+        "artifacts": [
+          {
+            "name": "Artifact of the Depths",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Shadows",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Stalker",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 5
+      },
+      "beta": {
+        "playerLevel": 75,
+        "artifacts": [
+          {
+            "name": "Artifact of the Depths",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Shadows",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Stalker",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Basilisk Scale",
+            "quantity": 4
+          },
+          {
+            "name": "Nameless Venom",
+            "quantity": 12
+          },
+          {
+            "name": "Reaper Pheromone Gland",
+            "quantity": 2
+          },
+          {
+            "name": "Rock Drake Feather",
+            "quantity": 2
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 10
+      },
+      "alpha": {
+        "playerLevel": 100,
+        "artifacts": [
+          {
+            "name": "Artifact of the Depths",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Shadows",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Stalker",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Basilisk Scale",
+            "quantity": 8
+          },
+          {
+            "name": "Nameless Venom",
+            "quantity": 20
+          },
+          {
+            "name": "Reaper Pheromone Gland",
+            "quantity": 7
+          },
+          {
+            "name": "Rock Drake Feather",
+            "quantity": 7
+          },
+          {
+            "name": "Alpha Basilisk Fang",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Karkinos Claw",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Reaper King Barb",
+            "quantity": 1
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 15
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "extinction-desert-titan",
+    "mapId": "extinction",
+    "name": "DESERT TITAN",
+    "type": "Titan / Boss",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": 1,
+        "artifacts": [
+          {
+            "name": "Artifact of Chaos",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Corrupt Heart",
+            "quantity": 100
+          },
+          {
+            "name": "Fire Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "extinction-forest-titan",
+    "mapId": "extinction",
+    "name": "FOREST TITAN",
+    "type": "Titan / Boss",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": 1,
+        "artifacts": [
+          {
+            "name": "Artifact of Growth",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Corrupt Heart",
+            "quantity": 100
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 10
+          },
+          {
+            "name": "Tyrannosaurus Arm",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "extinction-ice-titan",
+    "mapId": "extinction",
+    "name": "ICE TITAN",
+    "type": "Titan / Boss",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": 1,
+        "artifacts": [
+          {
+            "name": "Artifact of the Void",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Corrupt Heart",
+            "quantity": 100
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 10
+          },
+          {
+            "name": "Therizino Claws",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "extinction-king-titan",
+    "mapId": "extinction",
+    "name": "KING TITAN",
+    "type": "Boss final / Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 1,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Tyrannosaur Tooth",
+            "quantity": 5
+          },
+          {
+            "name": "Corrupt Heart",
+            "quantity": 150
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Desert Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Forest Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Ice Titan Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": 5
+      },
+      "beta": {
+        "playerLevel": 1,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Tyrannosaur Tooth",
+            "quantity": 10
+          },
+          {
+            "name": "Corrupt Heart",
+            "quantity": 300
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 20
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Desert Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Forest Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Ice Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Gamma King Titan Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [
+          "Avoir le trophée du King Titan Gamma pour lancer Bêta."
+        ],
+        "ascensionLevels": 10
+      },
+      "alpha": {
+        "playerLevel": 1,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Tyrannosaur Tooth",
+            "quantity": 10
+          },
+          {
+            "name": "Corrupt Heart",
+            "quantity": 300
+          },
+          {
+            "name": "Giganotosaurus Heart",
+            "quantity": 20
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 20
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 20
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Desert Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Forest Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Ice Titan Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Beta King Titan Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [
+          "Avoir le trophée du King Titan Bêta pour lancer Alpha."
+        ],
+        "ascensionLevels": 15
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": null,
+    "notes": [
+      "Sur ARK Survival Ascended, le King Titan donne des niveaux d’Ascension.",
+      "Progression : Gamma → Bêta → Alpha. Le trophée du King Titan de la difficulté précédente est nécessaire pour lancer la suivante."
+    ],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "ragnarok-nunatak",
+    "mapId": "ragnarok",
+    "name": "NUNATAK",
+    "type": "Gardien / Boss principal",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 70,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devious",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 80,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devious",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 5
+          },
+          {
+            "name": "Megalania Toxin",
+            "quantity": 10
+          },
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 10
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 10
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 10
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 10
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 10
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 10
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 90,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devious",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 25
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 10
+          },
+          {
+            "name": "Megalania Toxin",
+            "quantity": 25
+          },
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 25
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 25
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 25
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 25
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 25
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 25
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 25
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "ragnarok-iceworm-queen",
+    "mapId": "ragnarok",
+    "name": "ICEWORM QUEEN",
+    "type": "Boss de donjon",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — rencontre de donjon."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "none"
+  },
+  {
+    "id": "ragnarok-lava-elemental",
+    "mapId": "ragnarok",
+    "name": "LAVA ELEMENTAL",
+    "type": "Boss de donjon",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — rencontre de donjon."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "none"
+  },
+  {
+    "id": "ragnarok-spirit-direwolf-spirit-dire-bear",
+    "mapId": "ragnarok",
+    "name": "SPIRIT DIREWOLF & SPIRIT DIRE BEAR",
+    "type": "Boss de donjon",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — rencontre de donjon."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "none"
+  },
+  {
+    "id": "valguero-grendel",
+    "mapId": "valguero",
+    "name": "GRENDEL",
+    "type": "Gardien / Boss principal",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 70,
+        "artifacts": [
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Allosaurus Brain",
+            "quantity": 5
+          },
+          {
+            "name": "Argentavis Talon",
+            "quantity": 5
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 5
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 5
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 5
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 80,
+        "artifacts": [
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Allosaurus Brain",
+            "quantity": 10
+          },
+          {
+            "name": "Argentavis Talon",
+            "quantity": 8
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 8
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 8
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 5
+          },
+          {
+            "name": "Tyrannosaurus Arm",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 90,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Crag",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Destroyer",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Gatekeeper",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Allosaurus Brain",
+            "quantity": 15
+          },
+          {
+            "name": "Argentavis Talon",
+            "quantity": 15
+          },
+          {
+            "name": "Giganotosaurus Heart",
+            "quantity": 2
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 10
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 10
+          },
+          {
+            "name": "Tyrannosaurus Arm",
+            "quantity": 15
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "valguero-broodmother-lysrix-sauvage",
+    "mapId": "valguero",
+    "name": "BROODMOTHER LYSRIX SAUVAGE",
+    "type": "Boss présent directement sur la map",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — la Broodmother est présente directement sur Valguero."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "none"
+  },
+  {
+    "id": "genesis-moeder-master-of-the-ocean",
+    "mapId": "genesis",
+    "name": "MOEDER, MASTER OF THE OCEAN",
+    "type": "Boss de mission",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — combat lancé via la mission One Tough Moeder."
+        ],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — combat lancé via la mission One Tough Moeder."
+        ],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — combat lancé via la mission One Tough Moeder."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "none"
+  },
+  {
+    "id": "genesis-corrupted-master-controller",
+    "mapId": "genesis",
+    "name": "CORRUPTED MASTER CONTROLLER",
+    "type": "Boss final / Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Avoir terminé au moins 58 missions.",
+          "Aucun tribut nécessaire — aucun tribut physique."
+        ],
+        "ascensionLevels": 5
+      },
+      "beta": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Avoir terminé au moins 116 missions.",
+          "Aucun tribut nécessaire — aucun tribut physique."
+        ],
+        "ascensionLevels": 10
+      },
+      "alpha": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Avoir terminé au moins 168 missions.",
+          "Aucun tribut nécessaire — aucun tribut physique."
+        ],
+        "ascensionLevels": 15
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": null,
+    "notes": [
+      "La condition concerne le survivant qui initie la téléportation vers le combat."
+    ],
+    "tributeStatus": "none"
+  },
+  {
+    "id": "lost-colony-red-handed-lost-king-lost-queen",
+    "mapId": "lost-colony",
+    "name": "RED-HANDED — LOST KING & LOST QUEEN",
+    "type": "Boss final / Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 55,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Zombie Brains",
+            "quantity": 1
+          },
+          {
+            "name": "Neophyte Horns",
+            "quantity": 5
+          },
+          {
+            "name": "Minor Aberrant Sigil",
+            "quantity": 100
+          },
+          {
+            "name": "Minor Crimson Sigil",
+            "quantity": 100
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 5
+      },
+      "beta": {
+        "playerLevel": 70,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Ossidon Skull",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Zombie Brains",
+            "quantity": 5
+          },
+          {
+            "name": "Neophyte Horns",
+            "quantity": 10
+          },
+          {
+            "name": "Greater Aberrant Sigil",
+            "quantity": 150
+          },
+          {
+            "name": "Greater Crimson Sigil",
+            "quantity": 150
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 10
+      },
+      "alpha": {
+        "playerLevel": 95,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Alpha Ossidon Skull",
+            "quantity": 5
+          },
+          {
+            "name": "Alpha Zombie Brains",
+            "quantity": 10
+          },
+          {
+            "name": "Neophyte Horns",
+            "quantity": 15
+          },
+          {
+            "name": "Prime Aberrant Sigil",
+            "quantity": 200
+          },
+          {
+            "name": "Prime Crimson Sigil",
+            "quantity": 200
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": 15
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": null,
+    "notes": [
+      "Red-Handed est un seul enchaînement de combat : Phase Lost King, puis Lost Queen. L’Ascension est obtenue après avoir terminé le combat complet."
+    ],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-natrix-the-devious",
+    "mapId": "astraeos",
+    "name": "NATRIX, THE DEVIOUS",
+    "type": "Gardien",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 30,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 50,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 5
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 5
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 5
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 5
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 70,
+        "artifacts": [
+          {
+            "name": "Artifact of the Clever",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Hunter",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Massive",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Argentavis Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Sarcosuchus Skin",
+            "quantity": 10
+          },
+          {
+            "name": "Sauropod Vertebra",
+            "quantity": 10
+          },
+          {
+            "name": "Titanoboa Venom",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-thodes-the-widowmaker",
+    "mapId": "astraeos",
+    "name": "THODES, THE WIDOWMAKER",
+    "type": "Gardien",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 45,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 65,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 5
+          },
+          {
+            "name": "Megalania Toxin",
+            "quantity": 5
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 5
+          },
+          {
+            "name": "Therizino Claws",
+            "quantity": 5
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 5
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 85,
+        "artifacts": [
+          {
+            "name": "Artifact of the Brute",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Pack",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Devourer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 10
+          },
+          {
+            "name": "Megalania Toxin",
+            "quantity": 10
+          },
+          {
+            "name": "Spinosaurus Sail",
+            "quantity": 10
+          },
+          {
+            "name": "Therizino Claws",
+            "quantity": 10
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-hydraskos-the-unbroken",
+    "mapId": "astraeos",
+    "name": "HYDRASKOS, THE UNBROKEN",
+    "type": "Gardien",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 55,
+        "artifacts": [
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 75,
+        "artifacts": [
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Allosaurus Brain",
+            "quantity": 5
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 5
+          },
+          {
+            "name": "Giganotosaurus Heart",
+            "quantity": 1
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 5
+          },
+          {
+            "name": "Tyrannosaurus Arm",
+            "quantity": 5
+          },
+          {
+            "name": "Yutyrannus Lungs",
+            "quantity": 5
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 100,
+        "artifacts": [
+          {
+            "name": "Artifact of the Cunning",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Immune",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Skylord",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Strong",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Allosaurus Brain",
+            "quantity": 10
+          },
+          {
+            "name": "Basilosaurus Blubber",
+            "quantity": 10
+          },
+          {
+            "name": "Giganotosaurus Heart",
+            "quantity": 2
+          },
+          {
+            "name": "Tusoteuthis Tentacle",
+            "quantity": 10
+          },
+          {
+            "name": "Tyrannosaurus Arm",
+            "quantity": 15
+          },
+          {
+            "name": "Yutyrannus Lungs",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-manticore-astraeos",
+    "mapId": "astraeos",
+    "name": "MANTICORE — ASTRAEOS",
+    "type": "Boss d’arène",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 55,
+        "artifacts": [
+          {
+            "name": "Artifact of the Gatekeeper",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Crag",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Destroyer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Fire Talon",
+            "quantity": 2
+          },
+          {
+            "name": "Lightning Talon",
+            "quantity": 2
+          },
+          {
+            "name": "Poison Talon",
+            "quantity": 2
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 70,
+        "artifacts": [
+          {
+            "name": "Artifact of the Gatekeeper",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Crag",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Destroyer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Fire Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Lightning Talon",
+            "quantity": 10
+          },
+          {
+            "name": "Poison Talon",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 95,
+        "artifacts": [
+          {
+            "name": "Artifact of the Gatekeeper",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Crag",
+            "quantity": 1
+          },
+          {
+            "name": "Artifact of the Destroyer",
+            "quantity": 1
+          }
+        ],
+        "tributes": [
+          {
+            "name": "Fire Talon",
+            "quantity": 20
+          },
+          {
+            "name": "Lightning Talon",
+            "quantity": 20
+          },
+          {
+            "name": "Poison Talon",
+            "quantity": 20
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [
+      "La Manticore ne donne l’Ascension que sur Scorched Earth. Elle ne donne pas d’Ascension sur Astraeos."
+    ],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-minotarchos",
+    "mapId": "astraeos",
+    "name": "MINOTARCHOS",
+    "type": "Mini-boss",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Corrupt Heart",
+            "quantity": 2
+          },
+          {
+            "name": "Corrupted Nodule",
+            "quantity": 25
+          },
+          {
+            "name": "Lightning Talon",
+            "quantity": 5
+          },
+          {
+            "name": "Megalodon Tooth",
+            "quantity": 25
+          },
+          {
+            "name": "Thylacoleo Hook-Claw",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-erymanthian-kalydonios",
+    "mapId": "astraeos",
+    "name": "ERYMANTHIAN & KALYDONIOS",
+    "type": "World Boss double",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Corrupt Heart",
+            "quantity": 2
+          },
+          {
+            "name": "Corrupted Nodule",
+            "quantity": 25
+          },
+          {
+            "name": "Fire Talon",
+            "quantity": 5
+          },
+          {
+            "name": "Poison Talon",
+            "quantity": 5
+          },
+          {
+            "name": "Therizino Claws",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-colossus",
+    "mapId": "astraeos",
+    "name": "COLOSSUS",
+    "type": "Mini-boss",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Corrupt Heart",
+            "quantity": 2
+          },
+          {
+            "name": "Alpha Rex Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Raptor Claw",
+            "quantity": 5
+          },
+          {
+            "name": "Acro Adrenal Gland",
+            "quantity": 10
+          },
+          {
+            "name": "Astral Soul",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-kroaratos",
+    "mapId": "astraeos",
+    "name": "KROARATOS",
+    "type": "Mini-boss",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Corrupt Heart",
+            "quantity": 5
+          },
+          {
+            "name": "Fire Talon",
+            "quantity": 5
+          },
+          {
+            "name": "Giganotosaurus Heart",
+            "quantity": 1
+          },
+          {
+            "name": "Boaratos Tusk",
+            "quantity": 10
+          },
+          {
+            "name": "Flaming Boaratos Tusk",
+            "quantity": 3
+          },
+          {
+            "name": "Astral Soul",
+            "quantity": 10
+          }
+        ],
+        "bossTrophies": [],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-thanatos",
+    "mapId": "astraeos",
+    "name": "THANATOS",
+    "type": "World Boss",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Aucun tribut nécessaire — World Boss présent directement sur Astraeos."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [],
+    "tributeStatus": "none"
+  },
+  {
+    "id": "astraeos-abyssalus-the-void-beneath",
+    "mapId": "astraeos",
+    "name": "ABYSSALUS, THE VOID BENEATH",
+    "type": "Boss final / Boss d’Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 60,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Astral Soul",
+            "quantity": 20
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Gamma Natrix Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Gamma Thodes Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Gamma Hydraskos Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 75,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Astral Soul",
+            "quantity": 50
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Beta Natrix Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Beta Thodes Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Beta Hydraskos Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 100,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Astral Soul",
+            "quantity": 100
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Alpha Natrix Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Thodes Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Hydraskos Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": "astraeos",
+    "notes": [
+      "Ascension commune : Abyssalus ET Shallocis doivent tous les deux être vaincus dans la difficulté correspondante. Battre seulement l’un des deux ne valide pas l’Ascension."
+    ],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "astraeos-shallocis-the-void-above",
+    "mapId": "astraeos",
+    "name": "SHALLOCIS, THE VOID ABOVE",
+    "type": "Boss final / Boss d’Ascension",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": 60,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Hex Coins",
+            "quantity": 60
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Gamma Natrix Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Gamma Thodes Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Gamma Hydraskos Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": 75,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Hex Coins",
+            "quantity": 150
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Beta Natrix Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Beta Thodes Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Beta Hydraskos Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": 100,
+        "artifacts": [],
+        "tributes": [
+          {
+            "name": "Hex Coins",
+            "quantity": 300
+          }
+        ],
+        "bossTrophies": [
+          {
+            "name": "Alpha Natrix Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Thodes Trophy",
+            "quantity": 1
+          },
+          {
+            "name": "Alpha Hydraskos Trophy",
+            "quantity": 1
+          }
+        ],
+        "specialRequirements": [],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": true,
+    "ascensionGroup": "astraeos",
+    "notes": [
+      "Ascension commune : Abyssalus ET Shallocis doivent tous les deux être vaincus dans la difficulté correspondante. Battre seulement l’un des deux ne valide pas l’Ascension."
+    ],
+    "tributeStatus": "known"
+  },
+  {
+    "id": "svartalfheim-broodmother",
+    "mapId": "svartalfheim",
+    "name": "BROODMOTHER",
+    "type": "Boss",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [
+      "Version : Svartalfheim Premium ASA — Mod ID : 962796.",
+      "Ne pas reprendre les tributs de The Island ; ne pas inventer les quantités manquantes.",
+      "Système spécifique : Boss Tribute Cube, artéfacts, Mithril / ressources naines et Energy Crystals selon la recette de la version Premium."
+    ],
+    "tributeStatus": "unverified"
+  },
+  {
+    "id": "svartalfheim-megapithecus",
+    "mapId": "svartalfheim",
+    "name": "MEGAPITHECUS",
+    "type": "Boss",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [
+      "Version : Svartalfheim Premium ASA — Mod ID : 962796.",
+      "Ne pas reprendre les tributs de The Island ; ne pas inventer les quantités manquantes.",
+      "Système de Boss Tribute Cube de Svartalfheim."
+    ],
+    "tributeStatus": "unverified"
+  },
+  {
+    "id": "svartalfheim-dragon",
+    "mapId": "svartalfheim",
+    "name": "DRAGON",
+    "type": "Boss",
+    "difficulties": [
+      "gamma",
+      "beta",
+      "alpha"
+    ],
+    "requirements": {
+      "gamma": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      },
+      "beta": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      },
+      "alpha": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [
+      "Version : Svartalfheim Premium ASA — Mod ID : 962796.",
+      "Ne pas reprendre les tributs de The Island ; ne pas inventer les quantités manquantes.",
+      "Système de Boss Tribute Cube de Svartalfheim."
+    ],
+    "tributeStatus": "unverified"
+  },
+  {
+    "id": "svartalfheim-bane-of-thurduar",
+    "mapId": "svartalfheim",
+    "name": "BANE OF THURDUAR",
+    "type": "Boss personnalisé de Svartalfheim",
+    "difficulties": null,
+    "requirements": {
+      "default": {
+        "playerLevel": null,
+        "artifacts": [],
+        "tributes": [],
+        "bossTrophies": [],
+        "specialRequirements": [
+          "Tributs spécifiques Svartalfheim Premium : quantités en cours de vérification sur la version actuelle du serveur."
+        ],
+        "ascensionLevels": null
+      }
+    },
+    "ascension": false,
+    "ascensionGroup": null,
+    "notes": [
+      "Version : Svartalfheim Premium ASA — Mod ID : 962796.",
+      "Ne pas reprendre les tributs de The Island ; ne pas inventer les quantités manquantes.",
+      "Tributs spécifiques à la map. Le créateur a modifié le système au fil des versions : la version Premium actuelle du serveur est la référence."
+    ],
+    "tributeStatus": "unverified"
+  }
+]

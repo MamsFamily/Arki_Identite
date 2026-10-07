@@ -1,0 +1,2495 @@
+{
+  "source": "https://www.dododex.com/dinosaurs/ark-survival-ascended",
+  "retrievedAt": "2026-10-04",
+  "species": [
+    {
+      "name": "Achatina",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/achatina"
+    },
+    {
+      "name": "Acrocanthosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/acrocanthosaurus"
+    },
+    {
+      "name": "Allosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/allosaurus"
+    },
+    {
+      "name": "Ammonite",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ammonite"
+    },
+    {
+      "name": "Angler",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/angler"
+    },
+    {
+      "name": "Ankylosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ankylosaurus"
+    },
+    {
+      "name": "Araneo",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/araneo"
+    },
+    {
+      "name": "Archaeopteryx",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "genesis",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/archaeopteryx"
+    },
+    {
+      "name": "Archelon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/archelon"
+    },
+    {
+      "name": "Argentavis",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/argentavis"
+    },
+    {
+      "name": "Armadoggo",
+      "maps": [
+        "astraeos",
+        "genesis",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/armadoggo"
+    },
+    {
+      "name": "Arthropluera",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/arthropluera"
+    },
+    {
+      "name": "Astrocetus",
+      "maps": [
+        "genesis"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/astrocetus"
+    },
+    {
+      "name": "Attack Drone",
+      "maps": [
+        "genesis",
+        "the-island"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/attackdrone"
+    },
+    {
+      "name": "Aureliax",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/aureliax"
+    },
+    {
+      "name": "Baryonyx",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/baryonyx"
+    },
+    {
+      "name": "Basilisk",
+      "maps": [
+        "valguero",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/basilisk"
+    },
+    {
+      "name": "Basilosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/basilosaurus"
+    },
+    {
+      "name": "Beelzebufo",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/beelzebufo"
+    },
+    {
+      "name": "Bloodstalker",
+      "maps": [
+        "genesis"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/bloodstalker"
+    },
+    {
+      "name": "Boaratos",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/boaratos"
+    },
+    {
+      "name": "Brontosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/brontosaurus"
+    },
+    {
+      "name": "Broodmother Lysrix",
+      "maps": [
+        "valguero",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/broodmotherlysrix"
+    },
+    {
+      "name": "Bulbdog",
+      "maps": [
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/bulbdog"
+    },
+    {
+      "name": "Burrowbuck",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "scorched-earth",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/burrowbuck"
+    },
+    {
+      "name": "Carbonemys",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/carbonemys"
+    },
+    {
+      "name": "Carcharodontosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/carcharodontosaurus"
+    },
+    {
+      "name": "Carnotaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/carnotaurus"
+    },
+    {
+      "name": "Castoroides",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/castoroides"
+    },
+    {
+      "name": "Cat",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "lost-colony",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/cat"
+    },
+    {
+      "name": "Ceratosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ceratosaurus"
+    },
+    {
+      "name": "Cerberax",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/cerberax"
+    },
+    {
+      "name": "Chalicotherium",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/chalicotherium"
+    },
+    {
+      "name": "Cnidaria",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/cnidaria"
+    },
+    {
+      "name": "Coelacanth",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/coelacanth"
+    },
+    {
+      "name": "Compy",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/compy"
+    },
+    {
+      "name": "Concavenator",
+      "maps": [
+        "ragnarok",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/concavenator"
+    },
+    {
+      "name": "Cosmo",
+      "maps": [
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/cosmo"
+    },
+    {
+      "name": "Cryolophosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/cryolophosaurus"
+    },
+    {
+      "name": "Daeodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/daeodon"
+    },
+    {
+      "name": "Deathworm",
+      "maps": [
+        "ragnarok",
+        "astraeos",
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/deathworm"
+    },
+    {
+      "name": "Defense Unit",
+      "maps": [
+        "genesis",
+        "the-island",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/defenseunit"
+    },
+    {
+      "name": "Deinonychus",
+      "maps": [
+        "valguero"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/deinonychus"
+    },
+    {
+      "name": "Deinosuchus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/deinosuchus"
+    },
+    {
+      "name": "Deinotherium",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/deinotherium"
+    },
+    {
+      "name": "Desert Titan",
+      "maps": [
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/deserttitan"
+    },
+    {
+      "name": "Desmodus",
+      "maps": [
+        "astraeos",
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/desmodus"
+    },
+    {
+      "name": "Dilophosaur",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dilophosaur"
+    },
+    {
+      "name": "Dimetrodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dimetrodon"
+    },
+    {
+      "name": "Dimorphodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dimorphodon"
+    },
+    {
+      "name": "Diplocaulus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/diplocaulus"
+    },
+    {
+      "name": "Diplodocus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/diplodocus"
+    },
+    {
+      "name": "Dire Bear",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/direbear"
+    },
+    {
+      "name": "Direwolf",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/direwolf"
+    },
+    {
+      "name": "Dodo",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dodo"
+    },
+    {
+      "name": "DodoRex",
+      "maps": [
+        "the-island"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dodorex"
+    },
+    {
+      "name": "Dodo Wyvern",
+      "maps": [
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dodowyvern"
+    },
+    {
+      "name": "Doedicurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/doedicurus"
+    },
+    {
+      "name": "Dragon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "the-island"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dragon"
+    },
+    {
+      "name": "Drakeling",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/drakeling"
+    },
+    {
+      "name": "Dreadnoughtus",
+      "maps": [
+        "astraeos",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dreadnoughtus"
+    },
+    {
+      "name": "Dreadmare",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "lost-colony",
+        "scorched-earth",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dreadmare"
+    },
+    {
+      "name": "Dung Beetle",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dungbeetle"
+    },
+    {
+      "name": "Dunkleosteus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/dunkleosteus"
+    },
+    {
+      "name": "Elderclaw",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/elderclaw"
+    },
+    {
+      "name": "Electrophorus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/electrophorus"
+    },
+    {
+      "name": "Enforcer",
+      "maps": [
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/enforcer"
+    },
+    {
+      "name": "Enigmasaur",
+      "maps": [],
+      "sourceUrl": "https://www.dododex.com/taming/enigmasaur"
+    },
+    {
+      "name": "Equus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/equus"
+    },
+    {
+      "name": "Eurypterid",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/eurypterid"
+    },
+    {
+      "name": "Fasolasuchus",
+      "maps": [
+        "ragnarok",
+        "astraeos",
+        "aberration",
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/fasolasuchus"
+    },
+    {
+      "name": "Featherlight",
+      "maps": [
+        "valguero",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/featherlight"
+    },
+    {
+      "name": "Forest Titan",
+      "maps": [
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/foresttitan"
+    },
+    {
+      "name": "Gacha",
+      "maps": [
+        "astraeos",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gacha"
+    },
+    {
+      "name": "Gallimimus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gallimimus"
+    },
+    {
+      "name": "Gasbags",
+      "maps": [
+        "astraeos",
+        "genesis",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gasbags"
+    },
+    {
+      "name": "Gargantar",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "lost-colony",
+        "scorched-earth",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gargantar"
+    },
+    {
+      "name": "Giant Bee",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/giantbee"
+    },
+    {
+      "name": "Bison",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/giantbison"
+    },
+    {
+      "name": "Gigadesmodus",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gigadesmodus"
+    },
+    {
+      "name": "Giganotosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/giganotosaurus"
+    },
+    {
+      "name": "Gigantopithecus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gigantopithecus"
+    },
+    {
+      "name": "Gigantoraptor",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gigantoraptor"
+    },
+    {
+      "name": "Gloon",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/gloon"
+    },
+    {
+      "name": "Glowbug",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/glowbug"
+    },
+    {
+      "name": "Glowtail",
+      "maps": [
+        "valguero",
+        "astraeos",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/glowtail"
+    },
+    {
+      "name": "Grand Tortugar",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/grandtortugar"
+    },
+    {
+      "name": "Griffin",
+      "maps": [
+        "ragnarok"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/griffin"
+    },
+    {
+      "name": "Grendel",
+      "maps": [
+        "valguero"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/grendel"
+    },
+    {
+      "name": "Helicoprion",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/helicoprion"
+    },
+    {
+      "name": "Hesperornis",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/hesperornis"
+    },
+    {
+      "name": "Hyaenodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/hyaenodon"
+    },
+    {
+      "name": "Hydraskos",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/hydra"
+    },
+    {
+      "name": "Ice Titan",
+      "maps": [
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/icetitan"
+    },
+    {
+      "name": "Ichthyornis",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ichthyornis"
+    },
+    {
+      "name": "Ichthyosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ichthyosaurus"
+    },
+    {
+      "name": "Iguanodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/iguanodon"
+    },
+    {
+      "name": "Jerboa",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/jerboa"
+    },
+    {
+      "name": "Jug Bug",
+      "maps": [
+        "ragnarok",
+        "genesis",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/jugbug"
+    },
+    {
+      "name": "Kairuku",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/kairuku"
+    },
+    {
+      "name": "Kaprosuchus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/kaprosuchus"
+    },
+    {
+      "name": "Karkinos",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/karkinos"
+    },
+    {
+      "name": "Kentrosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/kentrosaurus"
+    },
+    {
+      "name": "King Titan",
+      "maps": [
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/kingtitan"
+    },
+    {
+      "name": "Lamprey",
+      "maps": [
+        "valguero",
+        "genesis",
+        "lost-colony",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/lamprey"
+    },
+    {
+      "name": "Leech",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/leech"
+    },
+    {
+      "name": "Leedsichthys",
+      "maps": [
+        "valguero",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/leedsichthys"
+    },
+    {
+      "name": "Liopleurodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/liopleurodon"
+    },
+    {
+      "name": "Lost King",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/lostking"
+    },
+    {
+      "name": "Lost Queen",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/lostqueen"
+    },
+    {
+      "name": "Lymantria",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/lymantria"
+    },
+    {
+      "name": "Lystrosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/lystrosaurus"
+    },
+    {
+      "name": "Lumina",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "lost-colony",
+        "scorched-earth",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/lumina"
+    },
+    {
+      "name": "Maeguana",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/maeguana"
+    },
+    {
+      "name": "Magmasaur",
+      "maps": [
+        "genesis"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/magmasaur"
+    },
+    {
+      "name": "Malwyn",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/malwyn"
+    },
+    {
+      "name": "Mammoth",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/mammoth"
+    },
+    {
+      "name": "Managarmr",
+      "maps": [
+        "astraeos",
+        "lost-colony",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/managarmr"
+    },
+    {
+      "name": "Manta",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/manta"
+    },
+    {
+      "name": "Manticore",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/manticore"
+    },
+    {
+      "name": "Mantis",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/mantis"
+    },
+    {
+      "name": "Megachelon",
+      "maps": [
+        "genesis"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megachelon"
+    },
+    {
+      "name": "Megalania",
+      "maps": [
+        "ragnarok",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megalania"
+    },
+    {
+      "name": "Megaloceros",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megaloceros"
+    },
+    {
+      "name": "Megalodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megalodon"
+    },
+    {
+      "name": "Megalosaurus",
+      "maps": [
+        "ragnarok",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megalosaurus"
+    },
+    {
+      "name": "Meganeura",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/meganeura"
+    },
+    {
+      "name": "Megapithecus",
+      "maps": [
+        "valguero",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megapithecus"
+    },
+    {
+      "name": "Megaraptor",
+      "maps": [
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megaraptor"
+    },
+    {
+      "name": "Megatherium",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/megatherium"
+    },
+    {
+      "name": "Mesopithecus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/mesopithecus"
+    },
+    {
+      "name": "Microraptor",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/microraptor"
+    },
+    {
+      "name": "Minotaur",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/minotaur"
+    },
+    {
+      "name": "Morellatops",
+      "maps": [
+        "ragnarok",
+        "astraeos",
+        "genesis",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/morellatops"
+    },
+    {
+      "name": "Mosasaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/mosasaurus"
+    },
+    {
+      "name": "Moschops",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/moschops"
+    },
+    {
+      "name": "Nameless",
+      "maps": [
+        "valguero",
+        "lost-colony",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/nameless"
+    },
+    {
+      "name": "Natrix",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/natrix"
+    },
+    {
+      "name": "Neophyte",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/neophyte"
+    },
+    {
+      "name": "Nunatak",
+      "maps": [
+        "ragnarok"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/nunatak"
+    },
+    {
+      "name": "Oasisaur",
+      "maps": [
+        "astraeos",
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/oasisaur"
+    },
+    {
+      "name": "Onyc",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/onyc"
+    },
+    {
+      "name": "Ossidon",
+      "maps": [
+        "ragnarok",
+        "lost-colony",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ossidon"
+    },
+    {
+      "name": "Otter",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/otter"
+    },
+    {
+      "name": "Overseer",
+      "maps": [
+        "the-island"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/overseer"
+    },
+    {
+      "name": "Oviraptor",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/oviraptor"
+    },
+    {
+      "name": "Ovis",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ovis"
+    },
+    {
+      "name": "Palaeoctopus",
+      "maps": [
+        "astraeos",
+        "genesis"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/palaeoctopus"
+    },
+    {
+      "name": "Pachy",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/pachy"
+    },
+    {
+      "name": "Pachyrhinosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/pachyrhinosaurus"
+    },
+    {
+      "name": "Paraceratherium",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/paracer"
+    },
+    {
+      "name": "Parasaur",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/parasaur"
+    },
+    {
+      "name": "Parrot",
+      "maps": [
+        "genesis"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/parrot"
+    },
+    {
+      "name": "Pegomastax",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/pegomastax"
+    },
+    {
+      "name": "Pelagornis",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/pelagornis"
+    },
+    {
+      "name": "Phiomia",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/phiomia"
+    },
+    {
+      "name": "Phoenix",
+      "maps": [
+        "astraeos",
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/phoenix"
+    },
+    {
+      "name": "Piranha",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/piranha"
+    },
+    {
+      "name": "Plesiosaur",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/plesiosaur"
+    },
+    {
+      "name": "Procoptodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/procoptodon"
+    },
+    {
+      "name": "Pteranodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/pteranodon"
+    },
+    {
+      "name": "Pulmonoscorpius",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/pulmonoscorpius"
+    },
+    {
+      "name": "Purlovia",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/purlovia"
+    },
+    {
+      "name": "Pyromane",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "scorched-earth",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/pyromane"
+    },
+    {
+      "name": "Quetzal",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/quetzal"
+    },
+    {
+      "name": "Raptor",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/raptor"
+    },
+    {
+      "name": "Ravager",
+      "maps": [
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/ravager"
+    },
+    {
+      "name": "Reaper",
+      "maps": [
+        "valguero",
+        "genesis",
+        "lost-colony",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/reaper"
+    },
+    {
+      "name": "Revenant",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/revenant"
+    },
+    {
+      "name": "Rex",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/rex"
+    },
+    {
+      "name": "Rhyniognatha",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "the-island"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/rhyniognatha"
+    },
+    {
+      "name": "Rock Drake",
+      "maps": [
+        "valguero",
+        "astraeos",
+        "aberration",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/rockdrake"
+    },
+    {
+      "name": "Rock Elemental",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/rockelemental"
+    },
+    {
+      "name": "Roll Rat",
+      "maps": [
+        "valguero",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/rollrat"
+    },
+    {
+      "name": "Sabertooth",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/sabertooth"
+    },
+    {
+      "name": "Sabertooth Salmon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/sabertoothsalmon"
+    },
+    {
+      "name": "Sarco",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/sarco"
+    },
+    {
+      "name": "Scout",
+      "maps": [
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/scout"
+    },
+    {
+      "name": "Seeker",
+      "maps": [
+        "valguero",
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/seeker"
+    },
+    {
+      "name": "Shastasaurus",
+      "maps": [
+        "genesis",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/shastasaurus"
+    },
+    {
+      "name": "Shinehorn",
+      "maps": [
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/shinehorn"
+    },
+    {
+      "name": "Snow Owl",
+      "maps": [
+        "astraeos",
+        "lost-colony",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/snowowl"
+    },
+    {
+      "name": "Solwyn",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/solwyn"
+    },
+    {
+      "name": "Spinosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/spinosaur"
+    },
+    {
+      "name": "Stegosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/stegosaurus"
+    },
+    {
+      "name": "Tapejara",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/tapejara"
+    },
+    {
+      "name": "Terror Bird",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/terrorbird"
+    },
+    {
+      "name": "Thanatos",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/thanatos"
+    },
+    {
+      "name": "Therizinosaurus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/therizinosaurus"
+    },
+    {
+      "name": "Thodes",
+      "maps": [
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/thodes"
+    },
+    {
+      "name": "Thorny Dragon",
+      "maps": [
+        "ragnarok",
+        "astraeos",
+        "genesis",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/thornydragon"
+    },
+    {
+      "name": "Thrall",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/thrall"
+    },
+    {
+      "name": "Thylacoleo",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/thylacoleo"
+    },
+    {
+      "name": "Tidepup",
+      "maps": [
+        "astraeos",
+        "genesis"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/tidepup"
+    },
+    {
+      "name": "Titanoboa",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/titanoboa"
+    },
+    {
+      "name": "Titanomyrma",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/titanomyrma"
+    },
+    {
+      "name": "Titanosaur",
+      "maps": [
+        "ragnarok",
+        "scorched-earth",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/titanosaur"
+    },
+    {
+      "name": "Triceratops",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/triceratops"
+    },
+    {
+      "name": "Trilobite",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "aberration",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/trilobite"
+    },
+    {
+      "name": "Troodon",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/troodon"
+    },
+    {
+      "name": "Murder Turkey",
+      "maps": [
+        "valguero",
+        "the-island"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/turkey"
+    },
+    {
+      "name": "Tusoteuthis",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/tusoteuthis"
+    },
+    {
+      "name": "Umbra",
+      "maps": [
+        "ragnarok",
+        "astraeos"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/umbra"
+    },
+    {
+      "name": "Unicorn",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "scorched-earth",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/unicorn"
+    },
+    {
+      "name": "Veilwyn",
+      "maps": [
+        "lost-colony"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/veilwyn"
+    },
+    {
+      "name": "Velonasaur",
+      "maps": [
+        "astraeos",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/velonasaur"
+    },
+    {
+      "name": "Vulture",
+      "maps": [
+        "ragnarok",
+        "genesis",
+        "lost-colony",
+        "scorched-earth"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/vulture"
+    },
+    {
+      "name": "Woolly Rhino",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/woollyrhino"
+    },
+    {
+      "name": "Wyvern",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "scorched-earth",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/wyvern"
+    },
+    {
+      "name": "Xiphactinus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "the-island",
+        "the-center"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/xiphactinus"
+    },
+    {
+      "name": "Yeti",
+      "maps": [
+        "genesis",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/yeti"
+    },
+    {
+      "name": "Yi Ling",
+      "maps": [
+        "genesis",
+        "aberration"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/yiling"
+    },
+    {
+      "name": "Yutyrannus",
+      "maps": [
+        "ragnarok",
+        "valguero",
+        "astraeos",
+        "genesis",
+        "lost-colony",
+        "scorched-earth",
+        "the-island",
+        "the-center",
+        "extinction"
+      ],
+      "sourceUrl": "https://www.dododex.com/taming/yutyrannus"
+    }
+  ]
+}
