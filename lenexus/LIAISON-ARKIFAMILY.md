@@ -64,11 +64,18 @@ La compilation du frontend/API et les tests doivent être exécutés avant
 activation. Les tests utilisent des comptes fictifs et une base SQLite de test,
 et n'héritent pas de la connexion PostgreSQL réelle.
 
-## Limite constatée lors de l'import
+## Contrôle de type après un import
 
-Le frontend passe son contrôle de type et les deux services compilent.
-Le contrôle de type global de l'API signale encore 17 erreurs dans des fichiers
-inchangés de l'archive (types des entrées cartes, dinos, guides et gestion du site).
-Les nouvelles routes de liaison n'ont plus d'erreur de type.
-Ces erreurs existantes sont à corriger avant d'exiger un contrôle global sans
-erreur ; elles ne sont pas masquées par la nouvelle liaison.
+Le contrôle global doit régénérer les déclarations des bibliothèques avec
+`tsc --build --force` avant de vérifier les applications. Les déclarations
+importées peuvent avoir été produites avec une autre version de Zod, tandis
+que le cache incrémental les considère encore à jour. Lors de l'import,
+des déclarations Zod 4 utilisées avec Zod 3 provoquaient 17 erreurs apparentes
+dans les routes API pourtant inchangées.
+
+`pnpm run typecheck` et `pnpm run build` imposent cette régénération, sans
+affaiblir les types ni exclure des routes. `pnpm run test:typecheck` vérifie
+qu'une déclaration périmée est bien remplacée même si le cache est à jour.
+Ce test est isolé dans un dossier temporaire, sans connexion à une base.
+Les tests API restent à lancer avec `pnpm --filter @workspace/api-server test`
+et utilisent exclusivement leurs fixtures, jamais une base réelle.
